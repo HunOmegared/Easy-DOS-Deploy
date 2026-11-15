@@ -37,6 +37,7 @@ const (
 	wzHead4
 	wzHasCard
 	wzHasBackup
+	wzFreeDOS
 	wzSetup
 	wzBootFloppy
 	wzBack4
@@ -118,6 +119,7 @@ func (a *app) openWizard() {
 	mk(wzHead4, "STATIC", T("Where should DOS come from?"), 0, "")
 	mk(wzHasCard, "BUTTON", T("A card or disk that already boots DOS on that machine"), link, T("Back it up first: geometry, boot code and system are taken from it (recommended)."))
 	mk(wzHasBackup, "BUTTON", T("A backup of such a card (an image file)"), link, T("Made earlier with this program or another tool. For a different card, change the geometry afterwards."))
+	mk(wzFreeDOS, "BUTTON", T("Nothing yet: FreeDOS, downloaded by the program"), link, T("For an empty card: the program downloads FreeDOS (kernel and FreeCOM, GNU GPL) and makes a bootable system."))
 	mk(wzSetup, "BUTTON", T("DOS install disks (MS-DOS Setup or FreeDOS)"), link, T("An empty image with the right geometry; install DOS on it in 86Box with its own Setup."))
 	mk(wzBootFloppy, "BUTTON", T("A DOS boot floppy image"), link, T("A small bootable system from the floppy: its system files and tools are copied."))
 	mk(wzBack4, "BUTTON", T("< Back"), WS_TABSTOP, "")
@@ -161,8 +163,9 @@ func (w *wizardWin) layout() {
 	move(w.c[wzHead4], m, m, lw, s(24))
 	move(w.c[wzHasCard], m, m+s(40), lw, s(70))
 	move(w.c[wzHasBackup], m, m+s(116), lw, s(70))
-	move(w.c[wzSetup], m, m+s(192), lw, s(70))
-	move(w.c[wzBootFloppy], m, m+s(268), lw, s(70))
+	move(w.c[wzFreeDOS], m, m+s(192), lw, s(70))
+	move(w.c[wzSetup], m, m+s(268), lw, s(70))
+	move(w.c[wzBootFloppy], m, m+s(344), lw, s(70))
 	move(w.c[wzBack4], cw-m-bw, ch-m-s(28), bw, s(28))
 }
 
@@ -172,7 +175,7 @@ func (w *wizardWin) show(page int) {
 		1: {wzHead, wzFloppy, wzCard, wzEmu, wzExisting, wzEditor, wzShowStart},
 		2: {wzHead2, wzLblDOS, wzDOS, wzLblMenu, wzMenu, wzMenuDesc, wzBack, wzNext},
 		3: {wzHead3, wzFromImage, wzFromDir, wzBack3},
-		4: {wzHead4, wzHasCard, wzHasBackup, wzSetup, wzBootFloppy, wzBack4},
+		4: {wzHead4, wzHasCard, wzHasBackup, wzFreeDOS, wzSetup, wzBootFloppy, wzBack4},
 	}
 	for p, ids := range pages {
 		for _, id := range ids {
@@ -277,6 +280,13 @@ func wizardProc(hwnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {
 				setCheck(a.boot.c[bwCopyAll], true)
 				a.boot.applyDiskInfo(p)
 			}
+		case wzFreeDOS:
+			w.close()
+			a.openBootWinWith(MediaHDD, nil)
+			setCheck(a.boot.c[bwFreeDOS], true)
+			a.boot.update()
+			a.boot.followSource()
+			a.openCalc()
 		case wzSetup:
 			w.close()
 			a.openBootWinWith(MediaHDD, nil)

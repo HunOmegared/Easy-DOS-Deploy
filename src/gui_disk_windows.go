@@ -26,6 +26,7 @@ const (
 	bwFromImg
 	bwFromBios
 	bwBlank
+	bwFreeDOS
 	bwPlan
 	bwSource
 	bwSrcBrowse
@@ -68,7 +69,7 @@ func (a *app) openBootWin() {
 	}
 	b := &bootWin{c: map[int]uintptr{}}
 	a.boot = b
-	b.hwnd = createWindow(0, "EasyDDTBoot", T("New bootable disk image"), WS_OVERLAPPEDWINDOW&^0x00050000, cwDefault, cwDefault, a.s(700), a.s(690), 0, 0) // no owner, so it does not stay above the main window
+	b.hwnd = createWindow(0, "EasyDDTBoot", T("New bootable disk image"), WS_OVERLAPPEDWINDOW&^0x00050000, cwDefault, cwDefault, a.s(700), a.s(720), 0, 0) // no owner, so it does not stay above the main window
 	mk := func(id int, class, text string, style, ex uint32) uintptr {
 		h := createWindow(ex, class, text, WS_CHILD|WS_VISIBLE|style, 0, 0, 10, 10, b.hwnd, uintptr(id))
 		sendMsg(h, WM_SETFONT, a.font, 1)
@@ -91,6 +92,7 @@ func (a *app) openBootWin() {
 	mk(bwFromImg, "BUTTON", T("From a card backup..."), WS_TABSTOP, 0)
 	mk(bwFromBios, "BUTTON", T("From BIOS setup..."), WS_TABSTOP, 0)
 	mk(bwBlank, "BUTTON", T("Empty image: I install DOS on it myself (e.g. DOS Setup in 86Box)"), WS_TABSTOP|BS_AUTOCHECKBOX, 0)
+	mk(bwFreeDOS, "BUTTON", T("FreeDOS without a system source: the program downloads it (kernel and FreeCOM)"), WS_TABSTOP|BS_AUTOCHECKBOX, 0)
 	mk(bwLblTotal, "STATIC", T("Image size in sectors (empty: cylinders × heads × sectors):"), 0, 0)
 	mk(bwTotal, "EDIT", "", edit, WS_EX_CLIENTEDGE)
 	mk(bwHelp, "STATIC", T("Enter the geometry DOS gets from the target machine's BIOS (MSD.EXE, Disk Drives), not the one in BIOS setup."), 0, 0)
@@ -154,6 +156,12 @@ func (b *bootWin) fillMenus(sel int) {
 		T("The menu in the editor: %s", strings.Join(titles, "; ")),
 		T("Keep the menu of the system source (write no menu)"),
 	}
+	if checked(b.c[bwFreeDOS]) {
+		items = items[:menuKeep] // there is no source menu to keep
+		if sel == menuKeep {
+			sel = 0
+		}
+	}
 	fillCombo(b.c[bwMenuKind], items, sel)
 	b.updateDrivers()
 }
@@ -165,6 +173,9 @@ func (b *bootWin) menuChoice() int {
 // sourceTarget is the DOS of the system source, or the editor's.
 func (b *bootWin) sourceTarget() Target {
 	a := theApp
+	if checked(b.c[bwFreeDOS]) {
+		return TargetFreeDOS
+	}
 	src := strings.Trim(strings.TrimSpace(getText(b.c[bwSource])), `"`)
 	if src != "" {
 		if src != b.srcPath {
@@ -225,6 +236,16 @@ func (b *bootWin) updateDrivers() {
 	}
 	enable(b.c[bwDrvBtn], true)
 	miss := MissingDrivers(a.proj, a.store)
+	if checked(b.c[bwFreeDOS]) {
+		_, fm := FreeDOSFiles(a.proj, a.store)
+		for _, id := range fm {
+			miss = append(miss, a.store.driverName(id))
+		}
+		if len(fm) > 0 {
+			setText(b.c[bwDrvInfo], T("To download when the image is made: %s", strings.Join(miss, "; ")))
+			return
+		}
+	}
 	switch {
 	case len(a.proj.Drivers) == 0:
 		setText(b.c[bwDrvInfo], T("This menu needs no extra drivers."))
@@ -303,6 +324,8 @@ func (b *bootWin) layout() {
 	move(b.c[bwPlan], m, y, cw, 2*lh)
 	y += 2*lh + s(4)
 	move(b.c[bwBlank], m, y, cw, rh)
+	y += rh + s(2)
+	move(b.c[bwFreeDOS], m, y, cw, rh)
 	y += rh + s(6)
 	move(b.c[bwLblSource], m, y, cw, lh)
 	y += lh + s(2)
@@ -352,6 +375,9 @@ func (b *bootWin) options() BootOptions {
 		o.Total = t
 	}
 	o.Blank = o.Kind == MediaHDD && checked(b.c[bwBlank])
+	if checked(b.c[bwFreeDOS]) && !o.Blank {
+		o.Source, o.CopyAll = "", false
+	}
 	return o
 }
 
@@ -365,9 +391,14 @@ func (b *bootWin) update() {
 	for _, id := range []int{bwProfile, bwSaveProf, bwDelProf, bwC, bwH, bwS, bwTotal, bwFromImg, bwFromBios, bwBlank} {
 		enable(b.c[id], hdd)
 	}
-	for _, id := range []int{bwSource, bwSrcBrowse, bwCopyAll, bwMenuKind, bwMenuEdit, bwDrvBtn, bwLabel} {
+	fd := checked(b.c[bwFreeDOS])
+	for _, id := range []int{bwMenuKind, bwMenuEdit, bwDrvBtn, bwLabel, bwFreeDOS} {
 		enable(b.c[id], !o.Blank)
 	}
+	for _, id := range []int{bwSource, bwSrcBrowse, bwCopyAll} {
+		enable(b.c[id], !o.Blank && !fd)
+	}
+	enable(b.c[bwBlank], hdd && !fd)
 	if !hdd {
 		setText(b.c[bwPlan], T("Standard floppy format (FAT12), as DOS FORMAT makes it."))
 		return
@@ -514,6 +545,14 @@ func (b *bootWin) create() {
 	if withMenu && (!a.ready() || !a.checkDrivers()) {
 		return
 	}
+	if checked(b.c[bwFreeDOS]) {
+		files, missing := FreeDOSFiles(a.proj, a.store)
+		if len(missing) > 0 {
+			b.downloadFreeDOS(missing)
+			return
+		}
+		o.FreeDOS = files
+	}
 	r, err := CreateBootImage(o)
 	if err != nil {
 		msgBox(b.hwnd, T("Could not create the image:")+"\n"+err.Error(), appTitle(), MB_ICONERROR)
@@ -610,6 +649,11 @@ func bootProc(hwnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {
 		case bwBlank:
 			if code == BN_CLICKED {
 				b.update()
+			}
+		case bwFreeDOS:
+			if code == BN_CLICKED {
+				b.update()
+				b.followSource()
 			}
 		case bwSrcBrowse:
 			if p := fileDialog(hwnd, false, T("System source"), "", "", imgFilter()...); p != "" {
@@ -1281,4 +1325,68 @@ func (a *app) geomToFloppy() {
 		return
 	}
 	msgBox(a.hwnd, T("GEOM.COM is now on %s.\n\nWrite the image to a floppy (WinImage, Greaseweazle), boot the target machine from it with the card or disk in place, and type GEOM.", filepath.Base(p)), appTitle(), MB_ICONINFORMATION)
+}
+
+// downloadFreeDOS fetches the FreeDOS kernel, FreeCOM and the tools the menu
+// needs, then makes the image.
+func (b *bootWin) downloadFreeDOS(ids []string) {
+	theApp.fetchDrivers(b.hwnd, ids, b.create)
+}
+
+// fetchDrivers asks to download catalog entries, downloads them with a
+// progress window, and calls then when all of them are here.
+func (a *app) fetchDrivers(owner uintptr, ids []string, then func()) {
+	var names []string
+	for _, id := range ids {
+		names = append(names, a.store.driverName(id))
+	}
+	if msgBox(owner, T("FreeDOS needs these files, which are not here yet:")+"\n\n• "+strings.Join(names, "\n• ")+"\n\n"+
+		T("Download them now? They are kept in the drivers folder for next time."), appTitle(), MB_YESNO|MB_ICONQUESTION) != IDYES {
+		return
+	}
+	store := a.store
+	a.startJob(T("Downloading %d driver(s)...", len(ids)), func(Progress) error {
+		var failed []string
+		for _, id := range ids {
+			if d := store.Find(id); d != nil {
+				if r := store.Download(d); !r.OK {
+					failed = append(failed, d.Name+": "+r.Message)
+				}
+			}
+		}
+		if len(failed) > 0 {
+			return fmt.Errorf("%s", strings.Join(failed, "\n"))
+		}
+		return nil
+	}, func(err error) {
+		if a.boot != nil {
+			a.boot.updateDrivers()
+		}
+		a.updateStatus()
+		if err != nil {
+			msgBox(owner, T("Failed:")+"\n"+err.Error()+"\n\n"+T("You can also browse for these files in the Drivers window."), appTitle(), MB_ICONERROR)
+			return
+		}
+		then()
+	})
+}
+
+// makeGeomFloppy makes a FreeDOS boot floppy that runs GEOM.COM at start.
+func (a *app) makeGeomFloppy() {
+	files, missing := FreeDOSFiles(nil, a.store)
+	if len(missing) > 0 {
+		a.fetchDrivers(a.hwnd, missing, a.makeGeomFloppy)
+		return
+	}
+	p := fileDialog(a.hwnd, true, T("Save the geometry floppy image"), "img", "geom-freedos.img", imgFilter()...)
+	if p == "" {
+		return
+	}
+	r, err := MakeGeomFloppy(p, files)
+	if err != nil {
+		msgBox(a.hwnd, T("Could not create the image:")+"\n"+err.Error(), appTitle(), MB_ICONERROR)
+		return
+	}
+	_ = r
+	msgBox(a.hwnd, T("The geometry floppy is ready: %s\n\nWrite it to a 1.44 MB floppy (WinImage, Greaseweazle) and boot the target machine from it with the card or disk in place. It shows the geometry by itself.", p), appTitle(), MB_ICONINFORMATION)
 }

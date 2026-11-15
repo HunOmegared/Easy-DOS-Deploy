@@ -47,7 +47,8 @@ hardware yet.
   CONFIG/AUTOEXEC is kept as `.BAK`.
 * **Make bootable disk images:** floppies from 360 KB to 2.88 MB, and hard disk
   / CF images with the exact geometry the target BIOS gives to DOS. The system
-  comes from a disk you already have; no MS-DOS files are distributed with the
+  comes from a disk you already have, or, for FreeDOS, the program downloads
+  it (kernel and FreeCOM, GNU GPL); no MS-DOS files are distributed with the
   program.
 * **CF cards and IDE disks:** back up a card to an image, and write an image
   back, safely. See the [CF card guide](docs/CF-GUIDE.md).
@@ -83,7 +84,7 @@ that folder is writable (portable use), otherwise in
 | `src/` | the Windows program (Go) and its tests |
 | `src/lang/` | the built-in German, French, Spanish and Italian translations |
 | `src/tools/winres/` | makes the icon, version information and manifest of the exe |
-| `asm/` | the 16-bit code: the MBR boot code and `GEOM.COM`, with a tiny assembler |
+| `asm/` | the 16-bit code: the MBR boot code and `GEOM.COM` with a tiny assembler, and the FreeDOS boot sector |
 | `docs/` | the guides above and the screenshot |
 | `.github/workflows/` | the GitHub Actions build |
 

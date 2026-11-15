@@ -1386,3 +1386,51 @@ TR: Una copia de una tarjeta así (un archivo de imagen)
 
 EN: Made earlier with this program or another tool. For a different card, change the geometry afterwards.
 TR: Hecha antes con este programa u otra herramienta. Para otra tarjeta, cambie después la geometría.
+
+EN: &Make a FreeDOS floppy with GEOM.COM...
+TR: C&rear un disquete FreeDOS con GEOM.COM...
+
+EN: Download them now? They are kept in the drivers folder for next time.
+TR: ¿Descargarlos ahora? Se guardan en la carpeta de controladores para la próxima vez.
+
+EN: For an empty card: the program downloads FreeDOS (kernel and FreeCOM, GNU GPL) and makes a bootable system.
+TR: Para una tarjeta vacía: el programa descarga FreeDOS (núcleo y FreeCOM, GNU GPL) y crea un sistema de arranque.
+
+EN: FreeCOM command shell (COMMAND.COM)
+TR: Intérprete de comandos FreeCOM (COMMAND.COM)
+
+EN: FreeDOS kernel (KERNEL.SYS)
+TR: Núcleo de FreeDOS (KERNEL.SYS)
+
+EN: FreeDOS needs these files, which are not here yet:
+TR: FreeDOS necesita estos archivos, que aún no están:
+
+EN: FreeDOS without a system source: the program downloads it (kernel and FreeCOM)
+TR: FreeDOS sin origen del sistema: el programa lo descarga (núcleo y FreeCOM)
+
+EN: FreeDOS: the kernel (KERNEL.SYS) or the command shell (COMMAND.COM) is missing.
+TR: FreeDOS: falta el núcleo (KERNEL.SYS) o el intérprete de comandos (COMMAND.COM).
+
+EN: Nothing yet: FreeDOS, downloaded by the program
+TR: Nada todavía: FreeDOS, descargado por el programa
+
+EN: Save the geometry floppy image
+TR: Guardar la imagen del disquete de geometría
+
+EN: System: FreeDOS (kernel, FreeCOM and the program's own boot code), %d files.
+TR: Sistema: FreeDOS (núcleo, FreeCOM y el código de arranque propio del programa), %d archivos.
+
+EN: The FreeDOS command shell, FreeCOM 0.86. Used for FreeDOS disks made without a system source.
+TR: El intérprete de comandos de FreeDOS, FreeCOM 0.86. Para discos FreeDOS creados sin origen del sistema.
+
+EN: The FreeDOS system: kernel 2043, for 8086 and up, FAT12 and FAT16. Used for FreeDOS disks made without a system source.
+TR: El sistema FreeDOS: núcleo 2043, desde el 8086, FAT12 y FAT16. Para discos FreeDOS creados sin origen del sistema.
+
+EN: The geometry floppy is ready: %s\n\nWrite it to a 1.44 MB floppy (WinImage, Greaseweazle) and boot the target machine from it with the card or disk in place. It shows the geometry by itself.
+TR: El disquete de geometría está listo: %s\n\nEscríbalo en un disquete de 1,44 MB (WinImage, Greaseweazle) y arranque desde él la máquina de destino con la tarjeta o el disco colocados. Muestra la geometría por sí solo.
+
+EN: To download when the image is made: %s
+TR: Se descargará al crear la imagen: %s
+
+EN: You can also browse for these files in the Drivers window.
+TR: También puede seleccionar estos archivos en la ventana Controladores.

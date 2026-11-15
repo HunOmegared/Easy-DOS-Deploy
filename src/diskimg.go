@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"sort"
 	"strings"
 	"time"
 )
@@ -67,6 +68,9 @@ type BootOptions struct {
 	// Blank makes an all-zero hard disk image of the right size, for
 	// partitioning and installing DOS in an emulator (DOS Setup, FDISK).
 	Blank bool
+	// FreeDOS, instead of a source: the files of a small FreeDOS system
+	// (FreeDOSFiles); the boot code is the program's own.
+	FreeDOS map[string][]byte
 }
 
 // DOS kinds found on a source disk.
@@ -496,6 +500,10 @@ func CreateBootImage(o BootOptions) (*Report, error) {
 	var bootFrom []byte
 	if src != nil {
 		bootFrom = src.boot
+	} else if o.FreeDOS != nil {
+		if bootFrom, err = fdBootSector(bp.fatType); err != nil {
+			return nil, err
+		}
 	}
 	if err := formatFAT(f, base, bp, bootFrom); err != nil {
 		return nil, err
@@ -507,8 +515,36 @@ func CreateBootImage(o BootOptions) (*Report, error) {
 		return nil, fmt.Errorf(T("the new image cannot be opened: %v"), err)
 	}
 	defer v.Close()
+	if src == nil && o.FreeDOS != nil {
+		if o.FreeDOS["KERNEL.SYS"] == nil || o.FreeDOS["COMMAND.COM"] == nil {
+			return nil, fmt.Errorf("%s", T("FreeDOS: the kernel (KERNEL.SYS) or the command shell (COMMAND.COM) is missing."))
+		}
+		names := make([]string, 0, len(o.FreeDOS))
+		for n := range o.FreeDOS {
+			names = append(names, n)
+		}
+		sort.Strings(names) // KERNEL.SYS and COMMAND.COM first in the root
+		sort.SliceStable(names, func(i, j int) bool { return !strings.Contains(names[i], `\`) && strings.Contains(names[j], `\`) })
+		for _, n := range names {
+			if err := v.WriteFile(n, o.FreeDOS[n]); err != nil {
+				return nil, err
+			}
+		}
+		if o.Kind == MediaHDD {
+			if _, err := v.mkdirAll([]string{"FREEDOS", "TEMP"}, true); err != nil {
+				return nil, err
+			}
+		}
+		r.Done = append(r.Done, T("System: FreeDOS (kernel, FreeCOM and the program's own boot code), %d files.", len(names)))
+	}
 	if src == nil {
-		r.Warnings = append(r.Warnings, T("No system source was given: the disk is formatted but does not boot."))
+		if o.FreeDOS == nil {
+			r.Warnings = append(r.Warnings, T("No system source was given: the disk is formatted but does not boot."))
+		}
+		r.Done = append(r.Done, T("Free space: %s", humanSize(v.FreeBytes())))
+		if err := v.Sync(); err != nil {
+			return nil, err
+		}
 		ok = true
 		return r, nil
 	}

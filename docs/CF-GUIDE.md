@@ -23,7 +23,7 @@ There are three ways to find the geometry:
 | Way | When to use it |
 |---|---|
 | **A backup of a card that already boots** on that machine | The most reliable: the program reads the geometry from the backup. |
-| **`MSD.EXE`** (Disk Drives) or **`GEOM.COM`** on the target machine | `GEOM.COM` is a tiny DOS program that prints what the BIOS gives. *Disk image > Save GEOM.COM* or *Put GEOM.COM onto a boot floppy image*. |
+| **`MSD.EXE`** (Disk Drives) or **`GEOM.COM`** on the target machine | `GEOM.COM` is a tiny DOS program that prints what the BIOS gives. *Disk image > Make a FreeDOS floppy with GEOM.COM* makes a boot floppy that runs it by itself; *Save GEOM.COM* and *Put GEOM.COM onto a boot floppy image* are for your own DOS floppy. |
 | **The values in BIOS setup** | *From BIOS setup...* in the image window works out what DOS gets in NORMAL, LBA or LARGE mode. |
 
 Save the geometry as a **profile**, and you do not have to type it again.
@@ -54,7 +54,7 @@ and the card made from that image boots.
 ## Where does DOS come from?
 
 The start-up wizard (*File > Start wizard*, then *Make a bootable CF card or
-IDE disk*) asks this. The three answers:
+IDE disk*) asks this. The answers:
 
 ### 1. From a working card, or a backup of one
 
@@ -67,7 +67,17 @@ changes.
 2. *Disk image > New bootable disk image:* check the geometry, choose the boot
    menu, and optionally copy the rest of the files from the backup.
 
-### 2. From the DOS install disks
+### 2. Nothing yet: FreeDOS, downloaded by the program
+
+For an empty card and no DOS disks at all. The program downloads the FreeDOS
+kernel and the FreeCOM command shell from their official releases on GitHub
+(GNU GPL), and the programs the boot menu loads (JemmEx, CuteMouse, SHSUCDX),
+and makes a bootable FreeDOS system with the menu. The files are kept in the
+`drivers` folder for next time.
+
+In the image window this is the *FreeDOS without a system source* check box.
+
+### 3. From the DOS install disks
 
 You have the MS-DOS (or FreeDOS) install floppies, but no working system.
 
@@ -77,7 +87,7 @@ You have the MS-DOS (or FreeDOS) install floppies, but no working system.
 3. Back in the program, write the boot menu and the drivers into the image
    (*Output > Write to disk image*).
 
-### 3. From a DOS boot floppy image
+### 4. From a DOS boot floppy image
 
 You have a bootable DOS floppy image (for example an MS-DOS 6.22 boot disk).
 

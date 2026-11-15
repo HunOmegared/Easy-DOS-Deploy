@@ -17,15 +17,22 @@ entries can be added; *Restore built-in list* brings it back.
 | MTCP.CFG sample | a basic mTCP setup (packet driver at 0x60, DHCP) | made by the program |
 | Easy Commander client (EC.EXE) | file transfer from a modern PC | browse (from its release) |
 | CuteMouse | PS/2 and serial mouse | download |
-| JemmEx / Jemm386 | memory manager, replaces HIMEM + EMM386 (386+) | download |
+| JemmEx / Jemm386 | memory manager, replaces HIMEM + EMM386 (386+) | download (GitHub release) |
 | HimemX | free HIMEM.SYS replacement | download |
 | OAKCDROM.SYS | generic ATAPI CD-ROM driver, works on old ISA controllers too | browse: Windows 98 boot disk, or `WINDOWS\COMMAND\EBD` |
 | UNISOUND | sets up ISA PnP sound cards (ESS, Creative, Yamaha, Crystal...) | browse: download it from the [Vogons topic](https://www.vogons.org/viewtopic.php?p=833659) |
 | UDVD2 | IDE/ATAPI CD/DVD driver | download |
 | SHSUCDX | free MSCDEX replacement | download |
+| FreeDOS kernel (KERNEL.SYS) | the FreeDOS system, kernel 2043 (8086+, FAT12/FAT16) | download (GitHub release) |
+| FreeCOM (COMMAND.COM) | the FreeDOS command shell, 0.86 | download (GitHub release) |
 
 The drivers are separate programs under their own licenses (mostly GPL or
 freeware). Nothing of them is included in this repository.
+
+The FreeDOS kernel and FreeCOM are used for FreeDOS disks made without a
+system source; the program downloads them when needed. With them it also puts
+JemmEx, CuteMouse and SHSUCDX into `C:\FREEDOS\BIN` when the menu loads them
+from there, as on a full FreeDOS installation.
 
 Downloaded files are kept in the `drivers` folder: next to the program if that
 folder is writable, otherwise in `%APPDATA%\EasyDDT\drivers`.

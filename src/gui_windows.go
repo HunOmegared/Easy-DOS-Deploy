@@ -78,6 +78,7 @@ const (
 	mWizard
 	mGeomSave
 	mGeomFloppy
+	mGeomFDFloppy
 	mBackupCard
 	mWriteCard
 	mTemplate = 3000 // + index
@@ -341,6 +342,7 @@ func (a *app) buildMenu() {
 	sep(dk)
 	add(dk, mGeomSave, T("Save &GEOM.COM (shows the geometry on the target machine)..."), false)
 	add(dk, mGeomFloppy, T("Put GEOM.COM onto a boot &floppy image..."), false)
+	add(dk, mGeomFDFloppy, T("&Make a FreeDOS floppy with GEOM.COM..."), false)
 	dr := popup(T("&Drivers"))
 	add(dr, mDrivers, T("&Manage drivers..."), false)
 	add(dr, mDrvFolder, T("Open driver &folder"), false)
@@ -1216,6 +1218,8 @@ func (a *app) onCommand(id int, code uint32) {
 		a.saveGeom()
 	case mGeomFloppy:
 		a.geomToFloppy()
+	case mGeomFDFloppy:
+		a.makeGeomFloppy()
 	case mBackupCard:
 		a.backupCard()
 	case mWriteCard:

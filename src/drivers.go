@@ -73,7 +73,7 @@ func DefaultCatalog() []Driver {
 			URLs: fdURLs("base/ctmouse.zip"), Info: "https://cutemouse.sourceforge.net/",
 			Files: []DriverFile{{Name: "CTMOUSE.EXE", Dest: `DRIVERS\CTMOUSE.EXE`}}},
 		{ID: "jemm", Name: T("JemmEx / Jemm386 memory manager"), Desc: T("Replaces HIMEM+EMM386, also works with MS-DOS (386+)."),
-			URLs: fdURLs("base/jemm.zip"), Info: "https://github.com/Baron-von-Riedesel/Jemm",
+			URLs: append([]string{"https://github.com/Baron-von-Riedesel/Jemm/releases/download/v5.86/JemmB_v586.zip"}, fdURLs("base/jemm.zip")...), Info: "https://github.com/Baron-von-Riedesel/Jemm",
 			Files: []DriverFile{{Name: "JEMMEX.EXE", Dest: `DRIVERS\JEMMEX.EXE`}, {Name: "JEMM386.EXE", Dest: `DRIVERS\JEMM386.EXE`}}},
 		{ID: "himemx", Name: T("HimemX XMS manager"), Desc: T("Free HIMEM.SYS replacement."),
 			URLs: fdURLs("base/himemx.zip"), Info: "https://github.com/Baron-von-Riedesel/HimemX",
@@ -89,6 +89,12 @@ func DefaultCatalog() []Driver {
 		{ID: "shsucdx", Name: T("SHSUCDX CD-ROM extension"), Desc: T("Free MSCDEX replacement."),
 			URLs: fdURLs("base/shsucdx.zip"), Info: "https://www.ibiblio.org/pub/micro/pc-stuff/freedos/files/repositories/1.3/",
 			Files: []DriverFile{{Name: "SHSUCDX.COM", Dest: `DRIVERS\SHSUCDX.COM`}}},
+		{ID: fdKernelID, Name: T("FreeDOS kernel (KERNEL.SYS)"), Desc: T("The FreeDOS system: kernel 2043, for 8086 and up, FAT12 and FAT16. Used for FreeDOS disks made without a system source."),
+			URLs: []string{"https://github.com/FDOS/kernel/releases/download/ke2043/ke2043_86f16.zip"}, Info: "https://github.com/FDOS/kernel",
+			Files: []DriverFile{{Name: "KERNEL.SYS", Dest: "KERNEL.SYS"}}},
+		{ID: fdCommandID, Name: T("FreeCOM command shell (COMMAND.COM)"), Desc: T("The FreeDOS command shell, FreeCOM 0.86. Used for FreeDOS disks made without a system source."),
+			URLs: []string{"https://github.com/FDOS/freecom/releases/download/com086/command.zip"}, Info: "https://github.com/FDOS/freecom",
+			Files: []DriverFile{{Name: "COMMAND.COM", Dest: `FREEDOS\BIN\COMMAND.COM`}}},
 	}
 }
 
@@ -417,7 +423,7 @@ func (s *Store) fetch(url string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("User-Agent", "EasyDDT/0.6")
+	req.Header.Set("User-Agent", "EasyDDT/0.7")
 	resp, err := httpClient.Do(req)
 	if err != nil {
 		return nil, err
@@ -547,4 +553,12 @@ func (s *Store) extractFromImage(d *Driver, src string) ([]string, error) {
 		return nil, fmt.Errorf("%s", T("the disk image does not contain the needed files"))
 	}
 	return got, nil
+}
+
+// driverName is the name of a catalog entry, or its ID if it is not there.
+func (s *Store) driverName(id string) string {
+	if d := s.Find(id); d != nil {
+		return d.Name
+	}
+	return id
 }
