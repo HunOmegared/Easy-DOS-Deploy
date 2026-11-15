@@ -15,9 +15,9 @@ import (
 )
 
 const (
-	version     = "0.7.0"
-	versionMS   = 0<<16 | 7 // major.minor
-	versionLS   = 0<<16 | 0 // patch.build
+	version     = "0.8.6"
+	versionMS   = 0<<16 | 8 // major.minor
+	versionLS   = 6<<16 | 0 // patch.build
 	productName = "Easy DDT"
 	company     = "Daniel Szentmiklosi"
 	description = "Easy DDT (DOS Deployment Tool) - DOS boot menus, bootable disk images and CF cards"
@@ -27,7 +27,7 @@ const (
 
 const manifest = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
-  <assemblyIdentity type="win32" name="Szentmiklosi.EasyDDT" version="0.7.0.0" processorArchitecture="amd64"/>
+  <assemblyIdentity type="win32" name="Szentmiklosi.EasyDDT" version="0.8.6.0" processorArchitecture="amd64"/>
   <description>Easy DDT (DOS Deployment Tool)</description>
   <dependency>
     <dependentAssembly>

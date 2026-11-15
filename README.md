@@ -13,6 +13,8 @@ have DOS line endings.
 
 ![The main window: menu items on the left, their CONFIG.SYS and AUTOEXEC.BAT lines on the right](docs/screenshot.png)
 
+![The start-up wizard: what would you like to do?](docs/wizard.png)
+
 ## Status
 
 Early version (0.x). Earlier versions were called Easy Retro System Builder (EasyRSB);
