@@ -11,10 +11,15 @@ have DOS line endings.
 
 ## Status
 
-Early version (0.x). The file generation, the importer, the FAT12/16/32 writer
-and the image builder have automated tests. The Windows user interface, the
-raw card reading/writing and booting the results on real machines are being
-tested now. **Keep a copy of every disk image and card you work on.**
+Early version (0.x). Tested end to end on real hardware: a backup of a
+working 1 GB CompactFlash card (MS-DOS 6.22) was made through a USB card
+reader, a new bootable image with a generated boot menu was built from it
+with the geometry the BIOS gives to DOS (1013/32/63, LBA mode), tried in
+86Box, written back to the card, and an **Amstrad Integra 486 (Phoenix BIOS)**
+booted from it with the menu working. The file generation, the importer, the
+FAT12/16/32 writer and the image builder also have automated tests.
+FreeDOS images and other machines have not been tested on real hardware yet.
+**Keep a copy of every disk image and card you work on.**
 
 ## What it does
 
