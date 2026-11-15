@@ -1446,3 +1446,24 @@ TR: Da selezionare (Driver...): %s
 
 EN: To download: %s
 TR: Da scaricare: %s
+
+EN: Drivers of the system source used: %s
+TR: Driver dell'origine del sistema usati: %s
+
+EN: The drivers of the system source are files on it, so all its files should be copied too. Copy all files of the source?
+TR: I driver dell'origine del sistema sono file che si trovano lì, quindi andrebbero copiati tutti i suoi file. Copiare tutti i file dell'origine?
+
+EN: The lines of the system source name files that are not on it: %s
+TR: Le righe dell'origine del sistema nominano file che non ci sono: %s
+
+EN: These menu items were edited by hand, so their lines were not changed: %s
+TR: Queste voci di menu sono state modificate a mano, quindi le loro righe non sono cambiate: %s
+
+EN: Use the drivers of the system source (none found)
+TR: Usa i driver dell'origine del sistema (nessuno trovato)
+
+EN: Use the drivers of the system source: %s
+TR: Usa i driver dell'origine del sistema: %s
+
+EN: keyboard
+TR: tastiera

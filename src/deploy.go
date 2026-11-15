@@ -213,8 +213,18 @@ func imageBootable(v *Volume) bool {
 
 var reShellP = regexp.MustCompile(`(?i)/P=([^\s]+)`)
 
-// readSource reads the boot files from a folder or an image and imports them.
-func readSource(t fsTarget) (*Project, []string, error) {
+// bootFiles are the CONFIG and AUTOEXEC lines of a DOS system.
+type bootFiles struct {
+	target            Target
+	cfgName, autoName string
+	cfgBytes          []byte
+	cfg, auto         []string
+	autoMissing       bool
+}
+
+// readBootFiles finds and reads CONFIG.SYS / FDCONFIG.SYS and the AUTOEXEC
+// file that CONFIG names (SHELL ... /P=) or the usual one.
+func readBootFiles(t fsTarget) (*bootFiles, error) {
 	target := TargetMSDOS
 	cfgName := "CONFIG.SYS"
 	if t.Exists("FDCONFIG.SYS") {
@@ -222,7 +232,7 @@ func readSource(t fsTarget) (*Project, []string, error) {
 	}
 	cfgBytes, err := t.ReadFile(cfgName)
 	if err != nil {
-		return nil, nil, fmt.Errorf("%s", T("CONFIG.SYS / FDCONFIG.SYS not found"))
+		return nil, fmt.Errorf("%s", T("CONFIG.SYS / FDCONFIG.SYS not found"))
 	}
 	cfg := DecodeFile(cfgBytes, CP852)
 	if target == TargetMSDOS && looksFreeDOS(cfg) {
@@ -242,11 +252,24 @@ func readSource(t fsTarget) (*Project, []string, error) {
 			}
 		}
 	}
-	var auto []string
-	var notes []string
+	bf := &bootFiles{target: target, cfgName: cfgName, autoName: autoName, cfgBytes: cfgBytes, cfg: cfg}
 	if b, err := t.ReadFile(autoName); err == nil {
-		auto = DecodeFile(b, CP852)
+		bf.auto = DecodeFile(b, CP852)
 	} else {
+		bf.autoMissing = true
+	}
+	return bf, nil
+}
+
+// readSource reads the boot files from a folder or an image and imports them.
+func readSource(t fsTarget) (*Project, []string, error) {
+	bf, err := readBootFiles(t)
+	if err != nil {
+		return nil, nil, err
+	}
+	target, cfgName, autoName, cfgBytes, cfg, auto := bf.target, bf.cfgName, bf.autoName, bf.cfgBytes, bf.cfg, bf.auto
+	var notes []string
+	if bf.autoMissing {
 		notes = append(notes, T("%s not found; the AUTOEXEC part is empty.", autoName))
 	}
 	p, n2 := Import(cfg, auto, target)

@@ -285,7 +285,7 @@ func (w *blockWin) update() {
 	for _, id := range []int{bkNetCard, bkNetArgs, bkEC} {
 		enable(w.c[id], b.Net)
 	}
-	cfg, auto, drv := b.Build(a.proj.Target)
+	cfg, auto, drv := b.BuildFor(a.proj.Target, a.proj.Machine)
 	var t strings.Builder
 	t.WriteString("[" + a.proj.ConfigFile() + "]\r\n")
 	for _, l := range cfg {
@@ -347,10 +347,10 @@ func (w *blockWin) ok() {
 		}
 	}
 	b := w.get()
-	it, drv := ItemFromBlocks(id, strings.TrimSpace(getText(w.c[bkTitle])), b, p.Target)
+	it, drv := ItemFromBlocks(id, strings.TrimSpace(getText(w.c[bkTitle])), b, p.Target, p.Machine)
 	if w.edit >= 0 {
 		old := &p.Items[w.edit]
-		if !old.BlocksMatch(p.Target) {
+		if !old.BlocksMatch(p.Target, p.Machine) {
 			if msgBox(w.hwnd, T("The lines of %s were edited by hand. Replace them with the lines of the building blocks?", old.ID), appTitle(), MB_YESNO|MB_ICONQUESTION) != IDYES {
 				return
 			}

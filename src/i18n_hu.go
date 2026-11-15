@@ -484,4 +484,11 @@ var huTexts = map[string]string{
 	"Where should MS-DOS come from?":                             "Honnan legyen az MS-DOS?",
 	"To browse for (Drivers...): %s":                             "Betallózandó (Driverek...): %s",
 	"To download: %s":                                            "Letöltendő: %s",
+	"Drivers of the system source used: %s":                      "A rendszerforrás saját driverei használva: %s",
+	"The drivers of the system source are files on it, so all its files should be copied too. Copy all files of the source?": "A rendszerforrás driverei fájlok a forráson, ezért minden fájlját át kell másolni. Átmásoljam a forrás összes fájlját?",
+	"The lines of the system source name files that are not on it: %s":                                                       "A rendszerforrás sorai olyan fájlokat neveznek meg, amelyek nincsenek rajta: %s",
+	"These menu items were edited by hand, so their lines were not changed: %s":                                              "Ezeket a menüpontokat kézzel szerkesztetted, ezért a soraik nem változtak: %s",
+	"Use the drivers of the system source (none found)":                                                                      "A rendszerforrás saját driverei (nem találtam ilyet)",
+	"Use the drivers of the system source: %s":                                                                               "A rendszerforrás saját drivereinek használata: %s",
+	"keyboard": "billentyűzet",
 }

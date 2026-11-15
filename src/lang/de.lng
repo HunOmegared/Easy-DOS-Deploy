@@ -1446,3 +1446,24 @@ TR: Auszuwählen (Treiber...): %s
 
 EN: To download: %s
 TR: Herunterzuladen: %s
+
+EN: Drivers of the system source used: %s
+TR: Treiber der Systemquelle verwendet: %s
+
+EN: The drivers of the system source are files on it, so all its files should be copied too. Copy all files of the source?
+TR: Die Treiber der Systemquelle sind Dateien darauf, daher sollten alle ihre Dateien mitkopiert werden. Alle Dateien der Quelle kopieren?
+
+EN: The lines of the system source name files that are not on it: %s
+TR: Die Zeilen der Systemquelle nennen Dateien, die nicht darauf sind: %s
+
+EN: These menu items were edited by hand, so their lines were not changed: %s
+TR: Diese Menüpunkte wurden von Hand bearbeitet, daher wurden ihre Zeilen nicht geändert: %s
+
+EN: Use the drivers of the system source (none found)
+TR: Die Treiber der Systemquelle verwenden (keine gefunden)
+
+EN: Use the drivers of the system source: %s
+TR: Die Treiber der Systemquelle verwenden: %s
+
+EN: keyboard
+TR: Tastatur

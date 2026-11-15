@@ -67,6 +67,17 @@ changes.
 2. *Disk image > New bootable disk image:* check the geometry, choose the boot
    menu, and optionally copy the rest of the files from the backup.
 
+**The machine's own drivers.** The program reads the CONFIG.SYS and
+AUTOEXEC.BAT of the backup and finds the drivers the machine already uses:
+mouse, CD-ROM (the device driver and MSCDEX), sound (for example CTSB16.SYS,
+DIAGNOSE and the BLASTER line of a Sound Blaster 16, or ULTRINIT and ULTRASND
+of a Gravis UltraSound), keyboard and code page. With *Use the drivers of the
+system source* (on by default when something is found) the new menu loads
+these instead of the program's own choices, so the drivers known to work on
+that machine stay. The high-loading options MEMMAKER wrote (`LH /L:...`,
+`DEVICEHIGH /L:...`) are left out; each menu item loads high again by its own
+memory setting. A batch file started with `CALL` counts as what it loads.
+
 ### 2. Nothing yet: FreeDOS, downloaded by the program
 
 For an empty card and no DOS disks at all. The program downloads the FreeDOS

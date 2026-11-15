@@ -58,6 +58,9 @@ type Project struct {
 	Items []Item `json:"items"`
 	// Driver IDs (see drivers.go) to copy into a disk image.
 	Drivers []string `json:"drivers"`
+	// Machine: the drivers of an existing system that block-made items use
+	// instead of the program's own (see machine.go); nil: none.
+	Machine *Machine `json:"machine,omitempty"`
 	// File names; empty means the default for the target.
 	ConfigName   string `json:"configname"`
 	AutoexecName string `json:"autoexecname"`

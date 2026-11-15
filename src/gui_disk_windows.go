@@ -31,6 +31,7 @@ const (
 	bwSource
 	bwSrcBrowse
 	bwCopyAll
+	bwUseOwn
 	bwLblMenu
 	bwMenuKind
 	bwMenuEdit
@@ -59,6 +60,11 @@ type bootWin struct {
 	loading bool
 	srcPath string
 	srcDOS  DOSKind
+	// the drivers found on the source (nil: none), and the files its lines
+	// name that are not on it
+	machine     *Machine
+	machineMiss []string
+	machineSrc  string
 }
 
 func (a *app) openBootWin() {
@@ -69,7 +75,7 @@ func (a *app) openBootWin() {
 	}
 	b := &bootWin{c: map[int]uintptr{}}
 	a.boot = b
-	b.hwnd = createWindow(0, "EasyDDTBoot", T("New bootable disk image"), WS_OVERLAPPEDWINDOW&^0x00050000, cwDefault, cwDefault, a.s(700), a.s(760), 0, 0) // no owner, so it does not stay above the main window
+	b.hwnd = createWindow(0, "EasyDDTBoot", T("New bootable disk image"), WS_OVERLAPPEDWINDOW&^0x00050000, cwDefault, cwDefault, a.s(700), a.s(800), 0, 0) // no owner, so it does not stay above the main window
 	mk := func(id int, class, text string, style, ex uint32) uintptr {
 		h := createWindow(ex, class, text, WS_CHILD|WS_VISIBLE|style, 0, 0, 10, 10, b.hwnd, uintptr(id))
 		sendMsg(h, WM_SETFONT, a.font, 1)
@@ -101,6 +107,7 @@ func (a *app) openBootWin() {
 	mk(bwSource, "EDIT", "", edit, WS_EX_CLIENTEDGE)
 	mk(bwSrcBrowse, "BUTTON", T("Browse..."), WS_TABSTOP, 0)
 	mk(bwCopyAll, "BUTTON", T("Copy all other files of the source too (e.g. the DOS folder)"), WS_TABSTOP|BS_AUTOCHECKBOX, 0)
+	mk(bwUseOwn, "BUTTON", "", WS_TABSTOP|BS_AUTOCHECKBOX|BS_MULTILINE, 0)
 	mk(bwLblMenu, "STATIC", T("Boot menu:"), 0, 0)
 	mk(bwMenuKind, "COMBOBOX", "", WS_TABSTOP|CBS_DROPDOWNLIST|WS_VSCROLL, 0)
 	mk(bwMenuEdit, "BUTTON", T("Edit..."), WS_TABSTOP, 0)
@@ -210,6 +217,54 @@ func (b *bootWin) menuChosen() {
 		a.proj, a.path, a.dirty, a.sel = TemplateByID(wizMenus[c]+suffix).Make(), "", false, 1
 		a.loadProject()
 	}
+	b.applyOwn()
+}
+
+// findMachine reads the drivers of the system source, once per source.
+func (b *bootWin) findMachine() {
+	src := strings.Trim(strings.TrimSpace(getText(b.c[bwSource])), `"`)
+	if src == b.machineSrc {
+		return
+	}
+	b.machineSrc, b.machine, b.machineMiss = src, nil, nil
+	if src != "" {
+		if m, miss, err := MachineFromImage(src); err == nil && !m.Empty() {
+			b.machine, b.machineMiss = m, miss
+			setCheck(b.c[bwUseOwn], true) // a new source: its drivers are the ones known to work
+		}
+	}
+}
+
+// useOwn is true when the new menu uses the drivers of the source.
+func (b *bootWin) useOwn() bool {
+	return b.machine != nil && checked(b.c[bwUseOwn]) && !checked(b.c[bwFreeDOS]) && b.menuChoice() != menuKeep
+}
+
+// applyOwn shows what was found on the source and makes the editor's menu
+// use those drivers or the program's own.
+func (b *bootWin) applyOwn() {
+	a := theApp
+	b.findMachine()
+	if b.machine == nil {
+		setText(b.c[bwUseOwn], T("Use the drivers of the system source (none found)"))
+		enable(b.c[bwUseOwn], false)
+	} else {
+		setText(b.c[bwUseOwn], T("Use the drivers of the system source: %s", b.machine.Summary()))
+		enable(b.c[bwUseOwn], !checked(b.c[bwFreeDOS]) && b.menuChoice() != menuKeep && !checked(b.c[bwBlank]))
+	}
+	var want *Machine
+	if b.useOwn() {
+		want = b.machine
+		setCheck(b.c[bwCopyAll], true) // the drivers are files of the source
+	}
+	if want != a.proj.Machine {
+		kept := a.proj.UseMachine(want)
+		a.setDirty()
+		a.loadProject()
+		if len(kept) > 0 {
+			msgBox(b.hwnd, T("These menu items were edited by hand, so their lines were not changed: %s", strings.Join(kept, ", ")), appTitle(), MB_ICONINFORMATION)
+		}
+	}
 	b.updateDrivers()
 }
 
@@ -225,6 +280,7 @@ func (b *bootWin) followSource() {
 		a.loadProject()
 	}
 	b.fillMenus(b.menuChoice())
+	b.applyOwn()
 }
 
 func (b *bootWin) updateDrivers() {
@@ -330,7 +386,9 @@ func (b *bootWin) layout() {
 	move(b.c[bwSrcBrowse], w-m-sb, y, sb, rh)
 	y += rh + s(6)
 	move(b.c[bwCopyAll], m, y, cw, rh)
-	y += rh
+	y += rh + s(2)
+	move(b.c[bwUseOwn], m, y, cw, 2*lh+s(4))
+	y += 2*lh + s(4)
 	y += s(6)
 	move(b.c[bwLblMenu], m, y+s(4), col, lh)
 	move(b.c[bwMenuKind], m+col, y, cw-col-sb-s(10), rh+s(160))
@@ -542,6 +600,12 @@ func (b *bootWin) create() {
 	if withMenu && (!a.ready() || !a.checkDrivers()) {
 		return
 	}
+	if b.useOwn() && !o.CopyAll {
+		if msgBox(b.hwnd, T("The drivers of the system source are files on it, so all its files should be copied too. Copy all files of the source?"), appTitle(), MB_YESNO|MB_ICONQUESTION) == IDYES {
+			setCheck(b.c[bwCopyAll], true)
+			o.CopyAll = true
+		}
+	}
 	if checked(b.c[bwFreeDOS]) {
 		files, missing := FreeDOSFiles(a.proj, a.store)
 		if len(missing) > 0 {
@@ -572,6 +636,12 @@ func (b *bootWin) create() {
 		if err != nil {
 			msgBox(b.hwnd, reportText(r, T("Error: %s", err.Error())), appTitle(), MB_ICONERROR)
 			return
+		}
+	}
+	if b.useOwn() {
+		r.Done = append(r.Done, T("Drivers of the system source used: %s", b.machine.Summary()))
+		if len(b.machineMiss) > 0 {
+			r.Warnings = append(r.Warnings, T("The lines of the system source name files that are not on it: %s", strings.Join(b.machineMiss, ", ")))
 		}
 	}
 	text := reportText(r, T("The image is ready: %s", o.Path))
@@ -646,11 +716,16 @@ func bootProc(hwnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {
 		case bwBlank:
 			if code == BN_CLICKED {
 				b.update()
+				b.applyOwn()
 			}
 		case bwFreeDOS:
 			if code == BN_CLICKED {
 				b.update()
 				b.followSource()
+			}
+		case bwUseOwn:
+			if code == BN_CLICKED {
+				b.applyOwn()
 			}
 		case bwSrcBrowse:
 			if p := fileDialog(hwnd, false, T("System source"), "", "", imgFilter()...); p != "" {

@@ -114,8 +114,15 @@ func (b BlockSet) Title() string {
 }
 
 // Build makes the lines and the list of drivers for the target DOS.
-func (b BlockSet) Build(t Target) (cfg, auto, drivers []string) {
+func (b BlockSet) Build(t Target) (cfg, auto, drivers []string) { return b.BuildFor(t, nil) }
+
+// BuildFor is Build with the drivers of the machine (see Machine): where it
+// has its own mouse, CD-ROM or sound driver, those lines are used.
+func (b BlockSet) BuildFor(t Target, m *Machine) (cfg, auto, drivers []string) {
 	b.Normalize()
+	if m == nil {
+		m = &Machine{}
+	}
 	free := t == TargetFreeDOS
 	high := b.Memory == "umb" || b.Memory == "ems"
 	dev, lh := "DEVICE=", ""
@@ -137,8 +144,26 @@ func (b BlockSet) Build(t Target) (cfg, auto, drivers []string) {
 	case b.Memory == "ems":
 		cfg = append(cfg, `DEVICE=C:\DOS\HIMEM.SYS`, `DEVICE=C:\DOS\EMM386.EXE RAM`, "DOS=HIGH,UMB")
 	}
+	// the machine's own lines: device drivers loaded high when the item has
+	// upper memory, programs in AUTOEXEC too; SET lines and the init
+	// programs of sound cards (which do not stay in memory) as they are
+	own := func(g Group, highAuto bool) {
+		for _, l := range g.Config {
+			cfg = append(cfg, dev+l)
+		}
+		for _, l := range g.Autoexec {
+			up := strings.ToUpper(l)
+			if highAuto && !strings.HasPrefix(up, "SET ") && !strings.HasPrefix(up, "CALL ") {
+				auto = append(auto, lh+l)
+			} else {
+				auto = append(auto, l)
+			}
+		}
+	}
 	// CD-ROM: device driver in CONFIG.SYS, extension in AUTOEXEC.BAT
-	if b.CDROM {
+	if b.CDROM && !m.CDROM.Empty() {
+		own(m.CDROM, true)
+	} else if b.CDROM {
 		switch b.CDDriver {
 		case "udvd2":
 			if free {
@@ -157,7 +182,9 @@ func (b BlockSet) Build(t Target) (cfg, auto, drivers []string) {
 			auto = append(auto, lh+`C:\DOS\MSCDEX.EXE /D:MSCD001 /L:`+b.CDLetter)
 		}
 	}
-	if b.Mouse {
+	if b.Mouse && !m.Mouse.Empty() {
+		own(m.Mouse, true)
+	} else if b.Mouse {
 		if free {
 			auto = append(auto, lh+`C:\FREEDOS\BIN\CTMOUSE.EXE`)
 		} else {
@@ -165,7 +192,9 @@ func (b BlockSet) Build(t Target) (cfg, auto, drivers []string) {
 			drivers = append(drivers, "ctmouse")
 		}
 	}
-	if b.Sound {
+	if b.Sound && !m.Sound.Empty() {
+		own(m.Sound, false)
+	} else if b.Sound {
 		auto = append(auto, "SET BLASTER="+strings.TrimSpace(b.Blaster))
 		if b.PnP {
 			auto = append(auto, `C:\DRIVERS\UNISOUND.COM /V70`)
@@ -206,9 +235,9 @@ var Presets = []Preset{
 }
 
 // ItemFromBlocks makes a menu item; the caller adds the drivers to the project.
-func ItemFromBlocks(id, title string, b BlockSet, t Target) (Item, []string) {
+func ItemFromBlocks(id, title string, b BlockSet, t Target, m *Machine) (Item, []string) {
 	b.Normalize()
-	cfg, auto, drv := b.Build(t)
+	cfg, auto, drv := b.BuildFor(t, m)
 	if title == "" {
 		title = b.Title()
 	}
@@ -218,11 +247,11 @@ func ItemFromBlocks(id, title string, b BlockSet, t Target) (Item, []string) {
 
 // BlocksMatch reports whether an item's lines are still exactly what its
 // blocks produce (so rebuilding them loses no hand edits).
-func (it *Item) BlocksMatch(t Target) bool {
+func (it *Item) BlocksMatch(t Target, m *Machine) bool {
 	if it.Blocks == nil {
 		return len(it.Config) == 0 && len(it.Autoexec) == 0
 	}
-	cfg, auto, _ := it.Blocks.Build(t)
+	cfg, auto, _ := it.Blocks.BuildFor(t, m)
 	return strings.Join(cfg, "\n") == strings.Join(it.Config, "\n") && strings.Join(auto, "\n") == strings.Join(it.Autoexec, "\n")
 }
 
@@ -249,11 +278,11 @@ func (p *Project) RebuildBlockItems(from Target) (kept []string) {
 		if it.Blocks == nil {
 			continue
 		}
-		if !it.BlocksMatch(from) {
+		if !it.BlocksMatch(from, p.Machine) {
 			kept = append(kept, it.ID)
 			continue
 		}
-		cfg, auto, drv := it.Blocks.Build(p.Target)
+		cfg, auto, drv := it.Blocks.BuildFor(p.Target, p.Machine)
 		it.Config, it.Autoexec = cfg, auto
 		p.AddDrivers(drv)
 	}
@@ -291,7 +320,7 @@ func ProjectFromPresets(t Target, timeout int, presetIDs ...string) *Project {
 	for _, id := range presetIDs {
 		for _, pr := range Presets {
 			if pr.ID == id {
-				it, drv := ItemFromBlocks(pr.ID, "", pr.Blocks, t)
+				it, drv := ItemFromBlocks(pr.ID, "", pr.Blocks, t, nil)
 				p.Items = append(p.Items, it)
 				p.AddDrivers(drv)
 			}

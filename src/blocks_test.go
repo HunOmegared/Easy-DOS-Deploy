@@ -89,7 +89,7 @@ func TestRebuildOnTargetChange(t *testing.T) {
 	if !has(p.Items[0].Autoexec, `SHSUCDX`) || has(p.Items[1].Autoexec, "SHSUCDX") || !has(p.Items[1].Autoexec, "hand edit") {
 		t.Fatal(p.Items)
 	}
-	if !p.Items[0].BlocksMatch(TargetFreeDOS) || p.Items[1].BlocksMatch(TargetFreeDOS) {
+	if !p.Items[0].BlocksMatch(TargetFreeDOS, nil) || p.Items[1].BlocksMatch(TargetFreeDOS, nil) {
 		t.Fatal("match")
 	}
 }
