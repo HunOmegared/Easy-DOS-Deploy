@@ -22,8 +22,9 @@ booted from it with the menu working. The same system was then put onto an
 same machine. `GEOM.COM` and a FreeDOS boot floppy made by the program's own
 FAT code were also tried there. The file generation, the importer, the
 FAT12/16/32 writer, the image builder and the 16-bit code also have automated
-tests. FreeDOS hard disk images and other machines have not been tested on real
-hardware yet.
+tests. A FreeDOS card made from nothing (an empty card, FreeDOS downloaded by
+the program, the program's own MBR) booted on the Integra as well. Other
+machines have not been tested on real hardware yet.
 **Keep a copy of every disk image and card you work on.**
 
 ## What it does
