@@ -1453,12 +1453,6 @@ TR: Las líneas del origen del sistema nombran archivos que no están en él: %s
 EN: These menu items were edited by hand, so their lines were not changed: %s
 TR: Estas opciones de menú se editaron a mano, así que sus líneas no se cambiaron: %s
 
-EN: Use the drivers of the system source (none found)
-TR: Usar los controladores del origen del sistema (no se encontró ninguno)
-
-EN: Use the drivers of the system source: %s
-TR: Usar los controladores del origen del sistema: %s
-
 EN: keyboard
 TR: teclado
 
@@ -1467,3 +1461,42 @@ TR: Libre y compatible con MS-DOS; la mayoría de los programas y juegos de DOS 
 
 EN: You need your own MS-DOS: a card that boots it, a backup of one, a boot floppy image or the install disks. The program cannot download it, because it belongs to Microsoft.
 TR: Necesita su propio MS-DOS: una tarjeta que arranque con él, una copia de ella, una imagen de disquete de arranque o los discos de instalación. El programa no puede descargarlo, porque pertenece a Microsoft.
+
+EN: %s on the source, not used
+TR: %s en el origen, sin usar
+
+EN: Also found, not taken over (network, tools):
+TR: También encontrados, no se toman (red, herramientas):
+
+EN: Choose a system source to see the drivers it uses.
+TR: Elija un origen del sistema para ver los controladores que usa.
+
+EN: Drivers of the system source
+TR: Controladores del origen del sistema
+
+EN: High loading (LH, DEVICEHIGH, /L:) is left out here; each menu item adds it for its memory setting.
+TR: La carga en memoria alta (LH, DEVICEHIGH, /L:) se omite aquí; cada opción del menú la añade según su ajuste de memoria.
+
+EN: Keyboard
+TR: Teclado
+
+EN: Lines...
+TR: Líneas...
+
+EN: Mouse
+TR: Ratón
+
+EN: Named, but not on the source: %s
+TR: Nombrados, pero no están en el origen: %s
+
+EN: No mouse, CD-ROM or sound driver was found on the system source.
+TR: No se encontró ningún controlador de ratón, CD-ROM o sonido en el origen del sistema.
+
+EN: Sound
+TR: Sonido
+
+EN: Use the drivers of the system source
+TR: Usar los controladores del origen del sistema
+
+EN: not on the source; the program's own (%s)
+TR: no está en el origen; el propio del programa (%s)

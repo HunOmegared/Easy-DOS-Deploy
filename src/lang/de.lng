@@ -1453,12 +1453,6 @@ TR: Die Zeilen der Systemquelle nennen Dateien, die nicht darauf sind: %s
 EN: These menu items were edited by hand, so their lines were not changed: %s
 TR: Diese Menüpunkte wurden von Hand bearbeitet, daher wurden ihre Zeilen nicht geändert: %s
 
-EN: Use the drivers of the system source (none found)
-TR: Die Treiber der Systemquelle verwenden (keine gefunden)
-
-EN: Use the drivers of the system source: %s
-TR: Die Treiber der Systemquelle verwenden: %s
-
 EN: keyboard
 TR: Tastatur
 
@@ -1467,3 +1461,42 @@ TR: Frei und MS-DOS-kompatibel; die meisten DOS-Programme und -Spiele laufen dar
 
 EN: You need your own MS-DOS: a card that boots it, a backup of one, a boot floppy image or the install disks. The program cannot download it, because it belongs to Microsoft.
 TR: Sie brauchen Ihr eigenes MS-DOS: eine Karte, die damit bootet, eine Sicherung davon, ein Bootdisketten-Image oder die Installationsdisketten. Das Programm kann es nicht herunterladen, weil es Microsoft gehört.
+
+EN: %s on the source, not used
+TR: %s auf der Quelle, nicht verwendet
+
+EN: Also found, not taken over (network, tools):
+TR: Ebenfalls gefunden, nicht übernommen (Netzwerk, Werkzeuge):
+
+EN: Choose a system source to see the drivers it uses.
+TR: Wählen Sie eine Systemquelle, um ihre Treiber zu sehen.
+
+EN: Drivers of the system source
+TR: Treiber der Systemquelle
+
+EN: High loading (LH, DEVICEHIGH, /L:) is left out here; each menu item adds it for its memory setting.
+TR: Das Hochladen (LH, DEVICEHIGH, /L:) ist hier weggelassen; jeder Menüpunkt fügt es für seine Speichereinstellung hinzu.
+
+EN: Keyboard
+TR: Tastatur
+
+EN: Lines...
+TR: Zeilen...
+
+EN: Mouse
+TR: Maus
+
+EN: Named, but not on the source: %s
+TR: Genannt, aber nicht auf der Quelle: %s
+
+EN: No mouse, CD-ROM or sound driver was found on the system source.
+TR: Auf der Systemquelle wurde kein Maus-, CD-ROM- oder Soundtreiber gefunden.
+
+EN: Sound
+TR: Sound
+
+EN: Use the drivers of the system source
+TR: Die Treiber der Systemquelle verwenden
+
+EN: not on the source; the program's own (%s)
+TR: nicht auf der Quelle; der eigene des Programms (%s)

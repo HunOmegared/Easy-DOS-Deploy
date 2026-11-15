@@ -1453,12 +1453,6 @@ TR: Le righe dell'origine del sistema nominano file che non ci sono: %s
 EN: These menu items were edited by hand, so their lines were not changed: %s
 TR: Queste voci di menu sono state modificate a mano, quindi le loro righe non sono cambiate: %s
 
-EN: Use the drivers of the system source (none found)
-TR: Usa i driver dell'origine del sistema (nessuno trovato)
-
-EN: Use the drivers of the system source: %s
-TR: Usa i driver dell'origine del sistema: %s
-
 EN: keyboard
 TR: tastiera
 
@@ -1467,3 +1461,42 @@ TR: Libero e compatibile con MS-DOS; la maggior parte dei programmi e dei giochi
 
 EN: You need your own MS-DOS: a card that boots it, a backup of one, a boot floppy image or the install disks. The program cannot download it, because it belongs to Microsoft.
 TR: Ti serve il tuo MS-DOS: una scheda che si avvia con esso, un suo backup, un'immagine di dischetto di avvio o i dischi di installazione. Il programma non può scaricarlo, perché appartiene a Microsoft.
+
+EN: %s on the source, not used
+TR: %s sull'origine, non usato
+
+EN: Also found, not taken over (network, tools):
+TR: Trovati anche, non ripresi (rete, strumenti):
+
+EN: Choose a system source to see the drivers it uses.
+TR: Scegli un'origine del sistema per vedere i driver che usa.
+
+EN: Drivers of the system source
+TR: Driver dell'origine del sistema
+
+EN: High loading (LH, DEVICEHIGH, /L:) is left out here; each menu item adds it for its memory setting.
+TR: Il caricamento in memoria alta (LH, DEVICEHIGH, /L:) qui è omesso; ogni voce del menu lo aggiunge secondo la sua impostazione di memoria.
+
+EN: Keyboard
+TR: Tastiera
+
+EN: Lines...
+TR: Righe...
+
+EN: Mouse
+TR: Mouse
+
+EN: Named, but not on the source: %s
+TR: Nominati, ma non presenti sull'origine: %s
+
+EN: No mouse, CD-ROM or sound driver was found on the system source.
+TR: Sull'origine del sistema non è stato trovato nessun driver di mouse, CD-ROM o audio.
+
+EN: Sound
+TR: Audio
+
+EN: Use the drivers of the system source
+TR: Usa i driver dell'origine del sistema
+
+EN: not on the source; the program's own (%s)
+TR: non sull'origine; quello del programma (%s)

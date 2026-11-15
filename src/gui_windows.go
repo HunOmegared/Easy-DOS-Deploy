@@ -761,6 +761,17 @@ func (a *app) targetChanged(from Target) {
 	}
 }
 
+// autoChanged is for changes the program makes by itself (the image window
+// following the source): an unsaved project made from a template stays
+// "unchanged", so choosing another menu does not ask to save it.
+func (a *app) autoChanged() {
+	if a.path != "" {
+		a.setDirty()
+		return
+	}
+	a.updateStatus()
+}
+
 func (a *app) setDirty() {
 	if !a.dirty {
 		a.dirty = true
@@ -893,11 +904,15 @@ func imgFilter() []string {
 	return []string{T("Disk images (*.img, *.ima, *.vhd, *.hdd, *.dsk)"), "*.img;*.ima;*.vhd;*.hdd;*.dsk;*.vfd;*.flp", T("All files"), "*.*"}
 }
 
-func (a *app) askSave() bool {
+func (a *app) askSave() bool { return a.askSaveFrom(a.hwnd) }
+
+// askSaveFrom asks over the given window (so the main window does not come
+// to the front when another window asks).
+func (a *app) askSaveFrom(owner uintptr) bool {
 	if !a.dirty {
 		return true
 	}
-	switch msgBox(a.hwnd, T("The project has changed. Save it?"), appTitle(), MB_YESNOCANCEL|MB_ICONQUESTION) {
+	switch msgBox(owner, T("The project has changed. Save it?"), appTitle(), MB_YESNOCANCEL|MB_ICONQUESTION) {
 	case IDYES:
 		return a.saveProject(false)
 	case IDNO:

@@ -1453,12 +1453,6 @@ TR: Les lignes de la source système nomment des fichiers qui n'y sont pas : %s
 EN: These menu items were edited by hand, so their lines were not changed: %s
 TR: Ces entrées de menu ont été modifiées à la main, leurs lignes n'ont donc pas été changées : %s
 
-EN: Use the drivers of the system source (none found)
-TR: Utiliser les pilotes de la source système (aucun trouvé)
-
-EN: Use the drivers of the system source: %s
-TR: Utiliser les pilotes de la source système : %s
-
 EN: keyboard
 TR: clavier
 
@@ -1467,3 +1461,42 @@ TR: Libre et compatible MS-DOS ; la plupart des programmes et jeux DOS fonctionn
 
 EN: You need your own MS-DOS: a card that boots it, a backup of one, a boot floppy image or the install disks. The program cannot download it, because it belongs to Microsoft.
 TR: Il vous faut votre propre MS-DOS : une carte qui démarre avec, une sauvegarde de celle-ci, une image de disquette de démarrage ou les disquettes d'installation. Le programme ne peut pas le télécharger, car il appartient à Microsoft.
+
+EN: %s on the source, not used
+TR: %s sur la source, non utilisé
+
+EN: Also found, not taken over (network, tools):
+TR: Trouvés aussi, non repris (réseau, outils) :
+
+EN: Choose a system source to see the drivers it uses.
+TR: Choisissez une source système pour voir les pilotes qu'elle utilise.
+
+EN: Drivers of the system source
+TR: Pilotes de la source système
+
+EN: High loading (LH, DEVICEHIGH, /L:) is left out here; each menu item adds it for its memory setting.
+TR: Le chargement en mémoire haute (LH, DEVICEHIGH, /L:) est omis ici ; chaque entrée de menu l'ajoute selon son réglage de mémoire.
+
+EN: Keyboard
+TR: Clavier
+
+EN: Lines...
+TR: Lignes...
+
+EN: Mouse
+TR: Souris
+
+EN: Named, but not on the source: %s
+TR: Nommés, mais absents de la source : %s
+
+EN: No mouse, CD-ROM or sound driver was found on the system source.
+TR: Aucun pilote de souris, de CD-ROM ou de son n'a été trouvé sur la source système.
+
+EN: Sound
+TR: Son
+
+EN: Use the drivers of the system source
+TR: Utiliser les pilotes de la source système
+
+EN: not on the source; the program's own (%s)
+TR: absent de la source ; celui du programme (%s)

@@ -32,6 +32,8 @@ const (
 	bwSrcBrowse
 	bwCopyAll
 	bwUseOwn
+	bwOwnInfo
+	bwOwnLines
 	bwLblMenu
 	bwMenuKind
 	bwMenuEdit
@@ -75,7 +77,7 @@ func (a *app) openBootWin() {
 	}
 	b := &bootWin{c: map[int]uintptr{}}
 	a.boot = b
-	b.hwnd = createWindow(0, "EasyDDTBoot", T("New bootable disk image"), WS_OVERLAPPEDWINDOW&^0x00050000, cwDefault, cwDefault, a.s(700), a.s(800), 0, 0) // no owner, so it does not stay above the main window
+	b.hwnd = createWindow(0, "EasyDDTBoot", T("New bootable disk image"), WS_OVERLAPPEDWINDOW&^0x00050000, cwDefault, cwDefault, a.s(700), a.s(860), 0, 0) // no owner, so it does not stay above the main window
 	mk := func(id int, class, text string, style, ex uint32) uintptr {
 		h := createWindow(ex, class, text, WS_CHILD|WS_VISIBLE|style, 0, 0, 10, 10, b.hwnd, uintptr(id))
 		sendMsg(h, WM_SETFONT, a.font, 1)
@@ -107,7 +109,9 @@ func (a *app) openBootWin() {
 	mk(bwSource, "EDIT", "", edit, WS_EX_CLIENTEDGE)
 	mk(bwSrcBrowse, "BUTTON", T("Browse..."), WS_TABSTOP, 0)
 	mk(bwCopyAll, "BUTTON", T("Copy all other files of the source too (e.g. the DOS folder)"), WS_TABSTOP|BS_AUTOCHECKBOX, 0)
-	mk(bwUseOwn, "BUTTON", "", WS_TABSTOP|BS_AUTOCHECKBOX|BS_MULTILINE, 0)
+	mk(bwUseOwn, "BUTTON", T("Use the drivers of the system source"), WS_TABSTOP|BS_AUTOCHECKBOX, 0)
+	mk(bwOwnInfo, "STATIC", "", 0, 0)
+	mk(bwOwnLines, "BUTTON", T("Lines..."), WS_TABSTOP, 0)
 	mk(bwLblMenu, "STATIC", T("Boot menu:"), 0, 0)
 	mk(bwMenuKind, "COMBOBOX", "", WS_TABSTOP|CBS_DROPDOWNLIST|WS_VSCROLL, 0)
 	mk(bwMenuEdit, "BUTTON", T("Edit..."), WS_TABSTOP, 0)
@@ -206,7 +210,7 @@ func (b *bootWin) menuChosen() {
 	a := theApp
 	c := b.menuChoice()
 	if c < menuEditor {
-		if !a.askSave() {
+		if !a.askSaveFrom(b.hwnd) {
 			b.fillMenus(menuEditor)
 			return
 		}
@@ -245,13 +249,10 @@ func (b *bootWin) useOwn() bool {
 func (b *bootWin) applyOwn() {
 	a := theApp
 	b.findMachine()
-	if b.machine == nil {
-		setText(b.c[bwUseOwn], T("Use the drivers of the system source (none found)"))
-		enable(b.c[bwUseOwn], false)
-	} else {
-		setText(b.c[bwUseOwn], T("Use the drivers of the system source: %s", b.machine.Summary()))
-		enable(b.c[bwUseOwn], !checked(b.c[bwFreeDOS]) && b.menuChoice() != menuKeep && !checked(b.c[bwBlank]))
-	}
+	usable := b.machine != nil && !checked(b.c[bwFreeDOS]) && b.menuChoice() != menuKeep && !checked(b.c[bwBlank])
+	enable(b.c[bwUseOwn], usable)
+	enable(b.c[bwOwnLines], b.machine != nil)
+	setText(b.c[bwOwnInfo], b.ownInfo())
 	var want *Machine
 	if b.useOwn() {
 		want = b.machine
@@ -259,7 +260,7 @@ func (b *bootWin) applyOwn() {
 	}
 	if want != a.proj.Machine {
 		kept := a.proj.UseMachine(want)
-		a.setDirty()
+		a.autoChanged()
 		a.loadProject()
 		if len(kept) > 0 {
 			msgBox(b.hwnd, T("These menu items were edited by hand, so their lines were not changed: %s", strings.Join(kept, ", ")), appTitle(), MB_ICONINFORMATION)
@@ -276,7 +277,7 @@ func (b *bootWin) followSource() {
 		from := a.proj.Target
 		a.proj.Target = t
 		a.targetChanged(from)
-		a.setDirty()
+		a.autoChanged()
 		a.loadProject()
 	}
 	b.fillMenus(b.menuChoice())
@@ -387,8 +388,12 @@ func (b *bootWin) layout() {
 	y += rh + s(6)
 	move(b.c[bwCopyAll], m, y, cw, rh)
 	y += rh + s(2)
-	move(b.c[bwUseOwn], m, y, cw, 2*lh+s(4))
-	y += 2*lh + s(4)
+	ob := fitW(s(100), s(24), b.c[bwOwnLines])
+	move(b.c[bwUseOwn], m, y, cw-ob-s(10), rh)
+	move(b.c[bwOwnLines], w-m-ob, y, ob, rh)
+	y += rh + s(2)
+	move(b.c[bwOwnInfo], m+s(20), y, cw-s(20)-ob-s(10), 4*lh)
+	y += 4*lh + s(4)
 	y += s(6)
 	move(b.c[bwLblMenu], m, y+s(4), col, lh)
 	move(b.c[bwMenuKind], m+col, y, cw-col-sb-s(10), rh+s(160))
@@ -727,6 +732,8 @@ func bootProc(hwnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {
 			if code == BN_CLICKED {
 				b.applyOwn()
 			}
+		case bwOwnLines:
+			b.showOwnLines()
 		case bwSrcBrowse:
 			if p := fileDialog(hwnd, false, T("System source"), "", "", imgFilter()...); p != "" {
 				setText(b.c[bwSource], p)
@@ -1461,4 +1468,69 @@ func (a *app) makeGeomFloppy() {
 	}
 	_ = r
 	msgBox(a.hwnd, T("The geometry floppy is ready: %s\n\nWrite it to a 1.44 MB floppy (WinImage, Greaseweazle) and boot the target machine from it with the card or disk in place. It shows the geometry by itself.", p), appTitle(), MB_ICONINFORMATION)
+}
+
+// ownInfo tells, kind by kind, what the new menu loads: the source's own
+// driver or the program's.
+func (b *bootWin) ownInfo() string {
+	if b.machine == nil {
+		if b.machineSrc == "" {
+			return T("Choose a system source to see the drivers it uses.")
+		}
+		return T("No mouse, CD-ROM or sound driver was found on the system source.")
+	}
+	m := b.machine
+	use := b.useOwn()
+	var out []string
+	line := func(kind string, g Group, programs string) {
+		switch {
+		case !g.Empty() && use:
+			out = append(out, kind+": "+g.Programs())
+		case !g.Empty():
+			out = append(out, kind+": "+T("%s on the source, not used", g.Programs()))
+		case programs != "":
+			out = append(out, kind+": "+T("not on the source; the program's own (%s)", programs))
+		}
+	}
+	line(T("Sound"), m.Sound, "SET BLASTER")
+	line(T("Mouse"), m.Mouse, "CTMOUSE")
+	line("CD-ROM", m.CDROM, "OAKCDROM, MSCDEX")
+	line(T("Keyboard"), m.Keyboard, "")
+	return strings.Join(out, "\n")
+}
+
+// showOwnLines shows the exact lines found on the source.
+func (b *bootWin) showOwnLines() {
+	m := b.machine
+	if m == nil {
+		return
+	}
+	var t []string
+	add := func(kind string, g Group) {
+		if g.Empty() {
+			return
+		}
+		t = append(t, kind+":")
+		for _, l := range g.Config {
+			t = append(t, "   CONFIG.SYS:   "+l)
+		}
+		for _, l := range g.Autoexec {
+			t = append(t, "   AUTOEXEC.BAT: "+l)
+		}
+	}
+	add(T("Sound"), m.Sound)
+	add(T("Mouse"), m.Mouse)
+	add("CD-ROM", m.CDROM)
+	add(T("Keyboard"), m.Keyboard)
+	if len(m.Other) > 0 {
+		t = append(t, "", T("Also found, not taken over (network, tools):"))
+		for _, l := range m.Other {
+			t = append(t, "   "+l)
+		}
+	}
+	if len(b.machineMiss) > 0 {
+		t = append(t, "", T("Named, but not on the source: %s", strings.Join(b.machineMiss, ", ")))
+	}
+	t = append(t, "", T("High loading (LH, DEVICEHIGH, /L:) is left out here; each menu item adds it for its memory setting."))
+	msgBox(b.hwnd, strings.Join(t, "\n"), T("Drivers of the system source"), MB_ICONINFORMATION)
 }
