@@ -142,8 +142,9 @@ func runGUI() {
 	a.data = dataDir(a.exeDir)
 	a.set = loadSettings(a.data)
 	langErrs := a.loadLanguageFiles()
+	// English unless the user chose another language in the Language menu
 	if a.set.Lang == "" || !SetLanguage(a.set.Lang) {
-		SetLanguage(systemLanguage())
+		SetLanguage("en")
 	}
 	a.store = NewStore(filepath.Join(a.data, "drivers"))
 	a.font = makeFont("Segoe UI", 9, a.dpi)

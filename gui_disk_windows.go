@@ -28,7 +28,11 @@ const (
 	bwSource
 	bwSrcBrowse
 	bwCopyAll
-	bwMenu
+	bwLblMenu
+	bwMenuKind
+	bwMenuEdit
+	bwDrvInfo
+	bwDrvBtn
 	bwLabel
 	bwOut
 	bwOutBrowse
@@ -50,6 +54,8 @@ type bootWin struct {
 	hwnd    uintptr
 	c       map[int]uintptr
 	loading bool
+	srcPath string
+	srcDOS  DOSKind
 }
 
 func (a *app) openBootWin() {
@@ -60,7 +66,7 @@ func (a *app) openBootWin() {
 	}
 	b := &bootWin{c: map[int]uintptr{}}
 	a.boot = b
-	b.hwnd = createWindow(0, "EasyRSBBoot", T("New bootable disk image"), WS_OVERLAPPEDWINDOW&^0x00050000, cwDefault, cwDefault, a.s(700), a.s(560), a.hwnd, 0)
+	b.hwnd = createWindow(0, "EasyRSBBoot", T("New bootable disk image"), WS_OVERLAPPEDWINDOW&^0x00050000, cwDefault, cwDefault, a.s(700), a.s(650), a.hwnd, 0)
 	mk := func(id int, class, text string, style, ex uint32) uintptr {
 		h := createWindow(ex, class, text, WS_CHILD|WS_VISIBLE|style, 0, 0, 10, 10, b.hwnd, uintptr(id))
 		sendMsg(h, WM_SETFONT, a.font, 1)
@@ -89,8 +95,11 @@ func (a *app) openBootWin() {
 	mk(bwSource, "EDIT", "", edit, WS_EX_CLIENTEDGE)
 	mk(bwSrcBrowse, "BUTTON", T("Browse..."), WS_TABSTOP, 0)
 	mk(bwCopyAll, "BUTTON", T("Copy all other files of the source too (e.g. the DOS folder)"), WS_TABSTOP|BS_AUTOCHECKBOX, 0)
-	mk(bwMenu, "BUTTON", T("Put the current boot menu and the selected drivers on it"), WS_TABSTOP|BS_AUTOCHECKBOX, 0)
-	sendMsg(b.c[bwMenu], BM_SETCHECK, 1, 0)
+	mk(bwLblMenu, "STATIC", T("Boot menu:"), 0, 0)
+	mk(bwMenuKind, "COMBOBOX", "", WS_TABSTOP|CBS_DROPDOWNLIST|WS_VSCROLL, 0)
+	mk(bwMenuEdit, "BUTTON", T("Edit..."), WS_TABSTOP, 0)
+	mk(bwDrvInfo, "STATIC", "", 0, 0)
+	mk(bwDrvBtn, "BUTTON", T("Drivers..."), WS_TABSTOP, 0)
 	mk(bwLblLabel, "STATIC", T("Volume label:"), 0, 0)
 	sendMsg(mk(bwLabel, "EDIT", "", edit|ES_UPPERCASE, WS_EX_CLIENTEDGE), EM_SETLIMIT, 11, 0)
 	mk(bwLblOut, "STATIC", T("New image file:"), 0, 0)
@@ -100,6 +109,7 @@ func (a *app) openBootWin() {
 	mk(bwClose, "BUTTON", T("Close"), WS_TABSTOP, 0)
 	fillCombo(b.c[bwKind], MediaNames(), 0)
 	b.fillProfiles("")
+	b.fillMenus(menuEditor)
 	b.layout()
 	b.update()
 	pShowWindow.Call(b.hwnd, SW_SHOW)
@@ -115,6 +125,109 @@ func (a *app) openBootWinWith(kind MediaKind, g *Geometry) {
 		b.setGeom(*g, 0)
 	} else {
 		b.update()
+	}
+}
+
+// Boot menu choices in the image window: the ready menus load into the
+// editor (so the Drivers window and the editor show the same), "the menu
+// in the editor" uses what is there, "keep" writes no menu.
+const (
+	menuEditor = 4 // = len(wizMenus)
+	menuKeep   = 5
+)
+
+func (b *bootWin) fillMenus(sel int) {
+	a := theApp
+	var titles []string
+	for _, it := range a.proj.Items {
+		titles = append(titles, title(it))
+	}
+	items := []string{
+		T("Plain DOS"),
+		T("Everyday: DOS / + mouse and CD-ROM / everything"),
+		T("Games: everything / EMS / no EMS / clean"),
+		T("Network with Easy Commander / plain DOS"),
+		T("The menu in the editor: %s", strings.Join(titles, "; ")),
+		T("Keep the menu of the system source (write no menu)"),
+	}
+	fillCombo(b.c[bwMenuKind], items, sel)
+	b.updateDrivers()
+}
+
+func (b *bootWin) menuChoice() int {
+	return clampIdx(int(sendMsg(b.c[bwMenuKind], CB_GETCURSEL, 0, 0)), menuKeep+1)
+}
+
+// sourceTarget is the DOS of the system source, or the editor's.
+func (b *bootWin) sourceTarget() Target {
+	a := theApp
+	src := strings.Trim(strings.TrimSpace(getText(b.c[bwSource])), `"`)
+	if src != "" {
+		if src != b.srcPath {
+			b.srcPath, b.srcDOS = src, DOSNone
+			if di, err := ReadDiskInfo(src); err == nil {
+				b.srcDOS = di.DOS
+			}
+		}
+		switch b.srcDOS {
+		case DOSFree:
+			return TargetFreeDOS
+		case DOSMS, DOSPC:
+			return TargetMSDOS
+		}
+	}
+	return a.proj.Target
+}
+
+// menuChosen loads a ready menu into the editor.
+func (b *bootWin) menuChosen() {
+	a := theApp
+	c := b.menuChoice()
+	if c < menuEditor {
+		if !a.askSave() {
+			b.fillMenus(menuEditor)
+			return
+		}
+		suffix := "-ms"
+		if b.sourceTarget() == TargetFreeDOS {
+			suffix = "-fd"
+		}
+		a.proj, a.path, a.dirty, a.sel = TemplateByID(wizMenus[c]+suffix).Make(), "", false, 1
+		a.loadProject()
+	}
+	b.updateDrivers()
+}
+
+// followSource switches the editor's menu to the DOS of a new source.
+func (b *bootWin) followSource() {
+	a := theApp
+	t := b.sourceTarget()
+	if t != a.proj.Target {
+		from := a.proj.Target
+		a.proj.Target = t
+		a.targetChanged(from)
+		a.setDirty()
+		a.loadProject()
+	}
+	b.fillMenus(b.menuChoice())
+}
+
+func (b *bootWin) updateDrivers() {
+	a := theApp
+	if b.menuChoice() == menuKeep {
+		setText(b.c[bwDrvInfo], T("No menu and no drivers are written; the files of the source stay as they are."))
+		enable(b.c[bwDrvBtn], false)
+		return
+	}
+	enable(b.c[bwDrvBtn], true)
+	miss := MissingDrivers(a.proj, a.store)
+	switch {
+	case len(a.proj.Drivers) == 0:
+		setText(b.c[bwDrvInfo], T("This menu needs no extra drivers."))
+	case len(miss) == 0:
+		setText(b.c[bwDrvInfo], T("All %d drivers of this menu are here.", len(a.proj.Drivers)))
+	default:
+		setText(b.c[bwDrvInfo], T("Missing drivers: %s", strings.Join(miss, "; ")))
 	}
 }
 
@@ -177,8 +290,14 @@ func (b *bootWin) layout() {
 	y += rh + s(6)
 	move(b.c[bwCopyAll], m, y, cw, rh)
 	y += rh
-	move(b.c[bwMenu], m, y, cw, rh)
-	y += rh + s(8)
+	y += s(6)
+	move(b.c[bwLblMenu], m, y+s(4), s(110), lh)
+	move(b.c[bwMenuKind], m+s(110), y, cw-s(110)-s(110), rh+s(160))
+	move(b.c[bwMenuEdit], w-m-s(100), y, s(100), rh)
+	y += rh + s(6)
+	move(b.c[bwDrvInfo], m+s(110), y+s(4), cw-s(110)-s(110), 2*lh)
+	move(b.c[bwDrvBtn], w-m-s(100), y, s(100), rh)
+	y += 2*lh + s(10)
 	move(b.c[bwLblLabel], m, y+s(4), s(110), lh)
 	move(b.c[bwLabel], m+s(110), y, s(140), rh)
 	y += rh + s(10)
@@ -332,6 +451,7 @@ func (b *bootWin) applyDiskInfo(p string) {
 	b.setGeom(di.Geom, di.Total)
 	if di.DOS != DOSNone {
 		setText(b.c[bwSource], p)
+		b.followSource()
 	}
 	msgBox(b.hwnd, T("Read from the image:\n\nGeometry (as FDISK recorded it): %d / %d / %d\nSize: %d sectors (%s)\nVolume: %s\nSystem: %s\n\nCheck that heads and sectors match what MSD shows on the target machine.",
 		di.Geom.C, di.Geom.H, di.Geom.S, di.Total, humanSize(di.Total*512), di.Desc, di.DOS), appTitle(), MB_ICONINFORMATION)
@@ -353,7 +473,7 @@ func (b *bootWin) create() {
 		msgBox(b.hwnd, T("The system source and the new image must be different files."), appTitle(), MB_ICONWARNING)
 		return
 	}
-	withMenu := sendMsg(b.c[bwMenu], BM_GETCHECK, 0, 0) == 1
+	withMenu := b.menuChoice() != menuKeep
 	if withMenu && (!a.ready() || !a.checkDrivers()) {
 		return
 	}
@@ -401,6 +521,14 @@ func bootProc(hwnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {
 		mm := *(**minMaxInfo)(unsafe.Pointer(&lParam))
 		mm.minTrack = point{int32(a.s(640)), int32(a.s(560))}
 		return 0
+	case 0x0006: // WM_ACTIVATE
+		if b != nil && len(b.c) > 0 && loword(wParam) != 0 {
+			sel := b.menuChoice()
+			if sel < menuEditor && a.dirty {
+				sel = menuEditor // edited in the editor since
+			}
+			b.fillMenus(sel)
+		}
 	case WM_COMMAND:
 		if b == nil {
 			return 0
@@ -419,6 +547,17 @@ func bootProc(hwnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {
 			if code == EN_CHANGE {
 				b.update()
 			}
+		case bwMenuKind:
+			if code == CBN_SELCHANGE {
+				b.menuChosen()
+			}
+		case bwMenuEdit:
+			if b.menuChoice() == menuKeep {
+				b.fillMenus(menuEditor)
+			}
+			pSetForegroundWindow.Call(a.hwnd)
+		case bwDrvBtn:
+			a.openDrivers()
 		case bwSaveProf:
 			b.saveProfile()
 		case bwDelProf:
@@ -428,6 +567,7 @@ func bootProc(hwnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {
 		case bwSrcBrowse:
 			if p := fileDialog(hwnd, false, T("System source"), "", "", imgFilter()...); p != "" {
 				setText(b.c[bwSource], p)
+				b.followSource()
 			}
 		case bwOutBrowse:
 			if p := fileDialog(hwnd, true, T("New image file"), "img", "dos.img", T("Disk images (*.img, *.ima, *.vhd, *.hdd, *.dsk)"), "*.img;*.ima", T("All files"), "*.*"); p != "" {

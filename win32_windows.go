@@ -58,10 +58,9 @@ var (
 	pGetDeviceCaps  = gdi32.NewProc("GetDeviceCaps")
 	pGetStockObject = gdi32.NewProc("GetStockObject")
 
-	pGetModuleHandleW         = kernel32.NewProc("GetModuleHandleW")
-	pCreateActCtxW            = kernel32.NewProc("CreateActCtxW")
-	pActivateActCtx           = kernel32.NewProc("ActivateActCtx")
-	pGetUserDefaultUILanguage = kernel32.NewProc("GetUserDefaultUILanguage")
+	pGetModuleHandleW = kernel32.NewProc("GetModuleHandleW")
+	pCreateActCtxW    = kernel32.NewProc("CreateActCtxW")
+	pActivateActCtx   = kernel32.NewProc("ActivateActCtx")
 
 	pGetOpenFileNameW = comdlg32.NewProc("GetOpenFileNameW")
 	pGetSaveFileNameW = comdlg32.NewProc("GetSaveFileNameW")
@@ -460,31 +459,4 @@ func runAsAdmin(args string) bool {
 
 func shellOpen(target string) {
 	pShellExecuteW.Call(0, uintptr(unsafe.Pointer(u16("open"))), uintptr(unsafe.Pointer(u16(target))), 0, 0, SW_SHOW)
-}
-
-// systemLanguage returns "hu" for a Hungarian Windows, "en" otherwise
-// (or the code of a loaded language file matching the primary language).
-func systemLanguage() string {
-	id, _, _ := pGetUserDefaultUILanguage.Call()
-	switch id & 0x3FF {
-	case 0x0E:
-		return "hu"
-	case 0x07:
-		return "de"
-	case 0x0C:
-		return "fr"
-	case 0x0A:
-		return "es"
-	case 0x10:
-		return "it"
-	case 0x15:
-		return "pl"
-	case 0x05:
-		return "cs"
-	case 0x1B:
-		return "sk"
-	case 0x13:
-		return "nl"
-	}
-	return "en"
 }
