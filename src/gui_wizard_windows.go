@@ -103,7 +103,7 @@ func (a *app) openWizard() {
 	mk(wzMenuDesc, "STATIC", "", 0, "")
 	mk(wzBack, "BUTTON", T("< Back"), WS_TABSTOP, "")
 	mk(wzNext, "BUTTON", T("Next >"), WS_TABSTOP|BS_DEFPUSHBUTTON, "")
-	fillCombo(w.c[wzDOS], []string{"MS-DOS 6.x " + T("(system from your own boot disk or card)"), "FreeDOS"}, 0)
+	fillCombo(w.c[wzDOS], []string{"MS-DOS 6.x " + T("(system from your own boot disk or card)"), "FreeDOS " + T("(the program can download it)")}, 0)
 	fillCombo(w.c[wzMenu], []string{
 		T("Plain DOS"),
 		T("Everyday: DOS / + mouse and CD-ROM / everything"),
@@ -116,12 +116,12 @@ func (a *app) openWizard() {
 	mk(wzFromDir, "BUTTON", T("On a drive or in a folder"), link, T("For example the CF card in the card reader, by its drive letter."))
 	mk(wzBack3, "BUTTON", T("< Back"), WS_TABSTOP, "")
 
-	mk(wzHead4, "STATIC", T("Where should DOS come from?"), 0, "")
+	mk(wzHead4, "STATIC", "", 0, "") // worded for the DOS of page 2 (setSourceTexts)
 	mk(wzHasCard, "BUTTON", T("A card or disk that already boots DOS on that machine"), link, T("Back it up first: geometry, boot code and system are taken from it (recommended)."))
 	mk(wzHasBackup, "BUTTON", T("A backup of such a card (an image file)"), link, T("Made earlier with this program or another tool. For a different card, change the geometry afterwards."))
 	mk(wzFreeDOS, "BUTTON", T("Nothing yet: FreeDOS, downloaded by the program"), link, T("For an empty card: the program downloads FreeDOS (kernel and FreeCOM, GNU GPL) and makes a bootable system."))
-	mk(wzSetup, "BUTTON", T("DOS install disks (MS-DOS Setup or FreeDOS)"), link, T("An empty image with the right geometry; install DOS on it in 86Box with its own Setup."))
-	mk(wzBootFloppy, "BUTTON", T("A DOS boot floppy image"), link, T("A small bootable system from the floppy: its system files and tools are copied."))
+	mk(wzSetup, "BUTTON", "", link, "")
+	mk(wzBootFloppy, "BUTTON", "", link, "")
 	mk(wzBack4, "BUTTON", T("< Back"), WS_TABSTOP, "")
 
 	w.layout()
@@ -161,21 +161,58 @@ func (w *wizardWin) layout() {
 	move(w.c[wzBack3], cw-m-bw, ch-m-s(28), bw, s(28))
 
 	move(w.c[wzHead4], m, m, lw, s(24))
-	move(w.c[wzHasCard], m, m+s(40), lw, s(70))
-	move(w.c[wzHasBackup], m, m+s(116), lw, s(70))
-	move(w.c[wzFreeDOS], m, m+s(192), lw, s(70))
-	move(w.c[wzSetup], m, m+s(268), lw, s(70))
-	move(w.c[wzBootFloppy], m, m+s(344), lw, s(70))
+	y = m + s(40)
+	for _, id := range w.sourceChoices() {
+		move(w.c[id], m, y, lw, s(70))
+		y += s(76)
+	}
 	move(w.c[wzBack4], cw-m-bw, ch-m-s(28), bw, s(28))
+}
+
+// freeDOS is true when FreeDOS is chosen on page 2.
+func (w *wizardWin) freeDOS() bool { return sendMsg(w.c[wzDOS], CB_GETCURSEL, 0, 0) == 1 }
+
+// sourceChoices are the "where should DOS come from" choices for the DOS of
+// page 2, in order: FreeDOS can be downloaded, MS-DOS cannot.
+func (w *wizardWin) sourceChoices() []int {
+	if w.freeDOS() {
+		return []int{wzFreeDOS, wzHasCard, wzHasBackup, wzSetup, wzBootFloppy}
+	}
+	return []int{wzHasCard, wzHasBackup, wzSetup, wzBootFloppy}
+}
+
+// setSourceTexts words page 4 for the chosen DOS.
+func (w *wizardWin) setSourceTexts() {
+	link := func(id int, title, note string) {
+		setText(w.c[id], title)
+		sendMsg(w.c[id], bcmSetNote, 0, uintptr(unsafe.Pointer(u16(note))))
+	}
+	setup := T("An empty image with the right geometry; install DOS on it in 86Box with its own Setup.")
+	if w.freeDOS() {
+		setText(w.c[wzHead4], T("Where should FreeDOS come from?"))
+		link(wzSetup, T("FreeDOS install disks or CD"), setup)
+		link(wzBootFloppy, T("A FreeDOS boot floppy image"), T("A small bootable system from the floppy: its system files and tools are copied."))
+	} else {
+		setText(w.c[wzHead4], T("Where should MS-DOS come from?"))
+		link(wzSetup, T("MS-DOS install disks (Setup)"), setup)
+		link(wzBootFloppy, T("An MS-DOS boot floppy image"), T("A small bootable system from the floppy: its system files and tools are copied."))
+	}
 }
 
 func (w *wizardWin) show(page int) {
 	w.page = page
+	if page == 4 {
+		w.setSourceTexts()
+		w.layout()
+	}
 	pages := map[int][]int{
 		1: {wzHead, wzFloppy, wzCard, wzEmu, wzExisting, wzEditor, wzShowStart},
 		2: {wzHead2, wzLblDOS, wzDOS, wzLblMenu, wzMenu, wzMenuDesc, wzBack, wzNext},
 		3: {wzHead3, wzFromImage, wzFromDir, wzBack3},
-		4: {wzHead4, wzHasCard, wzHasBackup, wzFreeDOS, wzSetup, wzBootFloppy, wzBack4},
+		4: append([]int{wzHead4, wzBack4}, w.sourceChoices()...),
+	}
+	if page != 4 {
+		pShowWindow.Call(w.c[wzFreeDOS], 0) // not on every page 4
 	}
 	for p, ids := range pages {
 		for _, id := range ids {
@@ -239,6 +276,7 @@ func (w *wizardWin) next() {
 		w.show(4)
 		return
 	}
+	fd := w.freeDOS()
 	w.close()
 	switch task {
 	case taskFloppy:
@@ -246,6 +284,12 @@ func (w *wizardWin) next() {
 	case taskEmu:
 		// a geometry every BIOS and emulator agrees on, about 500 MB
 		a.openBootWinWith(MediaHDD, &Geometry{1015, 16, 63})
+	}
+	if fd && a.boot != nil {
+		// FreeDOS needs no source: the program downloads it
+		setCheck(a.boot.c[bwFreeDOS], true)
+		a.boot.update()
+		a.boot.followSource()
 	}
 }
 

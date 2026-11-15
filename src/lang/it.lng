@@ -163,9 +163,6 @@ TR: 852 (Europa centrale)
 EN: < Back
 TR: < Indietro
 
-EN: A DOS boot floppy image
-TR: Un'immagine di dischetto di avvio DOS
-
 EN: A MENU line that is not a menu item was left out: %s
 TR: È stata tralasciata una riga MENU che non è una voce del menu: %s
 
@@ -336,9 +333,6 @@ TR: Immagine di dischetto di avvio DOS
 
 EN: DOS can only use 1024 cylinders. Use the geometry the BIOS gives in LBA/LARGE mode (more heads, fewer cylinders).
 TR: DOS può usare solo 1024 cilindri. Usa la geometria che il BIOS fornisce in modalità LBA/LARGE (più testine, meno cilindri).
-
-EN: DOS install disks (MS-DOS Setup or FreeDOS)
-TR: Dischi di installazione DOS (MS-DOS Setup o FreeDOS)
 
 EN: DOS program (*.com)
 TR: Programma DOS (*.com)
@@ -1138,9 +1132,6 @@ TR: Cosa vuoi fare?
 EN: Where is the system whose menu you want to change?
 TR: Dov'è il sistema di cui vuoi cambiare il menu?
 
-EN: Where should DOS come from?
-TR: Da dove deve venire DOS?
-
 EN: Where should the files go? (For example the root of a disk image mounted with ImDisk/OSFMount.)
 TR: Dove devono andare i file? (Per esempio la radice di un'immagine disco montata con ImDisk/OSFMount.)
 
@@ -1434,3 +1425,24 @@ TR: Da scaricare quando si crea l'immagine: %s
 
 EN: You can also browse for these files in the Drivers window.
 TR: Puoi anche selezionare questi file nella finestra Driver.
+
+EN: (the program can download it)
+TR: (il programma può scaricarlo)
+
+EN: A FreeDOS boot floppy image
+TR: Un'immagine di dischetto di avvio FreeDOS
+
+EN: An MS-DOS boot floppy image
+TR: Un'immagine di dischetto di avvio MS-DOS
+
+EN: FreeDOS install disks or CD
+TR: Dischi o CD di installazione di FreeDOS
+
+EN: MS-DOS install disks (Setup)
+TR: Dischi di installazione di MS-DOS (Setup)
+
+EN: Where should FreeDOS come from?
+TR: Da dove deve venire FreeDOS?
+
+EN: Where should MS-DOS come from?
+TR: Da dove deve venire MS-DOS?
