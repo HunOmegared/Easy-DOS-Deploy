@@ -32,6 +32,10 @@ type Machine struct {
 type Group struct {
 	Config   []string `json:"config,omitempty"`
 	Autoexec []string `json:"autoexec,omitempty"`
+	// Found tells where the lines came from when the system did not load
+	// the driver: "rem" (a commented-out line), "file" (only the driver file
+	// was on the system); empty: loaded.
+	Found string `json:"found,omitempty"`
 }
 
 func (g Group) Empty() bool { return len(g.Config) == 0 && len(g.Autoexec) == 0 }
@@ -212,6 +216,21 @@ func cfgBodyLines(cfg []string) []string {
 // read gives the content of a file on that system (for CALLed batch files
 // and to check that a driver is there); nil skips both.
 func FindMachine(cfg, auto []string, read func(p string) ([]byte, error)) *Machine {
+	return findMachine(cfg, auto, read, nil)
+}
+
+// Known driver files, for a system that has them but does not load them,
+// in the order they are preferred.
+var (
+	cdDriverFiles = []string{"OAKCDROM.SYS", "VIDE-CDD.SYS", "ATAPI.SYS", "AOATAPI.SYS", "UDVD2.SYS", "XCDROM.SYS", "SBIDE.SYS", "MTMCDAI.SYS", "IDE-CD.SYS", "ATAPICD.SYS", "CDROM.SYS"}
+	cdExtFiles    = []string{"MSCDEX.EXE", "SHSUCDX.COM", "SHSUCDX.EXE"}
+	mouseFiles    = []string{"CTMOUSE.EXE", "MOUSE.COM", "MOUSE.EXE", "GMOUSE.COM"}
+	reDevName     = regexp.MustCompile(`(?i)/D:(\S+)`)
+)
+
+// findMachine is FindMachine; files (paths on the volume, as Walk gives
+// them) lets it find drivers that are on the system but not loaded.
+func findMachine(cfg, auto []string, read func(p string) ([]byte, error), files []string) *Machine {
 	m := &Machine{}
 	seen := map[string]bool{}
 	add := func(g *Group, config bool, l string) {
@@ -308,6 +327,9 @@ func FindMachine(cfg, auto []string, read func(p string) ([]byte, error)) *Machi
 		}
 	}
 	scan(auto, 0)
+	if read != nil || files != nil {
+		m.complete(cfg, auto, read, files) // only where the files can be checked
+	}
 	// a CD-ROM needs both halves to be any use
 	if len(m.CDROM.Config) == 0 || len(m.CDROM.Autoexec) == 0 {
 		for _, l := range append(m.CDROM.Config, m.CDROM.Autoexec...) {
@@ -316,6 +338,177 @@ func FindMachine(cfg, auto []string, read func(p string) ([]byte, error)) *Machi
 		m.CDROM = Group{}
 	}
 	return m
+}
+
+// complete fills in what the system has but does not load: lines commented
+// out with REM (when the file they name is there) and, for the CD-ROM and
+// the mouse, driver files no line names.
+func (m *Machine) complete(cfg, auto []string, read func(p string) ([]byte, error), files []string) {
+	have := map[string]bool{}    // upper-case paths on the volume
+	where := map[string]string{} // upper-case file name -> path, shortest first
+	for _, f := range files {
+		up := strings.ToUpper(f)
+		have[up] = true
+		name := path.Base(strings.ReplaceAll(up, `\`, "/"))
+		if old, ok := where[name]; !ok || len(up) < len(old) {
+			where[name] = f
+		}
+	}
+	exists := func(l string) bool {
+		p := linePath(l)
+		if !strings.Contains(p, `\`) {
+			return false
+		}
+		dp := dosPath(p)
+		cands := []string{dp}
+		if !strings.Contains(path.Base(strings.ReplaceAll(dp, `\`, "/")), ".") {
+			cands = []string{dp + ".EXE", dp + ".COM"}
+		}
+		for _, c := range cands {
+			if files != nil && have[strings.ToUpper(c)] {
+				return true
+			}
+			if files == nil && read != nil {
+				if _, err := read(c); err == nil {
+					return true
+				}
+			}
+		}
+		return false
+	}
+	// the commented-out lines, as a system of their own
+	unrem := func(lines []string) []string {
+		var out []string
+		for _, l := range lines {
+			t := strings.TrimSpace(stripFDPrefix(l))
+			if len(t) > 4 && strings.EqualFold(t[:4], "REM ") {
+				out = append(out, strings.TrimSpace(t[4:]))
+			}
+		}
+		return out
+	}
+	rem := FindMachine(unrem(cfg), unrem(auto), nil)
+	usable := func(g Group) Group {
+		var u Group
+		for _, l := range g.Config {
+			if exists(l) {
+				u.Config = append(u.Config, l)
+			}
+		}
+		for _, l := range g.Autoexec {
+			if strings.HasPrefix(strings.ToUpper(l), "SET ") || exists(l) {
+				u.Autoexec = append(u.Autoexec, l)
+			}
+		}
+		return u
+	}
+	fileLine := func(names []string) string {
+		for _, n := range names {
+			if p, ok := where[n]; ok {
+				return `C:\` + p
+			}
+		}
+		return ""
+	}
+
+	// CD-ROM: the device driver and the extension, with the same name
+	cd := m.CDROM
+	found := ""
+	if len(cd.Config) == 0 {
+		if r := usable(Group{Config: remCDConfig(rem, unrem(cfg))}); len(r.Config) > 0 {
+			cd.Config, found = r.Config[:1], "rem"
+		} else if l := fileLine(cdDriverFiles); l != "" {
+			cd.Config, found = []string{l + " /D:MSCD001"}, "file"
+		}
+	}
+	if len(cd.Autoexec) == 0 && len(cd.Config) > 0 {
+		var ext []string
+		for _, l := range unrem(auto) {
+			if cdExtPrograms[lineProgram(normAutoexec(l))] {
+				ext = append(ext, normAutoexec(l))
+			}
+		}
+		if r := usable(Group{Autoexec: ext}); len(r.Autoexec) > 0 {
+			cd.Autoexec = r.Autoexec[:1]
+			if found == "" {
+				found = "rem"
+			}
+		} else if l := fileLine(cdExtFiles); l != "" {
+			cd.Autoexec = []string{l + " /D:MSCD001"}
+			if found == "" {
+				found = "file"
+			}
+		}
+	}
+	if len(cd.Config) > 0 && len(cd.Autoexec) > 0 {
+		// one device name for both: the loaded line's, or the driver's
+		name := ""
+		if found == "" || len(m.CDROM.Config) > 0 {
+			name = devName(cd.Config[0])
+		} else if len(m.CDROM.Autoexec) > 0 {
+			name = devName(m.CDROM.Autoexec[0])
+		}
+		if name == "" {
+			name = devName(cd.Config[0])
+		}
+		if name == "" {
+			name = "MSCD001"
+		}
+		cd.Config = []string{setDevName(cd.Config[0], name)}
+		cd.Autoexec = []string{setDevName(cd.Autoexec[0], name)}
+		cd.Found = found
+		m.CDROM = cd
+	}
+
+	if m.Mouse.Empty() {
+		if r := usable(rem.Mouse); !r.Empty() {
+			r.Found = "rem"
+			m.Mouse = r
+		} else if l := fileLine(mouseFiles); l != "" {
+			m.Mouse = Group{Autoexec: []string{l}, Found: "file"}
+		}
+	}
+	if m.Sound.Empty() {
+		// only with a program to run; SET lines alone may be stale
+		if r := usable(rem.Sound); len(r.Config) > 0 || hasProgram(r.Autoexec) {
+			r.Found = "rem"
+			m.Sound = r
+		}
+	}
+}
+
+// remCDConfig are the commented-out CONFIG lines that load a CD driver.
+func remCDConfig(rem *Machine, cfg []string) []string {
+	var out []string
+	for _, raw := range cfg {
+		if _, l, ok := normConfig(raw); ok && strings.Contains(strings.ToUpper(l), "/D:") && !mousePrograms[lineProgram(l)] {
+			out = append(out, l)
+		}
+	}
+	return out
+}
+
+func hasProgram(lines []string) bool {
+	for _, l := range lines {
+		if !strings.HasPrefix(strings.ToUpper(l), "SET ") {
+			return true
+		}
+	}
+	return false
+}
+
+func devName(l string) string {
+	if m := reDevName.FindStringSubmatch(l); m != nil {
+		return strings.ToUpper(m[1])
+	}
+	return ""
+}
+
+func setDevName(l, name string) string {
+	if reDevName.MatchString(l) {
+		return reDevName.ReplaceAllString(l, "/D:"+name)
+	}
+	return l + " /D:" + name
 }
 
 // dosPath turns C:\DIR\FILE.BAT into a path on the volume (DIR\FILE.BAT).
@@ -446,7 +639,14 @@ func MachineFromImage(path string) (*Machine, []string, error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	m := FindMachine(bf.cfg, bf.auto, v.ReadFile)
+	var files []string
+	v.Walk(func(fi FileInfo) error {
+		if !fi.Dir {
+			files = append(files, fi.Path)
+		}
+		return nil
+	})
+	m := findMachine(bf.cfg, bf.auto, v.ReadFile, files)
 	m.Source = path
 	return m, m.MissingFiles(v.Exists), nil
 }

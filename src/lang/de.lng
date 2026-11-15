@@ -1500,3 +1500,12 @@ TR: Die Treiber der Systemquelle verwenden
 
 EN: not on the source; the program's own (%s)
 TR: nicht auf der Quelle; der eigene des Programms (%s)
+
+EN: (commented out on the source)
+TR: (auf der Quelle auskommentiert)
+
+EN: (on the source, but not loaded there)
+TR: (auf der Quelle vorhanden, aber dort nicht geladen)
+
+EN: Taken from the system source: %s
+TR: Von der Systemquelle übernommen: %s

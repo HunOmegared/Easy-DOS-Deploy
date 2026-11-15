@@ -67,6 +67,7 @@ type bootWin struct {
 	machine     *Machine
 	machineMiss []string
 	machineSrc  string
+	fromSource  []string // catalog driver files taken from the source
 }
 
 func (a *app) openBootWin() {
@@ -230,11 +231,25 @@ func (b *bootWin) findMachine() {
 	if src == b.machineSrc {
 		return
 	}
-	b.machineSrc, b.machine, b.machineMiss = src, nil, nil
+	b.machineSrc, b.machine, b.machineMiss, b.fromSource = src, nil, nil, nil
 	if src != "" {
 		if m, miss, err := MachineFromImage(src); err == nil && !m.Empty() {
 			b.machine, b.machineMiss = m, miss
 			setCheck(b.c[bwUseOwn], true) // a new source: its drivers are the ones known to work
+		}
+		// catalog drivers that are on the source need not be browsed for
+		a := theApp
+		for i := range a.store.Catalog {
+			d := &a.store.Catalog[i]
+			if a.store.Ready(d) {
+				continue
+			}
+			if got, err := a.store.extractFromImage(d, src); err == nil {
+				b.fromSource = append(b.fromSource, got...)
+			}
+		}
+		if len(b.fromSource) > 0 {
+			a.updateStatus()
 		}
 	}
 }
@@ -294,6 +309,9 @@ func (b *bootWin) updateDrivers() {
 	enable(b.c[bwDrvBtn], true)
 	dl, br := DriverNeeds(a.proj, a.store, checked(b.c[bwFreeDOS]))
 	var lines []string
+	if len(b.fromSource) > 0 {
+		lines = append(lines, T("Taken from the system source: %s", strings.Join(b.fromSource, ", ")))
+	}
 	if len(dl) > 0 {
 		lines = append(lines, T("To download: %s", strings.Join(dl, ", ")))
 	}
@@ -1483,9 +1501,16 @@ func (b *bootWin) ownInfo() string {
 	use := b.useOwn()
 	var out []string
 	line := func(kind string, g Group, programs string) {
+		how := ""
+		switch g.Found {
+		case "rem":
+			how = " " + T("(commented out on the source)")
+		case "file":
+			how = " " + T("(on the source, but not loaded there)")
+		}
 		switch {
 		case !g.Empty() && use:
-			out = append(out, kind+": "+g.Programs())
+			out = append(out, kind+": "+g.Programs()+how)
 		case !g.Empty():
 			out = append(out, kind+": "+T("%s on the source, not used", g.Programs()))
 		case programs != "":
@@ -1509,6 +1534,12 @@ func (b *bootWin) showOwnLines() {
 	add := func(kind string, g Group) {
 		if g.Empty() {
 			return
+		}
+		switch g.Found {
+		case "rem":
+			kind += " " + T("(commented out on the source)")
+		case "file":
+			kind += " " + T("(on the source, but not loaded there)")
 		}
 		t = append(t, kind+":")
 		for _, l := range g.Config {

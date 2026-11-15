@@ -502,4 +502,7 @@ var huTexts = map[string]string{
 	"Sound":                                "Hang",
 	"Use the drivers of the system source": "A rendszerforrás saját drivereinek használata",
 	"not on the source; the program's own (%s)": "nincs a forráson; a program sajátja (%s)",
+	"(commented out on the source)":             "(a forráson ki volt kommentezve)",
+	"(on the source, but not loaded there)":     "(a forráson megvolt, de nem volt betöltve)",
+	"Taken from the system source: %s":          "A rendszerforrásról átvéve: %s",
 }

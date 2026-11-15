@@ -1500,3 +1500,12 @@ TR: Usa i driver dell'origine del sistema
 
 EN: not on the source; the program's own (%s)
 TR: non sull'origine; quello del programma (%s)
+
+EN: (commented out on the source)
+TR: (commentato sull'origine)
+
+EN: (on the source, but not loaded there)
+TR: (presente sull'origine, ma non caricato)
+
+EN: Taken from the system source: %s
+TR: Preso dall'origine del sistema: %s

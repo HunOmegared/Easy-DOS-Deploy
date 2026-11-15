@@ -78,6 +78,13 @@ that machine stay. The high-loading options MEMMAKER wrote (`LH /L:...`,
 `DEVICEHIGH /L:...`) are left out; each menu item loads high again by its own
 memory setting. A batch file started with `CALL` counts as what it loads.
 
+A driver the machine has but does not load is used too: a line commented out
+with `REM` (if the file it names is there), or a CD-ROM or mouse driver file
+that no line names (for example `VIDE-CDD.SYS` next to an `MSCDEX` line with
+no CD driver in CONFIG.SYS). The CD driver and MSCDEX get the same device
+name. Drivers of the program's list that are on the source, such as
+`OAKCDROM.SYS`, are taken from it, so they need not be browsed for.
+
 ### 2. Nothing yet: FreeDOS, downloaded by the program
 
 For an empty card and no DOS disks at all. The program downloads the FreeDOS

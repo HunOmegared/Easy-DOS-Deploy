@@ -192,3 +192,53 @@ func TestMachineFromBackupToNewCard(t *testing.T) {
 		t.Fatal("no CONFIG.BAK")
 	}
 }
+
+// Drivers the system has but does not load: commented-out lines whose files
+// are there, and CD / mouse driver files no line names.
+func TestFindMachineNotLoaded(t *testing.T) {
+	// the Integra card: MSCDEX is loaded, there is no CD driver in CONFIG.SYS,
+	// but VIDE-CDD.SYS is on the disk
+	m := findMachine([]string{`DEVICE=C:\DOS\HIMEM.SYS`}, []string{`LH /L:1,27952 C:\DOS\MSCDEX.EXE /D:MSCD0001`}, nil,
+		[]string{`DOS\HIMEM.SYS`, `DOS\MSCDEX.EXE`, `CDROM\VIDE-CDD.SYS`, `CDROM\README.TXT`})
+	if fmt.Sprint(m.CDROM) != fmt.Sprint(Group{Config: []string{`C:\CDROM\VIDE-CDD.SYS /D:MSCD0001`}, Autoexec: []string{`C:\DOS\MSCDEX.EXE /D:MSCD0001`}, Found: "file"}) {
+		t.Fatalf("%q", m.CDROM)
+	}
+	if !m.Mouse.Empty() {
+		t.Fatal(m.Mouse)
+	}
+
+	// both halves commented out, with their own device name; files there
+	cfg := []string{`DEVICE=C:\DOS\HIMEM.SYS`, `REM DEVICEHIGH /L:1,9000 =C:\ATAPI\ATAPI.SYS /D:CD1 /I:0`, `REM DEVICE=C:\GONE\GONE.SYS /D:X`}
+	auto := []string{`REM LH C:\DOS\MSCDEX.EXE /D:OTHER /L:E`, `REM C:\MOUSE\MOUSE.COM /Y`, `REM SET BLASTER=A220 I7 D1`}
+	files := []string{`ATAPI\ATAPI.SYS`, `DOS\MSCDEX.EXE`, `MOUSE\MOUSE.COM`}
+	m = findMachine(cfg, auto, nil, files)
+	if fmt.Sprint(m.CDROM) != fmt.Sprint(Group{Config: []string{`C:\ATAPI\ATAPI.SYS /D:CD1 /I:0`}, Autoexec: []string{`C:\DOS\MSCDEX.EXE /D:CD1 /L:E`}, Found: "rem"}) {
+		t.Fatalf("%q", m.CDROM)
+	}
+	if fmt.Sprint(m.Mouse) != fmt.Sprint(Group{Autoexec: []string{`C:\MOUSE\MOUSE.COM /Y`}, Found: "rem"}) {
+		t.Fatalf("%q", m.Mouse)
+	}
+	if !m.Sound.Empty() {
+		t.Fatal("a SET line alone is no sound driver", m.Sound)
+	}
+
+	// a commented-out driver whose file is gone is not used; the mouse
+	// driver file alone is
+	m = findMachine([]string{`REM DEVICE=C:\GONE\GONE.SYS /D:X`}, []string{`C:\DOS\MSCDEX.EXE /D:X`}, nil, []string{`DOS\MSCDEX.EXE`, `TOOLS\CTMOUSE.EXE`})
+	if !m.CDROM.Empty() || fmt.Sprint(m.Mouse) != fmt.Sprint(Group{Autoexec: []string{`C:\TOOLS\CTMOUSE.EXE`}, Found: "file"}) {
+		t.Fatalf("%q / %q", m.CDROM, m.Mouse)
+	}
+	// what the new menu then loads
+	p := TemplateByID("everyday-ms").Make()
+	m = findMachine([]string{`DEVICE=C:\DOS\HIMEM.SYS`}, []string{`C:\DOS\MSCDEX.EXE /D:MSCD0001`}, nil, []string{`DOS\MSCDEX.EXE`, `CDROM\VIDE-CDD.SYS`})
+	p.UseMachine(m)
+	o, _ := Generate(p)
+	if c := strings.Join(o.Config, "\n"); !strings.Contains(c, `DEVICEHIGH=C:\CDROM\VIDE-CDD.SYS /D:MSCD0001`) || strings.Contains(c, "OAKCDROM") {
+		t.Fatal(c)
+	}
+	for _, d := range p.Drivers {
+		if d == "oakcdrom" {
+			t.Fatal(p.Drivers)
+		}
+	}
+}
