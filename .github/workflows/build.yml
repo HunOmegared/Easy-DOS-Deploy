@@ -16,16 +16,23 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
-          go-version-file: go.mod
+          go-version-file: src/go.mod
       - name: Test
+        working-directory: src
         run: go test ./...
       - name: Vet (Windows)
+        working-directory: src
         run: GOOS=windows GOARCH=amd64 go vet ./...
       - name: Build EasyRSB.exe
         run: |
           mkdir -p dist
-          GOOS=windows GOARCH=amd64 go build -trimpath -ldflags="-s -w -H windowsgui" -o dist/EasyRSB.exe .
+          (cd src && GOOS=windows GOARCH=amd64 go build -trimpath -ldflags="-s -w -H windowsgui" -o ../dist/EasyRSB.exe .)
           cp README.md LICENSE dist/
+      - name: Check the 16-bit code is up to date
+        shell: bash
+        run: |
+          python3 asm/mbr.py  2>/dev/null | diff - <(tail -n +5 src/mbrcode.go)
+          python3 asm/geom.py 2>/dev/null | diff - <(tail -n +5 src/geomcom.go)
       - uses: actions/upload-artifact@v4
         with:
           name: EasyRSB

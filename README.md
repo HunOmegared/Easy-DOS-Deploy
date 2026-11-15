@@ -23,105 +23,62 @@ FreeDOS images and other machines have not been tested on real hardware yet.
 
 ## What it does
 
-* **Boot menu editor.** Menu items with their own CONFIG.SYS and AUTOEXEC.BAT
-  lines, plus common lines before and after them, a default item and a
-  timeout. Output for **MS-DOS 6.x** (`[MENU]` blocks) or **FreeDOS**
-  (`MENU` lines and `1?` prefixes). Preview before writing.
-* **Start-up wizard:** pick what you want to make (bootable floppy, bootable
-  CF card or IDE disk, emulator disk image, or a new menu for an existing
-  system), then the DOS and the kind of menu.
-* **Building blocks instead of typing:** tick memory manager (XMS / upper
-  memory / EMS), mouse, CD-ROM, Sound Blaster sound (with UNISOUND for ISA PnP
-  cards) and network (packet driver, mTCP, Easy Commander), and the program
-  writes the lines for MS-DOS or FreeDOS. Ready combinations: plain DOS (the
-  default), DOS + mouse, + CD-ROM, everything, games with and without EMS,
-  network, clean boot. The lines can still be edited by hand.
-* **Import an existing menu** from a disk image or a folder, including
-  `INCLUDE=` blocks and both `IF "%CONFIG%"==` and `GOTO %CONFIG%` styles.
-  Anything that cannot be mapped is listed, not silently dropped.
-* **Drivers.** A built-in list of freely available drivers (Crynwr NE2000 and
-  3C509 packet drivers, mTCP, CuteMouse, JemmEx, HimemX, UDVD2, SHSUCDX) that
-  can be downloaded from the FreeDOS 1.3 package repository. Drivers that are
-  not free to distribute, such as OAKCDROM.SYS from Windows 98, or that have no
-  fixed download address, such as UNISOUND, are browsed for: a file, a zip, or
-  a disk image (for example a Windows 98 boot floppy image), which the program
-  searches for the file. The list can be edited in the program.
-* **Write into disk images** without mounting them: raw floppy images, hard
-  disk images with an MBR (86Box `.img`) and fixed-size `.vhd`, FAT12/16/32.
-  The previous CONFIG/AUTOEXEC is kept as `.BAK`.
-* **Make bootable disk images:** floppies from 360 KB to 2.88 MB, and hard
-  disk / CF images with the exact cylinder/head/sector geometry the target
-  machine's BIOS gives to DOS. The boot code and system files are taken from a
-  bootable image you already have (for example a backup of a working card), so
-  no MS-DOS files are distributed with the program.
-* **Starting from an empty or unwanted card or disk:** the geometry comes
-  from the values in BIOS setup (the program works out what DOS gets in
-  NORMAL, LBA or LARGE mode) or, exactly, from `GEOM.COM`, a tiny DOS
-  program the program can put on a boot floppy image. Then either an empty
-  image of the right size to install DOS on in 86Box with its own Setup, or a
-  bootable system made from a DOS boot floppy image (the program writes its
-  own MBR boot code when the source has none).
-* **CF cards:** back up a card from a card reader to an image file, read its
-  geometry from the backup, and write an image back to a card. Only removable,
-  USB and SD disks are offered, never the Windows disk. Before writing, the
-  program shows what is on the disk now, warns loudly if it finds a Windows,
-  Linux or GPT partition, and asks you to type the disk number. Empty areas are
-  skipped and everything written is read back and compared. This also works
-  with an IDE hard disk on a USB-IDE adapter (as long as the adapter can read
-  the drive; very old CHS-only drives often cannot).
+* **Boot menu editor** for **MS-DOS 6.x** (`[MENU]` blocks) and **FreeDOS**
+  (`MENU` lines and `1?` prefixes), with a default item, a timeout and a
+  preview before writing.
+* **Start-up wizard:** choose what to make (bootable floppy, CF card or IDE
+  disk, emulator image, or a new menu for an existing system), then the DOS and
+  the kind of menu.
+* **Building blocks instead of typing:** memory manager, mouse, CD-ROM, Sound
+  Blaster (with UNISOUND for ISA PnP cards) and network; the program writes the
+  lines for MS-DOS or FreeDOS. Ready combinations from plain DOS to games and
+  network. The lines can still be edited by hand.
+* **Import an existing menu** from a disk image or a folder. Anything that
+  cannot be mapped is listed, not silently dropped.
+* **Drivers:** free drivers are downloaded, the others (such as OAKCDROM.SYS)
+  are browsed for in a file, a zip or a disk image. See [Drivers](docs/DRIVERS.md).
+* **Write into disk images** without mounting them: floppy images, hard disk
+  images (86Box `.img`) and fixed-size `.vhd`, FAT12/16/32. The old
+  CONFIG/AUTOEXEC is kept as `.BAK`.
+* **Make bootable disk images:** floppies from 360 KB to 2.88 MB, and hard disk
+  / CF images with the exact geometry the target BIOS gives to DOS. The system
+  comes from a disk you already have; no MS-DOS files are distributed with the
+  program.
+* **CF cards and IDE disks:** back up a card to an image, and write an image
+  back, safely. See the [CF card guide](docs/CF-GUIDE.md).
 * **English and Hungarian** user interface; other languages can be added with a
-  plain text file (Language > Make a translation file).
+  text file. See [Translating](docs/TRANSLATING.md).
 
-## Making a bootable CF card
+## Quick start
 
-The catch with CF cards is geometry: MS-DOS 6.22 boots with the
-cylinders/heads/sectors that the BIOS reports, and these depend on the
-machine, the adapter and the BIOS translation mode (NORMAL / LBA / LARGE).
+1. Download `EasyRSB.exe` from the [Releases](../../releases) page (Windows 10
+   or later, 64-bit). It is a single file; no installation.
+2. Start it. The wizard asks what you want to make.
+3. For a CF card or an IDE disk, read the [CF card guide](docs/CF-GUIDE.md)
+   first: the geometry of the target machine matters.
 
-1. Put the card into the target machine and boot DOS. Run `MSD.EXE`
-   (Disk Drives) to see the geometry DOS gets, for example 1013 / 32 / 63.
-   If the card already boots on that machine, a backup of it holds the same
-   information (step 2).
-2. *Disk image > Back up a card to an image file.* The program offers to
-   read the geometry, boot code and system from the backup.
-3. *Disk image > New bootable disk image:* check the geometry, choose the
-   system source, and optionally copy the rest of its files and add the
-   current menu with drivers. Save the geometry as a profile.
-4. Try the image in 86Box with the **same** geometry.
-5. *Disk image > Write an image to a card.* Needs administrator rights; the
-   program offers to restart itself.
-
-Do not change the BIOS drive settings afterwards, or the card will not boot.
-
-## Download
-
-Windows 10 or later, 64-bit. Download `EasyRSB.exe` from the
-[Releases](../../releases) page. It is a single file; no installation.
-Downloaded drivers, language files and settings are kept next to the program
-if that folder is writable (portable use), otherwise in
+Downloaded drivers, language files and settings are kept next to the program if
+that folder is writable (portable use), otherwise in
 `%APPDATA%\EasyRetroSystemBuilder`.
 
-## Building
+## Documentation
 
-Go 1.24 or later, no other dependencies (plain Win32 calls, no cgo):
+| Document | Content |
+|---|---|
+| [CF card guide](docs/CF-GUIDE.md) | geometry, the three ways to start, trying in 86Box, writing the card |
+| [Drivers](docs/DRIVERS.md) | the built-in driver list and where each driver comes from |
+| [Translating](docs/TRANSLATING.md) | adding a new language |
+| [Building](docs/BUILDING.md) | building and testing from source |
 
-```
-GOOS=windows GOARCH=amd64 go build -ldflags="-s -w -H windowsgui" -o EasyRSB.exe .
-go test ./...
-```
+## Repository layout
 
-The icon, version information and manifest come from
-`rsrc_windows_amd64.syso`, which `go run ./tools/winres` (or `go generate`)
-writes; it is committed, so a plain `go build` includes it. The tests run on
-any operating system. GitHub Actions builds the program for
-every push and attaches it to a release for every `v*` tag.
-
-## Translations
-
-*Language > Make a translation file* writes a text file with every English
-text and an empty line for the translation. Name it after the language code
-(`de.lng`), put it into the `lang` folder and choose *Language > Reload
-language files*. Pull requests with new languages are welcome.
+| Folder | Content |
+|---|---|
+| `src/` | the Windows program (Go) and its tests |
+| `src/tools/winres/` | makes the icon, version information and manifest of the exe |
+| `asm/` | the 16-bit code: the MBR boot code and `GEOM.COM`, with a tiny assembler |
+| `docs/` | the guides above and the screenshot |
+| `.github/workflows/` | the GitHub Actions build |
 
 ## License
 
