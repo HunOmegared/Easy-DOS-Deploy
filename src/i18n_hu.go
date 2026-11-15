@@ -394,7 +394,6 @@ var huTexts = map[string]string{
 	"Which DOS, and what should the boot menu offer?":                                    "Melyik DOS legyen, és mit kínáljon a boot menü?",
 	"< Back": "< Vissza",
 	"Next >": "Tovább >",
-	"(system from your own boot disk or card)":           "(a rendszer a saját boot lemezedről vagy kártyádról)",
 	"Where is the system whose menu you want to change?": "Hol van a rendszer, amelynek a menüjét módosítanád?",
 	"In a disk image": "Lemezképben",
 	"A floppy or hard disk image, a card backup or a fixed-size VHD.":                        "Floppy- vagy merevlemez-kép, kártyamentés vagy fix méretű VHD.",
@@ -475,7 +474,6 @@ var huTexts = map[string]string{
 	"The FreeDOS system: kernel 2043, for 8086 and up, FAT12 and FAT16. Used for FreeDOS disks made without a system source.": "A FreeDOS rendszer: 2043-as kernel, 8086-tól felfelé, FAT12 és FAT16. Rendszerforrás nélkül készülő FreeDOS-lemezekhez.",
 	"The geometry floppy is ready: %s\n\nWrite it to a 1.44 MB floppy (WinImage, Greaseweazle) and boot the target machine from it with the card or disk in place. It shows the geometry by itself.": "Kész a geometria-floppy: %s\n\nÍrd ki egy 1,44 MB-os floppyra (WinImage, Greaseweazle), és indítsd róla a célgépet úgy, hogy a kártya vagy a lemez benne van. Magától kiírja a geometriát.",
 	"You can also browse for these files in the Drivers window.": "Ezeket a fájlokat a Driverek ablakban be is tallózhatod.",
-	"(the program can download it)":                              "(a program le tudja tölteni)",
 	"A FreeDOS boot floppy image":                                "Egy FreeDOS boot floppy képe",
 	"An MS-DOS boot floppy image":                                "Egy MS-DOS boot floppy képe",
 	"FreeDOS install disks or CD":                                "FreeDOS telepítőlemezek vagy CD",
@@ -491,4 +489,6 @@ var huTexts = map[string]string{
 	"Use the drivers of the system source (none found)":                                                                      "A rendszerforrás saját driverei (nem találtam ilyet)",
 	"Use the drivers of the system source: %s":                                                                               "A rendszerforrás saját drivereinek használata: %s",
 	"keyboard": "billentyűzet",
+	"Free and MS-DOS compatible; most DOS programs and games run on it. The program can download it, so an empty card is enough.":                                                 "Ingyenes és MS-DOS-kompatibilis; a legtöbb DOS-os program és játék fut rajta. A program le tudja tölteni, így egy üres kártya is elég.",
+	"You need your own MS-DOS: a card that boots it, a backup of one, a boot floppy image or the install disks. The program cannot download it, because it belongs to Microsoft.": "Saját MS-DOS kell hozzá: egy kártya, ami bootol vele, annak mentése, egy boot floppy kép vagy a telepítőlemezek. A program nem tudja letölteni, mert a Microsofté.",
 }

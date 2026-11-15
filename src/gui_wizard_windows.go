@@ -22,7 +22,10 @@ const (
 	// page 2: system and menu
 	wzHead2
 	wzLblDOS
-	wzDOS
+	wzDOS // radio button: MS-DOS
+	wzDOSFree
+	wzDOSNote
+	wzDOSFreeNote
 	wzLblMenu
 	wzMenu
 	wzMenuDesc
@@ -97,13 +100,16 @@ func (a *app) openWizard() {
 
 	mk(wzHead2, "STATIC", T("Which DOS, and what should the boot menu offer?"), 0, "")
 	mk(wzLblDOS, "STATIC", T("System:"), 0, "")
-	mk(wzDOS, "COMBOBOX", "", WS_TABSTOP|CBS_DROPDOWNLIST|WS_VSCROLL, "")
+	mk(wzDOS, "BUTTON", "MS-DOS 6.x", WS_TABSTOP|WS_GROUP|BS_AUTORADIO, "")
+	mk(wzDOSNote, "STATIC", T("You need your own MS-DOS: a card that boots it, a backup of one, a boot floppy image or the install disks. The program cannot download it, because it belongs to Microsoft."), 0, "")
+	mk(wzDOSFree, "BUTTON", "FreeDOS", BS_AUTORADIO, "")
+	mk(wzDOSFreeNote, "STATIC", T("Free and MS-DOS compatible; most DOS programs and games run on it. The program can download it, so an empty card is enough."), 0, "")
+	setCheck(w.c[wzDOS], true)
 	mk(wzLblMenu, "STATIC", T("Boot menu:"), 0, "")
 	mk(wzMenu, "COMBOBOX", "", WS_TABSTOP|CBS_DROPDOWNLIST|WS_VSCROLL, "")
 	mk(wzMenuDesc, "STATIC", "", 0, "")
 	mk(wzBack, "BUTTON", T("< Back"), WS_TABSTOP, "")
 	mk(wzNext, "BUTTON", T("Next >"), WS_TABSTOP|BS_DEFPUSHBUTTON, "")
-	fillCombo(w.c[wzDOS], []string{"MS-DOS 6.x " + T("(system from your own boot disk or card)"), "FreeDOS " + T("(the program can download it)")}, 0)
 	fillCombo(w.c[wzMenu], []string{
 		T("Plain DOS"),
 		T("Everyday: DOS / + mouse and CD-ROM / everything"),
@@ -147,11 +153,17 @@ func (w *wizardWin) layout() {
 	bw := fitW(s(110), s(24), w.c[wzBack], w.c[wzNext])
 
 	move(w.c[wzHead2], m, m, lw, s(24))
-	move(w.c[wzLblDOS], m, m+s(48), col, s(20))
-	move(w.c[wzDOS], m+col, m+s(44), lw-col, s(200))
-	move(w.c[wzLblMenu], m, m+s(88), col, s(20))
-	move(w.c[wzMenu], m+col, m+s(84), lw-col, s(200))
-	move(w.c[wzMenuDesc], m+col, m+s(120), lw-col, s(200))
+	y = m + s(44)
+	move(w.c[wzLblDOS], m, y+s(3), col, s(20))
+	for _, r := range [][2]int{{wzDOS, wzDOSNote}, {wzDOSFree, wzDOSFreeNote}} {
+		move(w.c[r[0]], m+col, y, lw-col, s(22))
+		move(w.c[r[1]], m+col+s(20), y+s(24), lw-col-s(20), s(40))
+		y += s(72)
+	}
+	y += s(6)
+	move(w.c[wzLblMenu], m, y+s(4), col, s(20))
+	move(w.c[wzMenu], m+col, y, lw-col, s(200))
+	move(w.c[wzMenuDesc], m+col, y+s(36), lw-col, s(200))
 	move(w.c[wzBack], cw-m-2*bw-s(8), ch-m-s(28), bw, s(28))
 	move(w.c[wzNext], cw-m-bw, ch-m-s(28), bw, s(28))
 
@@ -170,7 +182,7 @@ func (w *wizardWin) layout() {
 }
 
 // freeDOS is true when FreeDOS is chosen on page 2.
-func (w *wizardWin) freeDOS() bool { return sendMsg(w.c[wzDOS], CB_GETCURSEL, 0, 0) == 1 }
+func (w *wizardWin) freeDOS() bool { return checked(w.c[wzDOSFree]) }
 
 // sourceChoices are the "where should DOS come from" choices for the DOS of
 // page 2, in order: FreeDOS can be downloaded, MS-DOS cannot.
@@ -207,7 +219,7 @@ func (w *wizardWin) show(page int) {
 	}
 	pages := map[int][]int{
 		1: {wzHead, wzFloppy, wzCard, wzEmu, wzExisting, wzEditor, wzShowStart},
-		2: {wzHead2, wzLblDOS, wzDOS, wzLblMenu, wzMenu, wzMenuDesc, wzBack, wzNext},
+		2: {wzHead2, wzLblDOS, wzDOS, wzDOSNote, wzDOSFree, wzDOSFreeNote, wzLblMenu, wzMenu, wzMenuDesc, wzBack, wzNext},
 		3: {wzHead3, wzFromImage, wzFromDir, wzBack3},
 		4: append([]int{wzHead4, wzBack4}, w.sourceChoices()...),
 	}
@@ -231,7 +243,7 @@ func (w *wizardWin) show(page int) {
 func (w *wizardWin) templateID() string {
 	m := clampIdx(int(sendMsg(w.c[wzMenu], CB_GETCURSEL, 0, 0)), len(wizMenus))
 	suffix := "-ms"
-	if sendMsg(w.c[wzDOS], CB_GETCURSEL, 0, 0) == 1 {
+	if w.freeDOS() {
 		suffix = "-fd"
 	}
 	return wizMenus[m] + suffix
@@ -348,7 +360,11 @@ func wizardProc(hwnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {
 			a.openCalc()
 		case wzNext:
 			w.next()
-		case wzDOS, wzMenu:
+		case wzDOS, wzDOSFree:
+			if code == BN_CLICKED {
+				w.describe()
+			}
+		case wzMenu:
 			if code == CBN_SELCHANGE {
 				w.describe()
 			}

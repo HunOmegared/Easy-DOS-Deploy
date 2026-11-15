@@ -145,9 +145,6 @@ TR: (copia)
 EN: (no card found)
 TR: (nessuna scheda trovata)
 
-EN: (system from your own boot disk or card)
-TR: (sistema dal tuo disco o scheda di avvio)
-
 EN: . Missing: %s. Download it yourself from %s and browse for it, or put it here: %s
 TR: . Manca: %s. Scaricalo da %s e selezionalo, oppure mettilo qui: %s
 
@@ -1420,9 +1417,6 @@ TR: Il dischetto della geometria è pronto: %s\n\nScrivilo su un dischetto da 1,
 EN: You can also browse for these files in the Drivers window.
 TR: Puoi anche selezionare questi file nella finestra Driver.
 
-EN: (the program can download it)
-TR: (il programma può scaricarlo)
-
 EN: A FreeDOS boot floppy image
 TR: Un'immagine di dischetto di avvio FreeDOS
 
@@ -1467,3 +1461,9 @@ TR: Usa i driver dell'origine del sistema: %s
 
 EN: keyboard
 TR: tastiera
+
+EN: Free and MS-DOS compatible; most DOS programs and games run on it. The program can download it, so an empty card is enough.
+TR: Libero e compatibile con MS-DOS; la maggior parte dei programmi e dei giochi DOS funziona su di esso. Il programma può scaricarlo, quindi basta una scheda vuota.
+
+EN: You need your own MS-DOS: a card that boots it, a backup of one, a boot floppy image or the install disks. The program cannot download it, because it belongs to Microsoft.
+TR: Ti serve il tuo MS-DOS: una scheda che si avvia con esso, un suo backup, un'immagine di dischetto di avvio o i dischi di installazione. Il programma non può scaricarlo, perché appartiene a Microsoft.

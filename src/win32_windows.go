@@ -83,6 +83,8 @@ const (
 	WM_SETFONT        = 0x0030
 	WM_GETFONT        = 0x0031
 	BS_MULTILINE      = 0x2000
+	BS_AUTORADIO      = 0x0009
+	WS_GROUP          = 0x00020000
 	WM_KEYDOWN        = 0x0100
 	WM_COMMAND        = 0x0111
 	WM_CTLCOLORSTATIC = 0x0138
