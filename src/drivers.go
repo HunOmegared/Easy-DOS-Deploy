@@ -417,7 +417,7 @@ func (s *Store) fetch(url string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("User-Agent", "Easy-Retro-System-Builder/0.1")
+	req.Header.Set("User-Agent", "Easy-DDT/0.6")
 	resp, err := httpClient.Do(req)
 	if err != nil {
 		return nil, err

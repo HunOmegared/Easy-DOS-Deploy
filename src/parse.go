@@ -31,7 +31,15 @@ func Import(configLines, autoexecLines []string, target Target) (*Project, []str
 
 func isMarker(l string) bool {
 	t := strings.TrimSpace(strings.TrimPrefix(strings.TrimSpace(l), "@"))
-	return strings.EqualFold(t, genMarker) || strings.EqualFold(t, oldMarker)
+	if strings.EqualFold(t, genMarker) {
+		return true
+	}
+	for _, m := range oldMarkers {
+		if strings.EqualFold(t, m) {
+			return true
+		}
+	}
+	return false
 }
 
 var reMSBlock = regexp.MustCompile(`^\s*\[([^\]]+)\]\s*$`)

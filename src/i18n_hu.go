@@ -249,7 +249,6 @@ var huTexts = map[string]string{
 	"Bootable DOS floppy image to put GEOM.COM on": "Bootolható DOS floppykép, amelyre a GEOM.COM kerüljön",
 	"Did not work:": "Nem sikerült:",
 	"GEOM.COM is now on %s.\n\nWrite the image to a floppy (WinImage, Greaseweazle), boot the target machine from it with the card or disk in place, and type GEOM.": "A GEOM.COM most már rajta van: %s.\n\nÍrd ki a képet floppyra (WinImage, Greaseweazle), indítsd róla a célgépet a kártyával vagy lemezzel a helyén, és írd be: GEOM.",
-	"Easy Retro System Builder":              "Easy Retro System Builder",
 	"Some language files could not be read:": "Néhány nyelvi fájlt nem sikerült beolvasni:",
 	"&File":                                  "&Fájl",
 	"Start &wizard...":                       "&Varázsló...",

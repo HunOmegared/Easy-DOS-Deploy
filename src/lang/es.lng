@@ -1,6 +1,6 @@
-# Easy Retro System Builder translation file (UTF-8).
+# Easy DDT translation file (UTF-8).
 # Built into the program; a file with the same name in the "lang" folder overrides it.
-# Corrections are welcome: https://github.com/HunOmegared/Easy-Retro-System-Builder
+# Corrections are welcome: https://github.com/HunOmegared/Easy-DDT
 
 @name = Español
 
@@ -426,9 +426,6 @@ TR: TODO lo que hay en este disco se sobrescribirá, incluida su tabla de partic
 
 EN: Easy Commander client (EC.EXE)
 TR: Cliente de Easy Commander (EC.EXE)
-
-EN: Easy Retro System Builder
-TR: Easy Retro System Builder
 
 EN: Edit driver
 TR: Editar controlador

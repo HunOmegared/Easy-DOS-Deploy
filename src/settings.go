@@ -33,7 +33,15 @@ func dataDir(exeDir string) string {
 		return exeDir
 	}
 	if d, err := os.UserConfigDir(); err == nil {
-		return filepath.Join(d, "EasyRetroSystemBuilder")
+		dir := filepath.Join(d, "EasyDDT")
+		// the folder of the program's earlier name moves over once
+		old := filepath.Join(d, "EasyRetroSystemBuilder")
+		if _, err := os.Stat(dir); os.IsNotExist(err) {
+			if _, err := os.Stat(old); err == nil {
+				os.Rename(old, dir)
+			}
+		}
+		return dir
 	}
 	return exeDir
 }

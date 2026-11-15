@@ -1,5 +1,5 @@
 // Command winres writes rsrc_windows_amd64.syso: the Windows resources of
-// EasyRSB.exe (icon, version information, manifest) as a COFF object that
+// EasyDDT.exe (icon, version information, manifest) as a COFF object that
 // the Go linker includes automatically. No outside tools are needed.
 //
 //	go run ./tools/winres
@@ -18,17 +18,17 @@ const (
 	version     = "0.6.0"
 	versionMS   = 0<<16 | 6 // major.minor
 	versionLS   = 0<<16 | 0 // patch.build
-	productName = "Easy Retro System Builder"
-	company     = "HunOmegared"
-	description = "Easy Retro System Builder - DOS boot menus, bootable disk images and CF cards"
-	copyright   = "Copyright (C) 2026 HunOmegared. GNU GPL v3."
-	exeName     = "EasyRSB.exe"
+	productName = "Easy DDT"
+	company     = "Daniel Szentmiklosi"
+	description = "Easy DDT (DOS Deployment Tool) - DOS boot menus, bootable disk images and CF cards"
+	copyright   = "Copyright (C) 2026 Daniel Szentmiklosi. GNU GPL v3."
+	exeName     = "EasyDDT.exe"
 )
 
 const manifest = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
-  <assemblyIdentity type="win32" name="HunOmegared.EasyRetroSystemBuilder" version="0.6.0.0" processorArchitecture="amd64"/>
-  <description>Easy Retro System Builder</description>
+  <assemblyIdentity type="win32" name="Szentmiklosi.EasyDDT" version="0.6.0.0" processorArchitecture="amd64"/>
+  <description>Easy DDT (DOS Deployment Tool)</description>
   <dependency>
     <dependentAssembly>
       <assemblyIdentity type="win32" name="Microsoft.Windows.Common-Controls" version="6.0.0.0" processorArchitecture="*" publicKeyToken="6595b64144ccf1df" language="*"/>
@@ -173,12 +173,12 @@ func versionInfo() []byte {
 		str("CompanyName", company),
 		str("FileDescription", description),
 		str("FileVersion", version),
-		str("InternalName", "EasyRSB"),
+		str("InternalName", "EasyDDT"),
 		str("LegalCopyright", copyright),
 		str("OriginalFilename", exeName),
 		str("ProductName", productName),
 		str("ProductVersion", version),
-		str("Comments", "https://github.com/HunOmegared/Easy-Retro-System-Builder"),
+		str("Comments", "https://github.com/HunOmegared/Easy-DDT"),
 	)
 	sfi := vnode("StringFileInfo", nil, 0, 1, table)
 	tr := []byte{0x09, 0x04, 0xB0, 0x04}

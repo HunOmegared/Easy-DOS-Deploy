@@ -23,10 +23,10 @@ jobs:
       - name: Vet (Windows)
         working-directory: src
         run: GOOS=windows GOARCH=amd64 go vet ./...
-      - name: Build EasyRSB.exe
+      - name: Build EasyDDT.exe
         run: |
           mkdir -p dist
-          (cd src && GOOS=windows GOARCH=amd64 go build -trimpath -ldflags="-s -w -H windowsgui" -o ../dist/EasyRSB.exe .)
+          (cd src && GOOS=windows GOARCH=amd64 go build -trimpath -ldflags="-s -w -H windowsgui" -o ../dist/EasyDDT.exe .)
           cp README.md LICENSE dist/
       - name: Check the 16-bit code is up to date
         shell: bash
@@ -35,12 +35,12 @@ jobs:
           python3 asm/geom.py 2>/dev/null | diff - <(tail -n +5 src/geomcom.go)
       - uses: actions/upload-artifact@v4
         with:
-          name: EasyRSB
+          name: EasyDDT
           path: dist/
       - name: Release
         if: startsWith(github.ref, 'refs/tags/v')
         run: |
-          cd dist && zip -9 ../EasyRSB-${GITHUB_REF_NAME}.zip *
-          cd .. && gh release create "$GITHUB_REF_NAME" "EasyRSB-${GITHUB_REF_NAME}.zip" --title "$GITHUB_REF_NAME" --generate-notes
+          cd dist && zip -9 ../EasyDDT-${GITHUB_REF_NAME}.zip *
+          cd .. && gh release create "$GITHUB_REF_NAME" "EasyDDT-${GITHUB_REF_NAME}.zip" --title "$GITHUB_REF_NAME" --generate-notes
         env:
           GH_TOKEN: ${{ github.token }}

@@ -73,7 +73,7 @@ func (a *app) openWizard() {
 	}
 	w := &wizardWin{c: map[int]uintptr{}}
 	a.wiz = w
-	w.hwnd = createWindow(WS_EX_DLGMODALFRAME, "EasyRSBWizard", appTitle(), 0x00C00000|0x00080000, cwDefault, cwDefault, a.s(640), a.s(560), a.hwnd, 0)
+	w.hwnd = createWindow(WS_EX_DLGMODALFRAME, "EasyDDTWizard", appTitle(), 0x00C00000|0x00080000, cwDefault, cwDefault, a.s(640), a.s(560), a.hwnd, 0)
 	mk := func(id int, class, text string, style uint32, note string) uintptr {
 		h := createWindow(0, class, text, WS_CHILD|style, 0, 0, 10, 10, w.hwnd, uintptr(id))
 		sendMsg(h, WM_SETFONT, a.font, 1)

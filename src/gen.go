@@ -6,10 +6,11 @@ import (
 )
 
 // Marker written into generated files so they can be recognised on import.
-const genMarker = "REM -- Easy Retro System Builder --"
+const genMarker = "REM -- Easy DDT --"
 
-// oldMarker is what the first versions wrote; still recognised on import.
-const oldMarker = "REM -- DOS Boot Menu Builder --"
+// oldMarkers are what earlier versions wrote (under earlier names of the
+// program); still recognised on import.
+var oldMarkers = []string{"REM -- Easy Retro System Builder --", "REM -- DOS Boot Menu Builder --"}
 
 const endLabel = "BMEND"
 

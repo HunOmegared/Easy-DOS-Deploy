@@ -1,4 +1,4 @@
-# Easy Retro System Builder
+# Easy DDT — DOS Deployment Tool
 
 A Windows program that builds the **boot menu** of a DOS PC and puts it, with
 the drivers it needs, onto a **disk image** or straight onto a **CompactFlash
@@ -11,7 +11,8 @@ have DOS line endings.
 
 ## Status
 
-Early version (0.x). Tested end to end on real hardware: a backup of a
+Early version (0.x). Earlier versions were called Easy Retro System Builder (EasyRSB);
+the program still recognises the boot menus and settings they made. Tested end to end on real hardware: a backup of a
 working 1 GB CompactFlash card (MS-DOS 6.22) was made through a USB card
 reader, a new bootable image with a generated boot menu was built from it
 with the geometry the BIOS gives to DOS (1013/32/63, LBA mode), tried in
@@ -52,7 +53,7 @@ FreeDOS images and other machines have not been tested on real hardware yet.
 
 ## Quick start
 
-1. Download `EasyRSB.exe` from the [Releases](../../releases) page (Windows 10
+1. Download `EasyDDT.exe` from the [Releases](../../releases) page (Windows 10
    or later, 64-bit). It is a single file; no installation.
 2. Start it. The wizard asks what you want to make.
 3. For a CF card or an IDE disk, read the [CF card guide](docs/CF-GUIDE.md)
@@ -60,7 +61,7 @@ FreeDOS images and other machines have not been tested on real hardware yet.
 
 Downloaded drivers, language files and settings are kept next to the program if
 that folder is writable (portable use), otherwise in
-`%APPDATA%\EasyRetroSystemBuilder`.
+`%APPDATA%\EasyDDT`.
 
 ## Documentation
 
@@ -83,6 +84,8 @@ that folder is writable (portable use), otherwise in
 | `.github/workflows/` | the GitHub Actions build |
 
 ## License
+
+Copyright (C) 2026 Daniel Szentmiklosi.
 
 GNU General Public License v3.0, see [LICENSE](LICENSE).
 

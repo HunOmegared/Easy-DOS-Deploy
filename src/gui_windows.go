@@ -14,7 +14,8 @@ import (
 	"unsafe"
 )
 
-func appTitle() string { return T("Easy Retro System Builder") }
+// appTitle is the name of the program; a name, so it is not translated.
+func appTitle() string { return "Easy DDT - DOS Deployment Tool" }
 
 const cwDefault = -0x80000000 // CW_USEDEFAULT
 
@@ -154,19 +155,19 @@ func runGUI() {
 	theApp = a
 	a.proj = DefaultProject(TargetMSDOS)
 
-	registerClass("EasyRSBMain", syscall.NewCallback(mainProc))
-	registerClass("EasyRSBPreview", syscall.NewCallback(previewProc))
-	registerClass("EasyRSBDrivers", syscall.NewCallback(driversProc))
-	registerClass("EasyRSBDrvEdit", syscall.NewCallback(editProc))
-	registerClass("EasyRSBBoot", syscall.NewCallback(bootProc))
-	registerClass("EasyRSBPick", syscall.NewCallback(pickProc))
-	registerClass("EasyRSBJob", syscall.NewCallback(jobProc))
-	registerClass("EasyRSBConfirm", syscall.NewCallback(confirmProc))
-	registerClass("EasyRSBBlocks", syscall.NewCallback(blocksProc))
-	registerClass("EasyRSBWizard", syscall.NewCallback(wizardProc))
-	registerClass("EasyRSBCalc", syscall.NewCallback(calcProc))
+	registerClass("EasyDDTMain", syscall.NewCallback(mainProc))
+	registerClass("EasyDDTPreview", syscall.NewCallback(previewProc))
+	registerClass("EasyDDTDrivers", syscall.NewCallback(driversProc))
+	registerClass("EasyDDTDrvEdit", syscall.NewCallback(editProc))
+	registerClass("EasyDDTBoot", syscall.NewCallback(bootProc))
+	registerClass("EasyDDTPick", syscall.NewCallback(pickProc))
+	registerClass("EasyDDTJob", syscall.NewCallback(jobProc))
+	registerClass("EasyDDTConfirm", syscall.NewCallback(confirmProc))
+	registerClass("EasyDDTBlocks", syscall.NewCallback(blocksProc))
+	registerClass("EasyDDTWizard", syscall.NewCallback(wizardProc))
+	registerClass("EasyDDTCalc", syscall.NewCallback(calcProc))
 
-	a.hwnd = createWindow(0, "EasyRSBMain", appTitle(), WS_OVERLAPPEDWINDOW,
+	a.hwnd = createWindow(0, "EasyDDTMain", appTitle(), WS_OVERLAPPEDWINDOW,
 		cwDefault, cwDefault, a.s(980), a.s(680), 0, 0)
 	a.buildMenu()
 	a.build()
@@ -1298,7 +1299,7 @@ func (a *app) showPreview() {
 	}
 	if a.preview == 0 {
 		a.prevC = map[int]uintptr{}
-		a.preview = createWindow(0, "EasyRSBPreview", T("Preview"), WS_OVERLAPPEDWINDOW, cwDefault, cwDefault, a.s(1000), a.s(640), 0, 0) // no owner: the main window can come to the front
+		a.preview = createWindow(0, "EasyDDTPreview", T("Preview"), WS_OVERLAPPEDWINDOW, cwDefault, cwDefault, a.s(1000), a.s(640), 0, 0) // no owner: the main window can come to the front
 		mk := func(id int, class string, style, ex uint32, font uintptr) {
 			h := createWindow(ex, class, "", WS_CHILD|WS_VISIBLE|style, 0, 0, 10, 10, a.preview, uintptr(id))
 			sendMsg(h, WM_SETFONT, font, 1)
@@ -1410,7 +1411,7 @@ func (a *app) openDrivers() {
 	}
 	d := &drvWin{c: map[int]uintptr{}}
 	a.drv = d
-	d.hwnd = createWindow(0, "EasyRSBDrivers", T("Drivers"), WS_OVERLAPPEDWINDOW, cwDefault, cwDefault, a.s(900), a.s(560), 0, 0) // no owner, see Preview
+	d.hwnd = createWindow(0, "EasyDDTDrivers", T("Drivers"), WS_OVERLAPPEDWINDOW, cwDefault, cwDefault, a.s(900), a.s(560), 0, 0) // no owner, see Preview
 	mk := func(id int, class, text string, style, ex uint32) {
 		h := createWindow(ex, class, text, WS_CHILD|WS_VISIBLE|style, 0, 0, 10, 10, d.hwnd, uintptr(id))
 		sendMsg(h, WM_SETFONT, a.font, 1)
@@ -1840,7 +1841,7 @@ func (a *app) openEditor(index int) {
 	if index >= 0 {
 		titleText = T("Edit driver")
 	}
-	e.hwnd = createWindow(WS_EX_DLGMODALFRAME, "EasyRSBDrvEdit", titleText, WS_OVERLAPPEDWINDOW, cwDefault, cwDefault, a.s(640), a.s(600), a.drv.hwnd, 0)
+	e.hwnd = createWindow(WS_EX_DLGMODALFRAME, "EasyDDTDrvEdit", titleText, WS_OVERLAPPEDWINDOW, cwDefault, cwDefault, a.s(640), a.s(600), a.drv.hwnd, 0)
 	mk := func(id int, class, text string, style, ex uint32) {
 		h := createWindow(ex, class, text, WS_CHILD|WS_VISIBLE|style, 0, 0, 10, 10, e.hwnd, uintptr(id))
 		sendMsg(h, WM_SETFONT, a.font, 1)

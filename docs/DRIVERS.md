@@ -28,7 +28,7 @@ The drivers are separate programs under their own licenses (mostly GPL or
 freeware). Nothing of them is included in this repository.
 
 Downloaded files are kept in the `drivers` folder: next to the program if that
-folder is writable, otherwise in `%APPDATA%\EasyRetroSystemBuilder\drivers`.
+folder is writable, otherwise in `%APPDATA%\EasyDDT\drivers`.
 
 If a menu item uses a driver that is missing, the program says so before
 writing, and offers to download or browse for it.
