@@ -736,6 +736,7 @@ type job struct {
 	text   uintptr
 	what   string
 	mu     sync.Mutex
+	phase  int
 	done   int64
 	total  int64
 	err    error
@@ -755,14 +756,14 @@ func (a *app) startJob(what string, run func(prog Progress) error, finish func(e
 	pShowWindow.Call(j.hwnd, SW_SHOW)
 	go func() {
 		last := int64(-1)
-		err := run(func(done, total int64) {
-			pct := done * 100 / max64(total, 1)
+		err := run(func(phase int, done, total int64) {
+			pct := int64(phase)*1000 + done*100/max64(total, 1)
 			if pct == last {
 				return
 			}
 			last = pct
 			j.mu.Lock()
-			j.done, j.total = done, total
+			j.phase, j.done, j.total = phase, done, total
 			j.mu.Unlock()
 			postMsg(j.hwnd, wmJobProgress, 0, 0)
 		})
@@ -787,9 +788,16 @@ func jobProc(hwnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {
 	case wmJobProgress:
 		if j != nil {
 			j.mu.Lock()
-			d, t := j.done, j.total
+			ph, d, t := j.phase, j.done, j.total
 			j.mu.Unlock()
-			setText(j.text, fmt.Sprintf("%s\n\n%s / %s  (%d%%)", j.what, humanSize(d), humanSize(t), d*100/max64(t, 1)))
+			step := T("Reading")
+			switch ph {
+			case phaseWrite:
+				step = T("Writing (empty areas are skipped)")
+			case phaseVerify:
+				step = T("Checking (reading back)")
+			}
+			setText(j.text, fmt.Sprintf("%s\n\n%s: %s / %s  (%d%%)", j.what, step, humanSize(d), humanSize(t), d*100/max64(t, 1)))
 		}
 		return 0
 	case wmJobDone:

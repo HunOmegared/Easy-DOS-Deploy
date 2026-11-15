@@ -177,8 +177,15 @@ func ListDisks() []PhysDisk {
 	return out
 }
 
-// Progress is called with bytes done and total; it must be cheap.
-type Progress func(done, total int64)
+// Progress is called with the phase (phaseRead, phaseWrite, phaseVerify)
+// and the bytes done of that phase; it must be cheap.
+type Progress func(phase int, done, total int64)
+
+const (
+	phaseRead = iota
+	phaseWrite
+	phaseVerify
+)
 
 func needAdmin(err error) bool { return errors.Is(err, errAccessDenied) }
 
@@ -219,7 +226,7 @@ func ReadDisk(d PhysDisk, path string, prog Progress) error {
 			return err
 		}
 		done += int64(got)
-		prog(done, size)
+		prog(phaseRead, done, size)
 	}
 	return f.Close()
 }
@@ -321,7 +328,7 @@ func WriteDisk(d PhysDisk, image string, quick, verify bool, prog Progress) (*Wr
 		if vol != nil && off >= 1<<20 && vol.Skippable(off, n) {
 			res.Skipped += n
 			off += n
-			prog(off, total)
+			prog(phaseWrite, off, size)
 			continue
 		}
 		if _, err := f.ReadAt(buf[:n], off); err != nil && err != io.EOF {
@@ -336,7 +343,7 @@ func WriteDisk(d PhysDisk, image string, quick, verify bool, prog Progress) (*Wr
 		}
 		res.Written += n
 		off += n
-		prog(off, total)
+		prog(phaseWrite, off, size)
 	}
 	if !verify {
 		return res, nil
@@ -349,7 +356,7 @@ func WriteDisk(d PhysDisk, image string, quick, verify bool, prog Progress) (*Wr
 		}
 		if vol != nil && off >= 1<<20 && vol.Skippable(off, n) {
 			off += n
-			prog(size+off, total)
+			prog(phaseVerify, off, size)
 			continue
 		}
 		f.ReadAt(buf[:n], off)
@@ -364,7 +371,7 @@ func WriteDisk(d PhysDisk, image string, quick, verify bool, prog Progress) (*Wr
 			return res, fmt.Errorf(T("The card does not hold what was written (at %s). The card or the reader may be faulty."), humanSize(off))
 		}
 		off += n
-		prog(size+off, total)
+		prog(phaseVerify, off, size)
 	}
 	res.Verified = true
 	return res, nil
