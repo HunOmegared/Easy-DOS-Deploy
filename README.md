@@ -7,10 +7,6 @@ FDCONFIG.SYS style menu for FreeDOS, so you do not have to remember the
 `[MENU]` / `MENUITEM` syntax or the `%CONFIG%` branches, and the files always
 have DOS line endings.
 
-It grew out of [Easy Commander](https://github.com/HunOmegared/Easy-Commander):
-making a DOS disk that boots with or without networking was more fiddly than it
-should be, and making a bootable CF card from Windows had no simple tool at all.
-
 ![The main window: menu items on the left, their CONFIG.SYS and AUTOEXEC.BAT lines on the right](docs/screenshot.png)
 
 ## Status
@@ -46,8 +42,12 @@ tested now. **Keep a copy of every disk image and card you work on.**
   no MS-DOS files are distributed with the program.
 * **CF cards:** back up a card from a card reader to an image file, read its
   geometry from the backup, and write an image back to a card. Only removable,
-  USB and SD disks are offered, never the Windows disk. Empty areas are skipped
-  and everything written is read back and compared.
+  USB and SD disks are offered, never the Windows disk. Before writing, the
+  program shows what is on the disk now, warns loudly if it finds a Windows,
+  Linux or GPT partition, and asks you to type the disk number. Empty areas are
+  skipped and everything written is read back and compared. This also works
+  with an IDE hard disk on a USB-IDE adapter (as long as the adapter can read
+  the drive; very old CHS-only drives often cannot).
 * **English and Hungarian** user interface; other languages can be added with a
   plain text file (Language > Make a translation file).
 

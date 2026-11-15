@@ -102,6 +102,7 @@ type app struct {
 	boot    *bootWin
 	pick    *pickWin
 	job     *job
+	confirm *confirmWin
 	preview uintptr
 	prevC   map[int]uintptr
 }
@@ -153,6 +154,7 @@ func runGUI() {
 	registerClass("EasyRSBBoot", syscall.NewCallback(bootProc))
 	registerClass("EasyRSBPick", syscall.NewCallback(pickProc))
 	registerClass("EasyRSBJob", syscall.NewCallback(jobProc))
+	registerClass("EasyRSBConfirm", syscall.NewCallback(confirmProc))
 
 	a.hwnd = createWindow(0, "EasyRSBMain", appTitle(), WS_OVERLAPPEDWINDOW,
 		cwDefault, cwDefault, a.s(980), a.s(680), 0, 0)
@@ -186,7 +188,7 @@ func runGUI() {
 			continue
 		}
 		handled := false
-		for _, h := range []uintptr{a.hwnd, a.preview, a.drvHwnd(), a.editHwnd(), a.bootHwnd(), a.pickHwnd()} {
+		for _, h := range []uintptr{a.hwnd, a.preview, a.drvHwnd(), a.editHwnd(), a.bootHwnd(), a.pickHwnd(), a.confirmHwnd()} {
 			if h != 0 {
 				if r, _, _ := pIsDialogMessageW.Call(h, uintptr(unsafe.Pointer(&m))); r != 0 {
 					handled = true
@@ -211,6 +213,13 @@ func (a *app) drvHwnd() uintptr {
 func (a *app) bootHwnd() uintptr {
 	if a.boot != nil {
 		return a.boot.hwnd
+	}
+	return 0
+}
+
+func (a *app) confirmHwnd() uintptr {
+	if a.confirm != nil {
+		return a.confirm.hwnd
 	}
 	return 0
 }

@@ -369,3 +369,30 @@ func WriteDisk(d PhysDisk, image string, quick, verify bool, prog Progress) (*Wr
 	res.Verified = true
 	return res, nil
 }
+
+// rawReader reads sectors of an open disk handle (512-byte aligned reads).
+type rawReader struct{ h syscall.Handle }
+
+func (r rawReader) ReadAt(b []byte, off int64) (int, error) {
+	if _, err := syscall.Seek(r.h, off, 0); err != nil {
+		return 0, err
+	}
+	var n uint32
+	if err := syscall.ReadFile(r.h, b, &n, nil); err != nil {
+		return int(n), err
+	}
+	if int(n) < len(b) {
+		return int(n), io.ErrUnexpectedEOF
+	}
+	return int(n), nil
+}
+
+// InspectPhysDisk lists the partitions on a disk (needs administrator rights).
+func InspectPhysDisk(d PhysDisk) ([]PartInfo, error) {
+	h, err := openRaw(d.Path(), false)
+	if err != nil {
+		return nil, err
+	}
+	defer syscall.CloseHandle(h)
+	return InspectDisk(rawReader{h})
+}

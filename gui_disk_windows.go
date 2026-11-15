@@ -724,24 +724,144 @@ func (a *app) writeCard(image string) {
 			msgBox(a.hwnd, T("The image (%s) is bigger than the card (%s).", humanSize(st.Size()), humanSize(d.Size)), appTitle(), MB_ICONERROR)
 			return
 		}
-		if msgBox(a.hwnd, T("EVERYTHING on this card will be overwritten:\n\n%s\n\nImage: %s (%s)\n\nAreas that are empty in the image are skipped; everything written is read back and checked.\n\nGo ahead?",
-			d.Label(), image, humanSize(st.Size())), appTitle(), MB_YESNO|MB_ICONWARNING|0x100) != IDYES { // MB_DEFBUTTON2
+		parts, err := InspectPhysDisk(d)
+		if err != nil {
+			if !a.adminCheck(err) {
+				msgBox(a.hwnd, T("Could not read it:")+"\n"+err.Error(), appTitle(), MB_ICONERROR)
+			}
 			return
 		}
-		var res *WriteResult
-		a.startJob(T("Writing to %s...", d.Label()), func(prog Progress) error {
-			var err error
-			res, err = WriteDisk(d, image, true, true, prog)
-			return err
-		}, func(err error) {
-			if err != nil {
-				if !a.adminCheck(err) {
-					msgBox(a.hwnd, T("Writing the card failed:")+"\n"+err.Error()+"\n\n"+T("The card may now be unusable until it is written again."), appTitle(), MB_ICONERROR)
-				}
-				return
-			}
-			msgBox(a.hwnd, T("The card is ready. Written: %s, skipped as empty: %s, read back and checked.\n\nPut it in the target machine; the BIOS settings must be the same as when the geometry was taken.",
-				humanSize(res.Written), humanSize(res.Skipped)), appTitle(), MB_ICONINFORMATION)
+		now, modern := DescribeParts(parts)
+		text := T("EVERYTHING on this disk will be overwritten, including its partition table:\n\n%s\n\nIt holds now:\n%s\n\nImage: %s (%s)\n\nAreas that are empty in the image are skipped; everything written is read back and checked.",
+			d.Label(), now, image, humanSize(st.Size()))
+		if modern {
+			text = T("WARNING: this disk has a modern partition (Windows, Linux or GPT). It is almost certainly NOT the disk of your retro PC.") + "\n\n" + text
+		}
+		a.confirmTyped(text, strconv.Itoa(d.Number), modern, func() {
+			a.runWrite(d, image)
 		})
 	})
+}
+
+func (a *app) runWrite(d PhysDisk, image string) {
+	var res *WriteResult
+	a.startJob(T("Writing to %s...", d.Label()), func(prog Progress) error {
+		var err error
+		res, err = WriteDisk(d, image, true, true, prog)
+		return err
+	}, func(err error) {
+		if err != nil {
+			if !a.adminCheck(err) {
+				msgBox(a.hwnd, T("Writing the card failed:")+"\n"+err.Error()+"\n\n"+T("The card may now be unusable until it is written again."), appTitle(), MB_ICONERROR)
+			}
+			return
+		}
+		msgBox(a.hwnd, T("The card is ready. Written: %s, skipped as empty: %s, read back and checked.\n\nPut it in the target machine; the BIOS settings must be the same as when the geometry was taken.",
+			humanSize(res.Written), humanSize(res.Skipped)), appTitle(), MB_ICONINFORMATION)
+	})
+}
+
+// ---- confirmation by typing ----
+
+const (
+	cfText = 10 + iota
+	cfLbl
+	cfEdit
+	cfOK
+	cfCancel
+)
+
+type confirmWin struct {
+	hwnd   uintptr
+	c      map[int]uintptr
+	want   string
+	onOK   func()
+	closed bool
+}
+
+// confirmTyped asks for a dangerous action; OK only works after the user
+// types want (the disk number).
+func (a *app) confirmTyped(text, want string, alarm bool, onOK func()) {
+	cw := &confirmWin{c: map[int]uintptr{}, want: want, onOK: onOK}
+	a.confirm = cw
+	title := T("Overwrite disk")
+	if alarm {
+		title = "!!! " + title + " !!!"
+	}
+	cw.hwnd = createWindow(WS_EX_DLGMODALFRAME, "EasyRSBConfirm", title, 0x00C00000|0x00080000, cwDefault, cwDefault, a.s(600), a.s(470), a.hwnd, 0)
+	mk := func(id int, class, t string, style, ex uint32) uintptr {
+		h := createWindow(ex, class, t, WS_CHILD|WS_VISIBLE|style, 0, 0, 10, 10, cw.hwnd, uintptr(id))
+		sendMsg(h, WM_SETFONT, a.font, 1)
+		cw.c[id] = h
+		return h
+	}
+	mk(cfText, "EDIT", strings.ReplaceAll(text, "\n", "\r\n"), ES_MULTILINE|ES_READONLY|ES_AUTOVSCROLL|WS_VSCROLL, WS_EX_CLIENTEDGE)
+	mk(cfLbl, "STATIC", T("To confirm, type the disk number (%s):", want), 0, 0)
+	mk(cfEdit, "EDIT", "", WS_TABSTOP|ES_AUTOHSCROLL, WS_EX_CLIENTEDGE)
+	mk(cfOK, "BUTTON", T("Overwrite"), WS_TABSTOP, 0)
+	mk(cfCancel, "BUTTON", T("Cancel"), WS_TABSTOP|BS_DEFPUSHBUTTON, 0)
+	w, h := clientSize(cw.hwnd)
+	s, m := a.s, a.s(12)
+	move(cw.c[cfText], m, m, w-2*m, h-3*m-s(28)-s(60))
+	move(cw.c[cfLbl], m, h-2*m-s(28)-s(50), w-2*m, s(18))
+	move(cw.c[cfEdit], m, h-2*m-s(28)-s(28), s(120), s(23))
+	move(cw.c[cfOK], w-m-2*s(110)-s(8), h-m-s(28), s(110), s(28))
+	move(cw.c[cfCancel], w-m-s(110), h-m-s(28), s(110), s(28))
+	enable(cw.c[cfOK], false)
+	enable(a.hwnd, false)
+	if a.boot != nil {
+		enable(a.boot.hwnd, false)
+	}
+	pShowWindow.Call(cw.hwnd, SW_SHOW)
+	pSetFocus.Call(cw.c[cfEdit])
+}
+
+func (cw *confirmWin) close(ok bool) {
+	a := theApp
+	if cw.closed {
+		return
+	}
+	cw.closed = true
+	enable(a.hwnd, true)
+	if a.boot != nil {
+		enable(a.boot.hwnd, true)
+	}
+	pDestroyWindow.Call(cw.hwnd)
+	a.confirm = nil
+	if ok {
+		cw.onOK()
+	}
+}
+
+func confirmProc(hwnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {
+	a := theApp
+	cw := a.confirm
+	switch msg {
+	case WM_COMMAND:
+		if cw == nil {
+			return 0
+		}
+		switch int(loword(wParam)) {
+		case cfEdit:
+			if hiword(wParam) == EN_CHANGE {
+				enable(cw.c[cfOK], strings.TrimSpace(getText(cw.c[cfEdit])) == cw.want)
+			}
+		case cfOK:
+			if strings.TrimSpace(getText(cw.c[cfEdit])) == cw.want {
+				cw.close(true)
+			}
+		case cfCancel, IDCANCEL, 1:
+			if hiword(wParam) == 0 {
+				cw.close(false)
+			}
+		}
+		return 0
+	case WM_CLOSE:
+		if cw != nil {
+			cw.close(false)
+		}
+		return 0
+	}
+	r, _, _ := pDefWindowProcW.Call(hwnd, uintptr(msg), wParam, lParam)
+	return r
 }
