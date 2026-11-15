@@ -67,7 +67,8 @@ type bootWin struct {
 	machine     *Machine
 	machineMiss []string
 	machineSrc  string
-	fromSource  []string // catalog driver files taken from the source
+	fromSource  []string        // catalog driver files taken from the source
+	triedSource map[string]bool // catalog IDs already looked for on it
 }
 
 func (a *app) openBootWin() {
@@ -231,26 +232,38 @@ func (b *bootWin) findMachine() {
 	if src == b.machineSrc {
 		return
 	}
-	b.machineSrc, b.machine, b.machineMiss, b.fromSource = src, nil, nil, nil
+	b.machineSrc, b.machine, b.machineMiss, b.fromSource, b.triedSource = src, nil, nil, nil, map[string]bool{}
 	if src != "" {
 		if m, miss, err := MachineFromImage(src); err == nil && !m.Empty() {
 			b.machine, b.machineMiss = m, miss
 			setCheck(b.c[bwUseOwn], true) // a new source: its drivers are the ones known to work
 		}
-		// catalog drivers that are on the source need not be browsed for
-		a := theApp
-		for i := range a.store.Catalog {
-			d := &a.store.Catalog[i]
-			if a.store.Ready(d) {
-				continue
-			}
-			if got, err := a.store.extractFromImage(d, src); err == nil {
-				b.fromSource = append(b.fromSource, got...)
-			}
+	}
+}
+
+// takeFromSource copies the catalog drivers the menu needs and that are on
+// the system source into the drivers folder, so they need not be browsed
+// for. Never the FreeDOS kernel or FreeCOM: an MS-DOS source has a
+// COMMAND.COM of its own.
+func (b *bootWin) takeFromSource() {
+	a := theApp
+	if b.machineSrc == "" || checked(b.c[bwFreeDOS]) {
+		return
+	}
+	got := false
+	for _, id := range a.proj.Drivers {
+		d := a.store.Find(id)
+		if d == nil || id == fdKernelID || id == fdCommandID || b.triedSource[id] || a.store.Ready(d) {
+			continue
 		}
-		if len(b.fromSource) > 0 {
-			a.updateStatus()
+		b.triedSource[id] = true
+		if files, err := a.store.extractFromImage(d, b.machineSrc); err == nil && len(files) > 0 {
+			b.fromSource = append(b.fromSource, files...)
+			got = true
 		}
+	}
+	if got {
+		a.updateStatus()
 	}
 }
 
@@ -307,6 +320,7 @@ func (b *bootWin) updateDrivers() {
 		return
 	}
 	enable(b.c[bwDrvBtn], true)
+	b.takeFromSource()
 	dl, br := DriverNeeds(a.proj, a.store, checked(b.c[bwFreeDOS]))
 	var lines []string
 	if len(b.fromSource) > 0 {

@@ -123,3 +123,32 @@ func TestDriverNeeds(t *testing.T) {
 		t.Fatal(dl, br)
 	}
 }
+
+// An MS-DOS COMMAND.COM must never stand in for FreeCOM (it came in from an
+// MS-DOS card backup once): it is refused, and one already there is set
+// aside and counts as missing.
+func TestFreeCOMCheck(t *testing.T) {
+	s := NewStore(filepath.Join(t.TempDir(), "drivers"))
+	d := s.Find(fdCommandID)
+	msdos := []byte("MS-DOS Version 6 command interpreter")
+	if err := s.putFile(d, "COMMAND.COM", msdos); err == nil {
+		t.Fatal("an MS-DOS COMMAND.COM was taken")
+	}
+	os.MkdirAll(s.DriverDir(d.ID), 0755)
+	os.WriteFile(s.FilePath(d.ID, "COMMAND.COM"), msdos, 0644)
+	if s.Ready(d) {
+		t.Fatal("the MS-DOS COMMAND.COM counts as FreeCOM")
+	}
+	if _, err := os.Stat(s.FilePath(d.ID, "COMMAND.COM") + ".BAD"); err != nil {
+		t.Fatal("not set aside")
+	}
+	if err := s.putFile(d, "COMMAND.COM", []byte("...FreeCOM version 0.86...")); err != nil || !s.Ready(d) {
+		t.Fatal(err)
+	}
+	// and from a card backup: an MS-DOS donor's COMMAND.COM is not taken
+	donor := makeDonor(t, MediaHDD, Geometry{100, 16, 63}, DOSMS)
+	s2 := NewStore(filepath.Join(t.TempDir(), "d2"))
+	if _, err := s2.extractFromImage(s2.Find(fdCommandID), donor); err == nil || s2.Ready(s2.Find(fdCommandID)) {
+		t.Fatal("taken from an MS-DOS backup", err)
+	}
+}

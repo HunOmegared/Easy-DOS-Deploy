@@ -501,8 +501,9 @@ var huTexts = map[string]string{
 	"No mouse, CD-ROM or sound driver was found on the system source.": "A rendszerforráson nem találtam egér-, CD-ROM- vagy hangdrivert.",
 	"Sound":                                "Hang",
 	"Use the drivers of the system source": "A rendszerforrás saját drivereinek használata",
-	"not on the source; the program's own (%s)": "nincs a forráson; a program sajátja (%s)",
-	"(commented out on the source)":             "(a forráson ki volt kommentezve)",
-	"(on the source, but not loaded there)":     "(a forráson megvolt, de nem volt betöltve)",
-	"Taken from the system source: %s":          "A rendszerforrásról átvéve: %s",
+	"not on the source; the program's own (%s)":                   "nincs a forráson; a program sajátja (%s)",
+	"(commented out on the source)":                               "(a forráson ki volt kommentezve)",
+	"(on the source, but not loaded there)":                       "(a forráson megvolt, de nem volt betöltve)",
+	"Taken from the system source: %s":                            "A rendszerforrásról átvéve: %s",
+	"this COMMAND.COM is not FreeCOM (the FreeDOS command shell)": "ez a COMMAND.COM nem FreeCOM (a FreeDOS parancsértelmezője)",
 }

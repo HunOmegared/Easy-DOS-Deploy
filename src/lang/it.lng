@@ -1509,3 +1509,6 @@ TR: (presente sull'origine, ma non caricato)
 
 EN: Taken from the system source: %s
 TR: Preso dall'origine del sistema: %s
+
+EN: this COMMAND.COM is not FreeCOM (the FreeDOS command shell)
+TR: questo COMMAND.COM non è FreeCOM (l'interprete dei comandi di FreeDOS)

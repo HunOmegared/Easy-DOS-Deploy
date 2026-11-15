@@ -255,18 +255,51 @@ func (s *Store) FilePath(id, name string) string {
 	return filepath.Join(s.DriverDir(id), strings.ToUpper(name))
 }
 
-// Missing returns the files of d not yet in the store.
+// Missing returns the files of d not yet in the store. A file that is not
+// what it should be (an MS-DOS COMMAND.COM in place of FreeCOM) is set aside
+// as .BAD and counts as missing.
 func (s *Store) Missing(d *Driver) []DriverFile {
 	var out []DriverFile
 	for _, f := range d.Files {
 		if f.Content != "" {
 			continue
 		}
-		if st, err := os.Stat(s.FilePath(d.ID, f.Name)); err != nil || st.IsDir() {
+		p := s.FilePath(d.ID, f.Name)
+		if st, err := os.Stat(p); err != nil || st.IsDir() {
 			out = append(out, f)
+			continue
+		}
+		if check := fileChecks[d.ID+"/"+strings.ToUpper(f.Name)]; check != nil {
+			if b, err := os.ReadFile(p); err != nil || check(b) != nil {
+				os.Rename(p, p+".BAD")
+				out = append(out, f)
+			}
 		}
 	}
 	return out
+}
+
+// fileChecks tell the right file from a look-alike, by catalog ID and name.
+var fileChecks = map[string]func([]byte) error{
+	fdCommandID + "/COMMAND.COM": func(b []byte) error {
+		if !bytes.Contains(bytes.ToUpper(b), []byte("FREECOM")) {
+			return fmt.Errorf("%s", T("this COMMAND.COM is not FreeCOM (the FreeDOS command shell)"))
+		}
+		return nil
+	},
+}
+
+// putFile stores one file of a driver, if it is the right one.
+func (s *Store) putFile(d *Driver, name string, data []byte) error {
+	if check := fileChecks[d.ID+"/"+strings.ToUpper(name)]; check != nil {
+		if err := check(data); err != nil {
+			return err
+		}
+	}
+	if err := os.MkdirAll(s.DriverDir(d.ID), 0755); err != nil {
+		return err
+	}
+	return os.WriteFile(s.FilePath(d.ID, name), data, 0644)
 }
 
 func (s *Store) Ready(d *Driver) bool { return len(s.Missing(d)) == 0 }
@@ -318,7 +351,7 @@ func (s *Store) AddFile(d *Driver, src string) ([]string, error) {
 	if err := os.MkdirAll(s.DriverDir(d.ID), 0755); err != nil {
 		return nil, err
 	}
-	if err := os.WriteFile(s.FilePath(d.ID, target.Name), b, 0644); err != nil {
+	if err := s.putFile(d, target.Name, b); err != nil {
 		return nil, err
 	}
 	return []string{target.Name}, nil
@@ -393,7 +426,7 @@ func (s *Store) extract(d *Driver, zb []byte) ([]string, error) {
 		if err := os.MkdirAll(s.DriverDir(d.ID), 0755); err != nil {
 			return got, err
 		}
-		if err := os.WriteFile(s.FilePath(d.ID, f.Name), data, 0644); err != nil {
+		if err := s.putFile(d, f.Name, data); err != nil {
 			return got, err
 		}
 		got = append(got, f.Name)
@@ -464,7 +497,7 @@ func (s *Store) Download(d *Driver) DownloadResult {
 			_, err = s.extract(d, b)
 		} else if len(d.Files) == 1 {
 			os.MkdirAll(s.DriverDir(d.ID), 0755)
-			err = os.WriteFile(s.FilePath(d.ID, d.Files[0].Name), b, 0644)
+			err = s.putFile(d, d.Files[0].Name, b)
 		}
 		if err != nil {
 			errs = append(errs, fmt.Sprintf("%s: %v", u, err))
@@ -544,7 +577,7 @@ func (s *Store) extractFromImage(d *Driver, src string) ([]string, error) {
 		if err := os.MkdirAll(s.DriverDir(d.ID), 0755); err != nil {
 			return got, err
 		}
-		if err := os.WriteFile(s.FilePath(d.ID, f.Name), data, 0644); err != nil {
+		if err := s.putFile(d, f.Name, data); err != nil {
 			return got, err
 		}
 		got = append(got, f.Name)
