@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -106,5 +107,19 @@ func TestGeomFloppy(t *testing.T) {
 	}
 	if di, _ := ReadDiskInfo(p); di.DOS != DOSFree {
 		t.Fatal(di.DOS)
+	}
+}
+
+// The image window says what is downloaded and what is browsed for.
+func TestDriverNeeds(t *testing.T) {
+	s := NewStore(filepath.Join(t.TempDir(), "drivers"))
+	p := TemplateByID("everyday-fd").Make()
+	dl, br := DriverNeeds(p, s, true)
+	want := "KERNEL.SYS COMMAND.COM JEMMEX.EXE CTMOUSE.EXE SHSUCDX.COM"
+	if got := strings.Join(dl, " "); got != want || strings.Join(br, " ") != "OAKCDROM.SYS" {
+		t.Fatalf("%q / %q", got, br)
+	}
+	if dl, br := DriverNeeds(p, s, false); len(dl) != 0 || len(br) != 1 {
+		t.Fatal(dl, br)
 	}
 }

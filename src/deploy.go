@@ -47,6 +47,50 @@ func backupName(name string) string {
 }
 
 // MissingDrivers lists selected drivers whose files are not in the store.
+// DriverNeeds sorts the files still missing for the project's menu (and,
+// with freeDOS, for a FreeDOS system made by the program) by how they can be
+// got: download has an address, browse has to be chosen by the user (such
+// as OAKCDROM.SYS from a Windows 98 boot disk). File names only, each once.
+func DriverNeeds(p *Project, store *Store, freeDOS bool) (download, browse []string) {
+	seen := map[string]bool{}
+	add := func(d *Driver, files []DriverFile) {
+		for _, f := range files {
+			if seen[f.Name] {
+				continue
+			}
+			seen[f.Name] = true
+			if len(d.URLs) > 0 {
+				download = append(download, f.Name)
+			} else {
+				browse = append(browse, f.Name)
+			}
+		}
+	}
+	for _, id := range p.Drivers {
+		if d := store.Find(id); d != nil {
+			add(d, store.Missing(d))
+		}
+	}
+	if freeDOS {
+		files, missing := FreeDOSFiles(p, store)
+		for _, id := range missing {
+			d := store.Find(id)
+			if d == nil {
+				continue
+			}
+			var need []DriverFile
+			for _, f := range d.Files {
+				// only the files the FreeDOS system uses
+				if files[f.Name] == nil && files[`FREEDOS\BIN\`+f.Name] == nil && (id != "jemm" || f.Name != "JEMM386.EXE") {
+					need = append(need, f)
+				}
+			}
+			add(d, need)
+		}
+	}
+	return download, browse
+}
+
 func MissingDrivers(p *Project, store *Store) []string {
 	var out []string
 	for _, id := range p.Drivers {

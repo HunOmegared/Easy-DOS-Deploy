@@ -640,9 +640,6 @@ TR: Voci del menu:
 EN: Missing drivers: %d (Drivers menu).
 TR: Driver mancanti: %d (menu Driver).
 
-EN: Missing drivers: %s
-TR: Driver mancanti: %s
-
 EN: Mode:
 TR: Modalità:
 
@@ -1420,9 +1417,6 @@ TR: Il sistema FreeDOS: kernel 2043, dall'8086 in su, FAT12 e FAT16. Per dischi 
 EN: The geometry floppy is ready: %s\n\nWrite it to a 1.44 MB floppy (WinImage, Greaseweazle) and boot the target machine from it with the card or disk in place. It shows the geometry by itself.
 TR: Il dischetto della geometria è pronto: %s\n\nScrivilo su un dischetto da 1,44 MB (WinImage, Greaseweazle) e avvia da lì la macchina di destinazione con la scheda o il disco montati. Mostra la geometria da solo.
 
-EN: To download when the image is made: %s
-TR: Da scaricare quando si crea l'immagine: %s
-
 EN: You can also browse for these files in the Drivers window.
 TR: Puoi anche selezionare questi file nella finestra Driver.
 
@@ -1446,3 +1440,9 @@ TR: Da dove deve venire FreeDOS?
 
 EN: Where should MS-DOS come from?
 TR: Da dove deve venire MS-DOS?
+
+EN: To browse for (Drivers...): %s
+TR: Da selezionare (Driver...): %s
+
+EN: To download: %s
+TR: Da scaricare: %s

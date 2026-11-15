@@ -69,7 +69,7 @@ func (a *app) openBootWin() {
 	}
 	b := &bootWin{c: map[int]uintptr{}}
 	a.boot = b
-	b.hwnd = createWindow(0, "EasyDDTBoot", T("New bootable disk image"), WS_OVERLAPPEDWINDOW&^0x00050000, cwDefault, cwDefault, a.s(700), a.s(720), 0, 0) // no owner, so it does not stay above the main window
+	b.hwnd = createWindow(0, "EasyDDTBoot", T("New bootable disk image"), WS_OVERLAPPEDWINDOW&^0x00050000, cwDefault, cwDefault, a.s(700), a.s(760), 0, 0) // no owner, so it does not stay above the main window
 	mk := func(id int, class, text string, style, ex uint32) uintptr {
 		h := createWindow(ex, class, text, WS_CHILD|WS_VISIBLE|style, 0, 0, 10, 10, b.hwnd, uintptr(id))
 		sendMsg(h, WM_SETFONT, a.font, 1)
@@ -235,24 +235,21 @@ func (b *bootWin) updateDrivers() {
 		return
 	}
 	enable(b.c[bwDrvBtn], true)
-	miss := MissingDrivers(a.proj, a.store)
-	if checked(b.c[bwFreeDOS]) {
-		_, fm := FreeDOSFiles(a.proj, a.store)
-		for _, id := range fm {
-			miss = append(miss, a.store.driverName(id))
-		}
-		if len(fm) > 0 {
-			setText(b.c[bwDrvInfo], T("To download when the image is made: %s", strings.Join(miss, "; ")))
-			return
-		}
+	dl, br := DriverNeeds(a.proj, a.store, checked(b.c[bwFreeDOS]))
+	var lines []string
+	if len(dl) > 0 {
+		lines = append(lines, T("To download: %s", strings.Join(dl, ", ")))
+	}
+	if len(br) > 0 {
+		lines = append(lines, T("To browse for (Drivers...): %s", strings.Join(br, ", ")))
 	}
 	switch {
+	case len(lines) > 0:
+		setText(b.c[bwDrvInfo], strings.Join(lines, "\n"))
 	case len(a.proj.Drivers) == 0:
 		setText(b.c[bwDrvInfo], T("This menu needs no extra drivers."))
-	case len(miss) == 0:
-		setText(b.c[bwDrvInfo], T("All %d drivers of this menu are here.", len(a.proj.Drivers)))
 	default:
-		setText(b.c[bwDrvInfo], T("Missing drivers: %s", strings.Join(miss, "; ")))
+		setText(b.c[bwDrvInfo], T("All %d drivers of this menu are here.", len(a.proj.Drivers)))
 	}
 }
 
@@ -339,9 +336,9 @@ func (b *bootWin) layout() {
 	move(b.c[bwMenuKind], m+col, y, cw-col-sb-s(10), rh+s(160))
 	move(b.c[bwMenuEdit], w-m-sb, y, sb, rh)
 	y += rh + s(6)
-	move(b.c[bwDrvInfo], m+col, y+s(4), cw-col-sb-s(10), 2*lh)
+	move(b.c[bwDrvInfo], m+col, y+s(4), cw-col-sb-s(10), 4*lh)
 	move(b.c[bwDrvBtn], w-m-sb, y, sb, rh)
-	y += 2*lh + s(10)
+	y += 4*lh + s(10)
 	move(b.c[bwLblLabel], m, y+s(4), col, lh)
 	move(b.c[bwLabel], m+col, y, s(140), rh)
 	y += rh + s(10)
