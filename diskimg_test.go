@@ -200,7 +200,7 @@ func TestBlankAndMenuOnNewImage(t *testing.T) {
 	if err != nil || len(r.Warnings) == 0 {
 		t.Fatal(err, r)
 	}
-	if _, err := WriteToImage(out, Templates[0].Make(), NewStore(t.TempDir()), false); err != nil {
+	if _, err := WriteToImage(out, TemplateByID("net-ms").Make(), NewStore(t.TempDir()), false); err != nil {
 		t.Fatal(err)
 	}
 	v, _ := OpenImage(out, false)

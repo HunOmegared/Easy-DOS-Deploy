@@ -53,6 +53,7 @@ const (
 	idLblColor
 	idLblCfgName
 	idLblAutoName
+	idBlocks
 )
 
 // menu IDs
@@ -73,6 +74,7 @@ const (
 	mLangFolder
 	mLangReload
 	mNewImage
+	mWizard
 	mBackupCard
 	mWriteCard
 	mTemplate = 3000 // + index
@@ -103,6 +105,8 @@ type app struct {
 	pick    *pickWin
 	job     *job
 	confirm *confirmWin
+	blocks  *blockWin
+	wiz     *wizardWin
 	preview uintptr
 	prevC   map[int]uintptr
 }
@@ -145,7 +149,7 @@ func runGUI() {
 	a.font = makeFont("Segoe UI", 9, a.dpi)
 	a.mono = makeFont("Consolas", 10, a.dpi)
 	theApp = a
-	a.proj = Templates[0].Make()
+	a.proj = DefaultProject(TargetMSDOS)
 
 	registerClass("EasyRSBMain", syscall.NewCallback(mainProc))
 	registerClass("EasyRSBPreview", syscall.NewCallback(previewProc))
@@ -155,6 +159,8 @@ func runGUI() {
 	registerClass("EasyRSBPick", syscall.NewCallback(pickProc))
 	registerClass("EasyRSBJob", syscall.NewCallback(jobProc))
 	registerClass("EasyRSBConfirm", syscall.NewCallback(confirmProc))
+	registerClass("EasyRSBBlocks", syscall.NewCallback(blocksProc))
+	registerClass("EasyRSBWizard", syscall.NewCallback(wizardProc))
 
 	a.hwnd = createWindow(0, "EasyRSBMain", appTitle(), WS_OVERLAPPEDWINDOW,
 		cwDefault, cwDefault, a.s(980), a.s(680), 0, 0)
@@ -176,6 +182,9 @@ func runGUI() {
 		msgBox(a.hwnd, T("Some language files could not be read:")+"\n\n"+strings.Join(t, "\n"), appTitle(), MB_ICONWARNING)
 	}
 	a.handleArgs(os.Args[1:])
+	if len(os.Args) == 1 && !a.set.HideWizard {
+		a.openWizard()
+	}
 
 	var m msgT
 	for {
@@ -188,7 +197,7 @@ func runGUI() {
 			continue
 		}
 		handled := false
-		for _, h := range []uintptr{a.hwnd, a.preview, a.drvHwnd(), a.editHwnd(), a.bootHwnd(), a.pickHwnd(), a.confirmHwnd()} {
+		for _, h := range []uintptr{a.hwnd, a.preview, a.drvHwnd(), a.editHwnd(), a.bootHwnd(), a.pickHwnd(), a.confirmHwnd(), a.blocksHwnd(), a.wizardHwnd()} {
 			if h != 0 {
 				if r, _, _ := pIsDialogMessageW.Call(h, uintptr(unsafe.Pointer(&m))); r != 0 {
 					handled = true
@@ -213,6 +222,13 @@ func (a *app) drvHwnd() uintptr {
 func (a *app) bootHwnd() uintptr {
 	if a.boot != nil {
 		return a.boot.hwnd
+	}
+	return 0
+}
+
+func (a *app) blocksHwnd() uintptr {
+	if a.blocks != nil {
+		return a.blocks.hwnd
 	}
 	return 0
 }
@@ -285,6 +301,8 @@ func (a *app) buildMenu() {
 		return m
 	}
 	file := popup(T("&File"))
+	add(file, mWizard, T("Start &wizard..."), false)
+	sep(file)
 	tm, _, _ := pCreatePopupMenu.Call()
 	for i, t := range Templates {
 		add(tm, mTemplate+i, T(t.Name), false)
@@ -364,7 +382,7 @@ func (a *app) build() {
 	a.ctl(idAutoName, "EDIT", edit|ES_UPPERCASE, WS_EX_CLIENTEDGE)
 
 	a.ctl(idList, "LISTBOX", WS_TABSTOP|LBS_NOTIFY|LBS_NOINTEGRALHEIGHT|WS_VSCROLL, WS_EX_CLIENTEDGE)
-	for _, id := range []int{idAdd, idCopy, idDel, idUp, idDown} {
+	for _, id := range []int{idAdd, idBlocks, idCopy, idDel, idUp, idDown} {
 		a.ctl(id, "BUTTON", WS_TABSTOP, 0)
 	}
 	sendMsg(a.ctl(idID, "EDIT", edit|ES_UPPERCASE, WS_EX_CLIENTEDGE), EM_SETLIMIT, 8, 0)
@@ -392,7 +410,8 @@ func (a *app) applyTexts() {
 	set(idLblAutoName, T("AUTOEXEC file:"))
 	set(idLblID, T("ID:"))
 	set(idLblTitle, T("Text in the menu:"))
-	set(idAdd, T("New"))
+	set(idAdd, T("New..."))
+	set(idBlocks, T("Building blocks..."))
 	set(idCopy, T("Copy"))
 	set(idDel, T("Delete"))
 	set(idUp, T("Up"))
@@ -470,11 +489,11 @@ func (a *app) layout() {
 	bottomH := s(30)
 	listW := s(270)
 	btnH := s(26)
-	listH := h - top - bottomH - btnH - s(3)*m
+	listH := h - top - bottomH - 2*btnH - s(4) - s(3)*m
 	move(a.c[idList], m, top, listW, listH)
-	bw := (listW - 4*s(4)) / 5
-	for i, id := range []int{idAdd, idCopy, idDel, idUp, idDown} {
-		move(a.c[id], m+i*(bw+s(4)), top+listH+s(6), bw, btnH)
+	bw := (listW - 2*s(4)) / 3
+	for i, id := range []int{idAdd, idBlocks, idCopy, idDel, idUp, idDown} {
+		move(a.c[id], m+(i%3)*(bw+s(4)), top+listH+s(6)+(i/3)*(btnH+s(4)), bw, btnH)
 	}
 
 	ex := m + listW + m
@@ -609,6 +628,7 @@ func (a *app) refreshList() {
 
 	isItem := a.sel >= 1 && a.sel <= a.itemCount()
 	enable(a.c[idDel], isItem)
+	enable(a.c[idBlocks], isItem)
 	enable(a.c[idCopy], isItem && a.itemCount() < MaxItems)
 	enable(a.c[idAdd], a.itemCount() < MaxItems)
 	enable(a.c[idUp], isItem && a.sel > 1)
@@ -672,7 +692,11 @@ func (a *app) readSettings() {
 		return
 	}
 	p := a.proj
+	oldTarget := p.Target
 	p.Target = Target(sendMsg(a.c[idTarget], CB_GETCURSEL, 0, 0))
+	if p.Target != oldTarget {
+		a.targetChanged(oldTarget)
+	}
 	p.Codepage = Codepage(sendMsg(a.c[idCodepage], CB_GETCURSEL, 0, 0))
 	if d := int(sendMsg(a.c[idDefault], CB_GETCURSEL, 0, 0)); d >= 0 && d < len(p.Items) {
 		p.Default = d
@@ -687,6 +711,29 @@ func (a *app) readSettings() {
 	p.ConfigName = strings.TrimSpace(getText(a.c[idCfgName]))
 	p.AutoexecName = strings.TrimSpace(getText(a.c[idAutoName]))
 	a.setDirty()
+}
+
+// targetChanged rebuilds the items made of building blocks for the new DOS
+// and adjusts the common lines of a project that still has the defaults.
+func (a *app) targetChanged(from Target) {
+	p := a.proj
+	cs, ce := commonStart(from), commonEnd(from)
+	if strings.Join(p.Start.Config, "\n") == strings.Join(cs.Config, "\n") && strings.Join(p.Start.Autoexec, "\n") == strings.Join(cs.Autoexec, "\n") &&
+		strings.Join(p.End.Config, "\n") == strings.Join(ce.Config, "\n") {
+		p.Start, p.End = commonStart(p.Target), commonEnd(p.Target)
+		if p.Target == TargetFreeDOS && p.AutoexecName == "" {
+			p.AutoexecName = "FDAUTO.BAT"
+		} else if p.Target == TargetMSDOS && p.AutoexecName == "FDAUTO.BAT" {
+			p.AutoexecName = ""
+		}
+		a.loading = true
+		setText(a.c[idAutoName], p.AutoexecName)
+		a.loading = false
+	}
+	kept := p.RebuildBlockItems(from)
+	if len(kept) > 0 {
+		msgBox(a.hwnd, T("These menu items were edited by hand, so their lines were not changed for %s: %s\n\nCheck the paths in them (for example C:\\DOS and C:\\FREEDOS\\BIN).", p.Target.String(), strings.Join(kept, ", ")), appTitle(), MB_ICONINFORMATION)
+	}
 }
 
 func (a *app) setDirty() {
@@ -1098,7 +1145,11 @@ func (a *app) onCommand(id int, code uint32) {
 			}
 		}
 	case idAdd:
-		a.addItem(false)
+		a.openBlocks(-1)
+	case idBlocks:
+		if a.sel >= 1 && a.sel <= a.itemCount() {
+			a.openBlocks(a.sel - 1)
+		}
 	case idCopy:
 		a.addItem(true)
 	case idDel:
@@ -1136,6 +1187,8 @@ func (a *app) onCommand(id int, code uint32) {
 		shellOpen(a.store.Dir)
 	case mNewImage:
 		a.openBootWin()
+	case mWizard:
+		a.openWizard()
 	case mBackupCard:
 		a.backupCard()
 	case mWriteCard:
@@ -1591,7 +1644,7 @@ func (d *drvWin) browse() {
 		return
 	}
 	p := fileDialog(d.hwnd, false, T("File for: %s (%s)", dr.Name, strings.Join(names, ", ")), "", "",
-		T("Driver file or zip"), "*.com;*.exe;*.sys;*.zip;*.cfg", T("All files"), "*.*")
+		T("Driver file, zip or disk image"), "*.com;*.exe;*.sys;*.zip;*.cfg;*.img;*.ima;*.vhd;*.hdd;*.dsk;*.vfd;*.flp", T("All files"), "*.*")
 	if p == "" {
 		return
 	}

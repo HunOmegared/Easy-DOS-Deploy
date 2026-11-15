@@ -113,12 +113,12 @@ func TestLanguageFileRoundTrip(t *testing.T) {
 func TestEnglishOutput(t *testing.T) {
 	SetLanguage("en")
 	defer SetLanguage("hu")
-	p := Templates[0].Make()
+	p := TemplateByID("net-ms").Make()
 	o, err := Generate(p)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(strings.Join(o.Config, "\n"), "MENUITEM=PLAIN, DOS only") {
+	if !strings.Contains(strings.Join(o.Config, "\n"), "MENUITEM=NET, DOS + network + Easy Commander") {
 		t.Fatal(o.Config)
 	}
 	p.Items = nil

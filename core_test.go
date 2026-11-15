@@ -348,13 +348,13 @@ func TestVHD(t *testing.T) {
 // ---- generation ----
 
 func TestGenerateMSDOS(t *testing.T) {
-	p := Templates[0].Make()
+	p := TemplateByID("net-ms").Make()
 	o, err := Generate(p)
 	if err != nil {
 		t.Fatal(err)
 	}
 	cfg := strings.Join(o.Config, "\n")
-	for _, want := range []string{"[MENU]\nMENUITEM=NET, Easy Commander (halozattal)\nMENUITEM=PLAIN, Csak DOS\nMENUDEFAULT=NET, 5", "[COMMON]\nDEVICE=C:\\DOS\\HIMEM.SYS", "[NET]", "[PLAIN]"} {
+	for _, want := range []string{"[MENU]\nMENUITEM=NET, DOS + hálózat + Easy Commander\nMENUITEM=DOS, DOS\nMENUDEFAULT=NET, 5", "[COMMON]\nFILES=30", "[NET]\nDEVICE=C:\\DOS\\HIMEM.SYS", "[DOS]"} {
 		if !strings.Contains(cfg, want) {
 			t.Fatalf("missing %q in\n%s", want, cfg)
 		}
@@ -374,7 +374,7 @@ func TestGenerateMSDOS(t *testing.T) {
 }
 
 func TestGenerateFreeDOS(t *testing.T) {
-	p := Templates[1].Make()
+	p := TemplateByID("net-fd").Make()
 	p.Items[0].Config = []string{`DEVICE=C:\X.SYS`}
 	o, err := Generate(p)
 	if err != nil {
@@ -384,18 +384,18 @@ func TestGenerateFreeDOS(t *testing.T) {
 		t.Fatal(o.ConfigName, o.AutoexecName)
 	}
 	cfg := strings.Join(o.Config, "\n")
-	for _, want := range []string{"MENUDEFAULT=1,5", "MENU 1 - Easy Commander (halozattal)", "MENU 2 - Csak DOS", "REM NET\n1?DEVICE=C:\\X.SYS", "SHELL=C:\\FREEDOS"} {
+	for _, want := range []string{"MENUDEFAULT=1,5", "MENU 1 - DOS + hálózat + Easy Commander", "MENU 2 - DOS", "REM NET\n1?DEVICE=C:\\X.SYS", "SHELL=C:\\FREEDOS"} {
 		if !strings.Contains(cfg, want) {
 			t.Fatalf("missing %q in\n%s", want, cfg)
 		}
 	}
-	if !strings.Contains(strings.Join(o.Autoexec, "\n"), `IF "%CONFIG%"=="2" GOTO PLAIN`) {
+	if !strings.Contains(strings.Join(o.Autoexec, "\n"), `IF "%CONFIG%"=="2" GOTO DOS`) {
 		t.Fatal(o.Autoexec)
 	}
 }
 
 func TestValidate(t *testing.T) {
-	p := Templates[0].Make()
+	p := TemplateByID("net-ms").Make()
 	p.Items[1].ID = "NET"
 	if !HasFatal(p.Validate()) {
 		t.Fatal("duplicate not caught")
@@ -456,6 +456,7 @@ func roundTrip(t *testing.T, p *Project) {
 			if len(it.Autoexec) == 0 {
 				it.Autoexec = nil
 			}
+			it.Blocks = nil
 		}
 	}
 	pp := p.Clone()
@@ -622,7 +623,7 @@ func TestDeployToFolderAndImage(t *testing.T) {
 	if _, err := store.AddFile(d, src); err != nil {
 		t.Fatal(err)
 	}
-	p := Templates[0].Make()
+	p := TemplateByID("net-ms").Make()
 	if miss := MissingDrivers(p, store); len(miss) != 2 { // mtcp, ec
 		t.Fatalf("missing %v", miss)
 	}
@@ -662,7 +663,7 @@ func TestDeployToFolderAndImage(t *testing.T) {
 	}
 	// folder
 	dir := t.TempDir()
-	if _, err := WriteToFolder(dir, Templates[1].Make(), store, false); err != nil {
+	if _, err := WriteToFolder(dir, TemplateByID("net-fd").Make(), store, false); err != nil {
 		t.Fatal(err)
 	}
 	q, notes, err = ReadFromFolder(dir)

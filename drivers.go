@@ -78,6 +78,11 @@ func DefaultCatalog() []Driver {
 		{ID: "himemx", Name: T("HimemX XMS manager"), Desc: T("Free HIMEM.SYS replacement."),
 			URLs: fdURLs("base/himemx.zip"), Info: "https://github.com/Baron-von-Riedesel/HimemX",
 			Files: []DriverFile{{Name: "HIMEMX.EXE", Dest: `DRIVERS\HIMEMX.EXE`}}},
+		{ID: "oakcdrom", Name: T("OAKCDROM.SYS generic ATAPI CD-ROM driver"), Desc: T("Works with nearly every IDE/ATAPI CD drive, also on old ISA controllers. Part of Windows 98, not free: browse for it on your Windows 98 boot disk (or its image), or in WINDOWS\\COMMAND\\EBD."),
+			Files: []DriverFile{{Name: "OAKCDROM.SYS", Dest: `DRIVERS\OAKCDROM.SYS`}}},
+		{ID: "unisound", Name: T("UNISOUND ISA PnP sound card driver"), Desc: T("Freeware by JazeFox: sets up ISA PnP sound cards (ESS, Creative, Yamaha, Crystal, Aztech, OPTi...) and their mixer. Download it from the Vogons forum topic and browse for UNISOUND.COM or the zip."),
+			Info:  "https://www.vogons.org/viewtopic.php?p=833659",
+			Files: []DriverFile{{Name: "UNISOUND.COM", Dest: `DRIVERS\UNISOUND.COM`}}},
 		{ID: "udvd2", Name: T("UDVD2 CD/DVD driver"), Desc: T("For IDE/ATAPI CD drives (CONFIG.SYS DEVICE= line)."),
 			URLs: fdURLs("drivers/udvd2.zip"), Info: "https://www.ibiblio.org/pub/micro/pc-stuff/freedos/files/repositories/1.3/",
 			Files: []DriverFile{{Name: "UDVD2.SYS", Dest: `DRIVERS\UDVD2.SYS`}}},
@@ -118,6 +123,12 @@ func (s *Store) Reload() error {
 		return fmt.Errorf(T("%s is damaged, the built-in list is used: %v"), s.catalogPath(), err)
 	}
 	s.Catalog, s.Custom = c, true
+	// entries added to the built-in list in newer versions
+	for _, d := range DefaultCatalog() {
+		if s.Find(d.ID) == nil {
+			s.Catalog = append(s.Catalog, d)
+		}
+	}
 	return nil
 }
 
@@ -272,6 +283,9 @@ func (s *Store) AddFile(d *Driver, src string) ([]string, error) {
 	}
 	if strings.EqualFold(filepath.Ext(src), ".zip") {
 		return s.extract(d, b)
+	}
+	if isImageName(src) {
+		return s.extractFromImage(d, src)
 	}
 	base := strings.ToUpper(filepath.Base(src))
 	var target *DriverFile
@@ -472,4 +486,65 @@ func (s *Store) Download(d *Driver) DownloadResult {
 		strings.Join(names, ", "), where, s.DriverDir(d.ID))
 	r.Message = msg
 	return r
+}
+
+func isImageName(p string) bool {
+	switch strings.ToLower(filepath.Ext(p)) {
+	case ".img", ".ima", ".vhd", ".hdd", ".dsk", ".vfd", ".flp":
+		return true
+	}
+	return false
+}
+
+// extractFromImage looks for the driver's files on a DOS disk image (for
+// example OAKCDROM.SYS on a Windows 98 boot floppy), in any folder.
+func (s *Store) extractFromImage(d *Driver, src string) ([]string, error) {
+	v, err := OpenImage(src, false)
+	if err != nil {
+		return nil, err
+	}
+	defer v.Close()
+	found := map[string]string{} // upper-case name -> path on the image
+	err = v.Walk(func(fi FileInfo) error {
+		if fi.Dir {
+			return nil
+		}
+		name := fi.Path
+		if i := strings.LastIndex(name, `\`); i >= 0 {
+			name = name[i+1:]
+		}
+		// prefer the shortest path (root over subfolders)
+		if old, ok := found[name]; !ok || len(fi.Path) < len(old) {
+			found[name] = fi.Path
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	var got []string
+	for _, f := range d.Files {
+		if f.Content != "" {
+			continue
+		}
+		p, ok := found[strings.ToUpper(f.Name)]
+		if !ok {
+			continue
+		}
+		data, err := v.ReadFile(p)
+		if err != nil {
+			return got, err
+		}
+		if err := os.MkdirAll(s.DriverDir(d.ID), 0755); err != nil {
+			return got, err
+		}
+		if err := os.WriteFile(s.FilePath(d.ID, f.Name), data, 0644); err != nil {
+			return got, err
+		}
+		got = append(got, f.Name)
+	}
+	if len(got) == 0 {
+		return nil, fmt.Errorf("%s", T("the disk image does not contain the needed files"))
+	}
+	return got, nil
 }

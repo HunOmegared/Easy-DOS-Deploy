@@ -10,6 +10,8 @@ import (
 type Settings struct {
 	Lang     string        `json:"lang"`
 	Profiles []GeomProfile `json:"profiles,omitempty"`
+	// HideWizard: do not open the start-up wizard.
+	HideWizard bool `json:"hidewizard,omitempty"`
 }
 
 // GeomProfile remembers the geometry of a card in a machine.

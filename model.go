@@ -38,6 +38,8 @@ type Item struct {
 	Title    string   `json:"title"`
 	Config   []string `json:"config"`
 	Autoexec []string `json:"autoexec"`
+	// Blocks, when set, is what the lines were built from (see blocks.go).
+	Blocks *BlockSet `json:"blocks,omitempty"`
 }
 
 // Project is everything the program saves and generates from.

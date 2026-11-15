@@ -22,16 +22,25 @@ tested now. **Keep a copy of every disk image and card you work on.**
   lines, plus common lines before and after them, a default item and a
   timeout. Output for **MS-DOS 6.x** (`[MENU]` blocks) or **FreeDOS**
   (`MENU` lines and `1?` prefixes). Preview before writing.
-* **Templates:** Easy Commander with networking or plain DOS, a games menu
-  (EMS / no EMS / clean), with or without CD-ROM, for both systems.
+* **Start-up wizard:** pick what you want to make (bootable floppy, bootable
+  CF card or IDE disk, emulator disk image, or a new menu for an existing
+  system), then the DOS and the kind of menu.
+* **Building blocks instead of typing:** tick memory manager (XMS / upper
+  memory / EMS), mouse, CD-ROM, Sound Blaster sound (with UNISOUND for ISA PnP
+  cards) and network (packet driver, mTCP, Easy Commander), and the program
+  writes the lines for MS-DOS or FreeDOS. Ready combinations: plain DOS (the
+  default), DOS + mouse, + CD-ROM, everything, games with and without EMS,
+  network, clean boot. The lines can still be edited by hand.
 * **Import an existing menu** from a disk image or a folder, including
   `INCLUDE=` blocks and both `IF "%CONFIG%"==` and `GOTO %CONFIG%` styles.
   Anything that cannot be mapped is listed, not silently dropped.
 * **Drivers.** A built-in list of freely available drivers (Crynwr NE2000 and
   3C509 packet drivers, mTCP, CuteMouse, JemmEx, HimemX, UDVD2, SHSUCDX) that
-  can be downloaded from the FreeDOS 1.3 package repository. If a download fails
-  the program says where to get the file and lets you browse for it (a file or
-  a zip). The list can be edited in the program.
+  can be downloaded from the FreeDOS 1.3 package repository. Drivers that are
+  not free to distribute, such as OAKCDROM.SYS from Windows 98, or that have no
+  fixed download address, such as UNISOUND, are browsed for: a file, a zip, or
+  a disk image (for example a Windows 98 boot floppy image), which the program
+  searches for the file. The list can be edited in the program.
 * **Write into disk images** without mounting them: raw floppy images, hard
   disk images with an MBR (86Box `.img`) and fixed-size `.vhd`, FAT12/16/32.
   The previous CONFIG/AUTOEXEC is kept as `.BAK`.

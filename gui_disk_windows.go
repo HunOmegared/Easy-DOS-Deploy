@@ -105,6 +105,19 @@ func (a *app) openBootWin() {
 	pShowWindow.Call(b.hwnd, SW_SHOW)
 }
 
+// openBootWinWith opens the image window with a type and, optionally, a
+// geometry already filled in.
+func (a *app) openBootWinWith(kind MediaKind, g *Geometry) {
+	a.openBootWin()
+	b := a.boot
+	sendMsg(b.c[bwKind], CB_SETCURSEL, uintptr(kind), 0)
+	if g != nil {
+		b.setGeom(*g, 0)
+	} else {
+		b.update()
+	}
+}
+
 func (b *bootWin) fillProfiles(sel string) {
 	a := theApp
 	cb := b.c[bwProfile]
