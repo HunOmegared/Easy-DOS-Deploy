@@ -1,8 +1,12 @@
 # Easy DDT — DOS Deployment Tool
 
-A Windows program that builds the **boot menu** of a DOS PC and puts it, with
-the drivers it needs, onto a **disk image** or straight onto a **CompactFlash
-card**. It writes the CONFIG.SYS / AUTOEXEC.BAT pair for MS-DOS 6.x and the
+**Create bootable MS-DOS and FreeDOS images with boot menus, and deploy them
+to CF cards and IDE disks, from Windows.**
+
+Easy DDT makes floppy and hard disk images with the exact geometry the target
+machine's BIOS gives to DOS, writes them to a CompactFlash card or an IDE disk
+through a USB reader, and builds the **boot menu** with the drivers it needs.
+It writes the CONFIG.SYS / AUTOEXEC.BAT pair for MS-DOS 6.x and the
 FDCONFIG.SYS style menu for FreeDOS, so you do not have to remember the
 `[MENU]` / `MENUITEM` syntax or the `%CONFIG%` branches, and the files always
 have DOS line endings.
