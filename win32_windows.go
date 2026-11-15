@@ -307,8 +307,57 @@ func move(h uintptr, x, y, w, hh int) {
 	pMoveWindow.Call(h, uintptr(x), uintptr(y), uintptr(w), uintptr(hh), 1)
 }
 
+var (
+	pSetWindowsHookExW   = user32.NewProc("SetWindowsHookExW")
+	pUnhookWindowsHookEx = user32.NewProc("UnhookWindowsHookEx")
+	pCallNextHookEx      = user32.NewProc("CallNextHookEx")
+	pSetDlgItemTextW     = user32.NewProc("SetDlgItemTextW")
+	pGetDlgItem          = user32.NewProc("GetDlgItem")
+	pGetCurrentThreadId  = kernel32.NewProc("GetCurrentThreadId")
+
+	msgHook   uintptr
+	msgFlags  uint32
+	msgHookCB = syscall.NewCallback(msgHookProc)
+)
+
+// msgHookProc renames the buttons of our message boxes into the program's
+// language when the box is about to appear (Windows would use its own).
+func msgHookProc(code int32, wParam, lParam uintptr) uintptr {
+	const hcbtActivate = 5
+	if code == hcbtActivate && msgHook != 0 {
+		h := wParam
+		set := func(id int, text string) {
+			if c, _, _ := pGetDlgItem.Call(h, uintptr(id)); c != 0 {
+				pSetDlgItemTextW.Call(h, uintptr(id), uintptr(unsafe.Pointer(u16(text))))
+			}
+		}
+		set(IDYES, T("&Yes"))
+		set(IDNO, T("&No"))
+		if msgFlags&0x0F == MB_OK {
+			set(1, T("OK"))
+			set(IDCANCEL, T("OK"))
+		} else {
+			set(1, T("OK"))
+			set(IDCANCEL, T("Cancel"))
+		}
+		hk := msgHook
+		msgHook = 0
+		pUnhookWindowsHookEx.Call(hk)
+		return 0
+	}
+	r, _, _ := pCallNextHookEx.Call(0, uintptr(code), wParam, lParam)
+	return r
+}
+
 func msgBox(owner uintptr, text, caption string, flags uint32) int {
+	tid, _, _ := pGetCurrentThreadId.Call()
+	msgFlags = flags
+	msgHook, _, _ = pSetWindowsHookExW.Call(5, msgHookCB, 0, tid) // WH_CBT
 	r, _, _ := pMessageBoxW.Call(owner, uintptr(unsafe.Pointer(u16(text))), uintptr(unsafe.Pointer(u16(caption))), uintptr(flags))
+	if msgHook != 0 {
+		pUnhookWindowsHookEx.Call(msgHook)
+		msgHook = 0
+	}
 	return int(r)
 }
 

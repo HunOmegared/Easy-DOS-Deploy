@@ -424,4 +424,6 @@ var huTexts = map[string]string{
 	"Empty (MS-DOS 6.x)":                                                                     "Üres (MS-DOS 6.x)",
 	"A single empty menu item, for writing everything by hand.":                              "Egyetlen üres menüpont, ha mindent kézzel írnál.",
 	"Empty (FreeDOS)": "Üres (FreeDOS)",
+	"&Yes":            "&Igen",
+	"&No":             "&Nem",
 }
