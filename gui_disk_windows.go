@@ -484,6 +484,10 @@ func (b *bootWin) create() {
 	}
 	if withMenu {
 		r2, err := WriteToImage(o.Path, a.proj, a.store, true)
+		// the menu writer reports the free space again at the end
+		if n := len(r.Done); n > 0 && strings.HasPrefix(r.Done[n-1], strings.TrimSpace(strings.Split(T("Free space: %s", ""), ":")[0])) {
+			r.Done = r.Done[:n-1]
+		}
 		if r2 != nil {
 			r.Done = append(r.Done, r2.Done...)
 			for _, w := range r2.Warnings {

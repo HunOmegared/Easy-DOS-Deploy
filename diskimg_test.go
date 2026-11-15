@@ -209,3 +209,35 @@ func TestBlankAndMenuOnNewImage(t *testing.T) {
 		t.Fatal("menu missing")
 	}
 }
+
+func TestCodepageNames(t *testing.T) {
+	// a DOS file name with a code page 852 letter (0xE0 = Ó) and a 0xE5 first byte
+	src := makeDonor(t, MediaHDD, Geometry{60, 16, 63}, DOSMS)
+	v, _ := OpenImage(src, true)
+	names := []string{"STUFFZ\\DN\\OLVASS\xe0.EL!", "\xe5RT.TXT"}
+	for _, n := range names {
+		if err := v.WriteFile(n, []byte(n)); err != nil {
+			t.Fatal(err)
+		}
+	}
+	v.Close()
+	out := filepath.Join(t.TempDir(), "n.img")
+	r, err := CreateBootImage(BootOptions{Path: out, Kind: MediaHDD, Geom: Geometry{60, 16, 63}, Source: src, CopyAll: true})
+	if err != nil || len(r.Warnings) > 0 {
+		t.Fatal(err, r.Warnings)
+	}
+	v, _ = OpenImage(out, false)
+	defer v.Close()
+	for _, n := range names {
+		b, err := v.ReadFile(n)
+		if err != nil || string(b) != n {
+			t.Fatalf("%q: %v", n, err)
+		}
+	}
+	if DisplayName("OLVASS\xe0.EL!") != "OLVASSÓ.EL!" {
+		t.Fatal(DisplayName("OLVASS\xe0.EL!"))
+	}
+	if _, err := To83("É.TXT"); err == nil {
+		t.Fatal("typed accented name accepted")
+	}
+}

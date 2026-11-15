@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 	"time"
+	"unicode/utf8"
 )
 
 // Volume is a FAT12/16/32 file system inside a disk image file: a raw
@@ -484,7 +485,19 @@ func To83(s string) ([11]byte, error) {
 	for i := range out {
 		out[i] = ' '
 	}
-	u := strings.ToUpper(strings.TrimSpace(s))
+	// Names read from a DOS disk may contain codepage bytes (accented
+	// letters such as 0xE0); such a string is not valid UTF-8 and its bytes
+	// are kept as they are. Names typed by the user (valid UTF-8) must be
+	// plain ASCII.
+	raw := !utf8.ValidString(s)
+	t := strings.TrimSpace(s)
+	b := []byte(t)
+	for i, c := range b {
+		if c >= 'a' && c <= 'z' {
+			b[i] = c - 32 // ASCII upper case only; leaves codepage bytes alone
+		}
+	}
+	u := string(b)
 	if u == "" || u == "." || u == ".." {
 		return out, fmt.Errorf(T("invalid name: %q"), s)
 	}
@@ -495,14 +508,38 @@ func To83(s string) ([11]byte, error) {
 	if len(base) == 0 || len(base) > 8 || len(ext) > 3 {
 		return out, fmt.Errorf(T("%q is not an 8.3 name"), s)
 	}
-	for _, c := range base + ext {
-		if !(c >= 'A' && c <= 'Z' || c >= '0' && c <= '9' || strings.ContainsRune("!#$%&'()-@^_`{}~", c)) {
+	for _, c := range []byte(base + ext) {
+		ok := c >= 'A' && c <= 'Z' || c >= '0' && c <= '9' || strings.IndexByte("!#$%&'()-@^_`{}~", c) >= 0
+		if raw && c >= 0x80 {
+			ok = true
+		}
+		if !ok {
 			return out, fmt.Errorf(T("%q contains a character that is not allowed"), s)
 		}
 	}
 	copy(out[:], base)
 	copy(out[8:], ext)
+	if out[0] == 0xE5 {
+		out[0] = 0x05 // 0xE5 marks deleted entries; DOS stores it as 0x05
+	}
 	return out, nil
+}
+
+// DisplayName shows a DOS path read from a disk; codepage bytes are shown
+// as the letters they stand for (code page 852).
+func DisplayName(p string) string {
+	if utf8.ValidString(p) {
+		return p
+	}
+	var sb strings.Builder
+	for i := 0; i < len(p); i++ {
+		if c := p[i]; c < 0x80 {
+			sb.WriteByte(c)
+		} else {
+			sb.WriteRune(cp852High[c-128])
+		}
+	}
+	return sb.String()
 }
 
 func splitPath(p string) []string {

@@ -520,11 +520,11 @@ func CreateBootImage(o BootOptions) (*Report, error) {
 			}
 			data, err := src.v.ReadFile(fi.Path)
 			if err != nil {
-				skipped = append(skipped, fi.Path)
+				skipped = append(skipped, DisplayName(fi.Path)+" ("+err.Error()+")")
 				return nil
 			}
 			if err := v.WriteFile(fi.Path, data); err != nil {
-				return fmt.Errorf("%s: %v", fi.Path, err)
+				return fmt.Errorf("%s: %v", DisplayName(fi.Path), err)
 			}
 			if a := fi.Attr & 0x27; a != 0x20 {
 				v.SetAttr(fi.Path, a)
