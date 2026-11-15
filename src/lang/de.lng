@@ -598,9 +598,6 @@ TR: Das Menü der Systemquelle behalten (kein Menü schreiben)
 EN: LARGE / ECHS
 TR: LARGE / ECHS
 
-EN: LBA (LBA mode on)
-TR: LBA (LBA-Modus an)
-
 EN: Letter:
 TR: Buchstabe:
 
@@ -1365,3 +1362,27 @@ TR: » Gemeinsamer Teil (nach jedem Punkt)
 
 EN: » Common part (before every item)
 TR: » Gemeinsamer Teil (vor jedem Punkt)
+
+EN: 256 heads: MS-DOS 6.x and Windows 9x cannot use a disk that the BIOS gives like this. In BIOS setup, set the drive to type User with fewer cylinders ("From BIOS setup..." tells how many), then check it again with GEOM.COM.
+TR: 256 Köpfe: MS-DOS 6.x und Windows 9x können ein Laufwerk, das das BIOS so liefert, nicht verwenden. Stellen Sie das Laufwerk im BIOS-Setup auf Typ User mit weniger Zylindern ("Aus dem BIOS-Setup..." sagt, wie viele) und prüfen Sie es dann erneut mit GEOM.COM.
+
+EN: 256 heads: MS-DOS cannot use this disk.
+TR: 256 Köpfe: MS-DOS kann dieses Laufwerk nicht verwenden.
+
+EN: 256 heads: MS-DOS cannot use this. In BIOS setup, set the drive to type User with %d cylinders (heads and sectors unchanged); DOS then gets %d / %d / %d. "Use these values" takes this.
+TR: 256 Köpfe: das kann MS-DOS nicht verwenden. Stellen Sie das Laufwerk im BIOS-Setup auf Typ User mit %d Zylindern (Köpfe und Sektoren unverändert); DOS bekommt dann %d / %d / %d. "Diese Werte verwenden" übernimmt das.
+
+EN: LBA, heads doubled (e.g. Phoenix 1995)
+TR: LBA, Köpfe verdoppelt (z. B. Phoenix 1995)
+
+EN: LBA-assisted, up to 255 heads (most BIOSes from 1996)
+TR: LBA-unterstützt, bis 255 Köpfe (die meisten BIOS ab 1996)
+
+EN: One MS-DOS partition can be 2 GB at most: the image uses %d cylinders of them.
+TR: Eine MS-DOS-Partition darf höchstens 2 GB groß sein: das Image verwendet %d Zylinder davon.
+
+EN: A backup of such a card (an image file)
+TR: Eine Sicherung einer solchen Karte (eine Image-Datei)
+
+EN: Made earlier with this program or another tool. For a different card, change the geometry afterwards.
+TR: Früher mit diesem oder einem anderen Programm erstellt. Für eine andere Karte ändern Sie danach die Geometrie.

@@ -598,9 +598,6 @@ TR: Garder le menu de la source système (n'écrire aucun menu)
 EN: LARGE / ECHS
 TR: LARGE / ECHS
 
-EN: LBA (LBA mode on)
-TR: LBA (mode LBA activé)
-
 EN: Letter:
 TR: Lettre :
 
@@ -1365,3 +1362,27 @@ TR: » Partie commune (après chaque entrée)
 
 EN: » Common part (before every item)
 TR: » Partie commune (avant chaque entrée)
+
+EN: 256 heads: MS-DOS 6.x and Windows 9x cannot use a disk that the BIOS gives like this. In BIOS setup, set the drive to type User with fewer cylinders ("From BIOS setup..." tells how many), then check it again with GEOM.COM.
+TR: 256 têtes : MS-DOS 6.x et Windows 9x ne peuvent pas utiliser un disque que le BIOS présente ainsi. Dans le setup du BIOS, réglez le disque sur le type User avec moins de cylindres ("Depuis le setup du BIOS..." indique combien), puis vérifiez à nouveau avec GEOM.COM.
+
+EN: 256 heads: MS-DOS cannot use this disk.
+TR: 256 têtes : MS-DOS ne peut pas utiliser ce disque.
+
+EN: 256 heads: MS-DOS cannot use this. In BIOS setup, set the drive to type User with %d cylinders (heads and sectors unchanged); DOS then gets %d / %d / %d. "Use these values" takes this.
+TR: 256 têtes : MS-DOS ne peut pas l'utiliser. Dans le setup du BIOS, réglez le disque sur le type User avec %d cylindres (têtes et secteurs inchangés) ; DOS obtient alors %d / %d / %d. "Utiliser ces valeurs" reprend ce résultat.
+
+EN: LBA, heads doubled (e.g. Phoenix 1995)
+TR: LBA, têtes doublées (par ex. Phoenix 1995)
+
+EN: LBA-assisted, up to 255 heads (most BIOSes from 1996)
+TR: LBA assisté, jusqu'à 255 têtes (la plupart des BIOS depuis 1996)
+
+EN: One MS-DOS partition can be 2 GB at most: the image uses %d cylinders of them.
+TR: Une partition MS-DOS fait 2 Go au plus : l'image en utilise %d cylindres.
+
+EN: A backup of such a card (an image file)
+TR: Une sauvegarde d'une telle carte (un fichier image)
+
+EN: Made earlier with this program or another tool. For a different card, change the geometry afterwards.
+TR: Faite auparavant avec ce programme ou un autre outil. Pour une autre carte, modifiez ensuite la géométrie.

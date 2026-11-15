@@ -1104,7 +1104,7 @@ func (a *app) openCalc() {
 	}
 	w := &calcWin{c: map[int]uintptr{}}
 	a.calc = w
-	w.hwnd = createWindow(WS_EX_DLGMODALFRAME, "EasyDDTCalc", T("Geometry from BIOS setup"), 0x00C00000|0x00080000, cwDefault, cwDefault, a.s(560), a.s(380), a.boot.hwnd, 0)
+	w.hwnd = createWindow(WS_EX_DLGMODALFRAME, "EasyDDTCalc", T("Geometry from BIOS setup"), 0x00C00000|0x00080000, cwDefault, cwDefault, a.s(600), a.s(440), a.boot.hwnd, 0)
 	mk := func(id int, class, text string, style, ex uint32) uintptr {
 		h := createWindow(ex, class, text, WS_CHILD|WS_VISIBLE|style, 0, 0, 10, 10, w.hwnd, uintptr(id))
 		sendMsg(h, WM_SETFONT, a.font, 1)
@@ -1141,9 +1141,9 @@ func (a *app) openCalc() {
 	y += s(36)
 	ml := fitW(s(70), s(6), w.c[gcLblMode])
 	move(w.c[gcLblMode], m, y+s(4), ml, s(18))
-	move(w.c[gcMode], m+ml, y, s(260), s(120))
+	move(w.c[gcMode], m+ml, y, cw-2*m-ml, s(140))
 	y += s(40)
-	move(w.c[gcResult], m, y, cw-2*m, s(60))
+	move(w.c[gcResult], m, y, cw-2*m, ch-y-m-s(38))
 	ow := fitW(s(150), s(24), w.c[gcOK])
 	cnw := fitW(s(100), s(24), w.c[gcCancel])
 	move(w.c[gcOK], cw-m-ow-s(8)-cnw, ch-m-s(28), ow, s(28))
@@ -1159,29 +1159,52 @@ func (w *calcWin) values() (Geometry, Geometry, bool) {
 	if setup.C == 0 || setup.H == 0 || setup.S == 0 || setup.H > 255 || setup.S > 63 {
 		return setup, Geometry{}, false
 	}
-	mode := clampIdx(int(sendMsg(w.c[gcMode], CB_GETCURSEL, 0, 0)), 3)
-	return setup, DOSGeometry(setup, mode), true
+	return setup, DOSGeometry(setup, w.mode()), true
+}
+
+func (w *calcWin) mode() int {
+	return clampIdx(int(sendMsg(w.c[gcMode], CB_GETCURSEL, 0, 0)), len(TranslationModes()))
+}
+
+// result is what goes into the image window: the geometry DOS gets, cut to
+// one FAT16 partition, with the image size; or the geometry it will get
+// after the drive is set to type User with fewer cylinders (256 heads).
+func (w *calcWin) result() (g Geometry, total int64, text string, ok bool) {
+	setup, g, ok := w.values()
+	if !ok {
+		return g, 0, T("Type the cylinders, heads and sectors shown in BIOS setup."), false
+	}
+	text = T("DOS will most likely get: %d / %d / %d\nDisk size: %d sectors (%s)", g.C, g.H, g.S, setup.Sectors(), humanSize(setup.Sectors()*512))
+	if g.H > 255 {
+		c, ug, found := UserCylinders(setup, w.mode())
+		if !found {
+			return g, 0, text + "\n" + T("256 heads: MS-DOS cannot use this disk."), false
+		}
+		text += "\n" + T("256 heads: MS-DOS cannot use this. In BIOS setup, set the drive to type User with %d cylinders (heads and sectors unchanged); DOS then gets %d / %d / %d. \"Use these values\" takes this.", c, ug.C, ug.H, ug.S)
+		return ug, ug.Sectors(), text, true
+	}
+	total = setup.Sectors()
+	if fg := FitFAT16(g); fg.C < g.C {
+		text += "\n" + T("One MS-DOS partition can be 2 GB at most: the image uses %d cylinders of them.", fg.C)
+		g, total = fg, fg.Sectors()
+	}
+	return g, total, text, true
 }
 
 func (w *calcWin) update() {
-	setup, g, ok := w.values()
-	if !ok {
-		setText(w.c[gcResult], T("Type the cylinders, heads and sectors shown in BIOS setup."))
-		enable(w.c[gcOK], false)
-		return
-	}
-	enable(w.c[gcOK], true)
-	setText(w.c[gcResult], T("DOS will most likely get: %d / %d / %d\nDisk size: %d sectors (%s)", g.C, g.H, g.S, setup.Sectors(), humanSize(setup.Sectors()*512)))
+	_, _, text, ok := w.result()
+	setText(w.c[gcResult], text)
+	enable(w.c[gcOK], ok)
 }
 
 func (w *calcWin) close(use bool) {
 	a := theApp
-	setup, g, ok := w.values()
+	g, total, _, ok := w.result()
 	if a.boot != nil {
 		enable(a.boot.hwnd, true)
 		if use && ok {
 			sendMsg(a.boot.c[bwKind], CB_SETCURSEL, uintptr(MediaHDD), 0)
-			a.boot.setGeom(g, setup.Sectors())
+			a.boot.setGeom(g, total)
 		}
 		pSetForegroundWindow.Call(a.boot.hwnd)
 	}
@@ -1209,7 +1232,7 @@ func calcProc(hwnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {
 			}
 		case gcOK, 1:
 			if code == 0 {
-				if _, _, ok := w.values(); ok {
+				if _, _, _, ok := w.result(); ok {
 					w.close(true)
 				}
 			}

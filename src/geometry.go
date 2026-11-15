@@ -3,27 +3,47 @@ package main
 // BIOS translation modes as offered in BIOS setup programs.
 const (
 	ModeNormal = 0 // CHS as the drive reports it (max. 1024 cylinders, about 504 MB)
-	ModeLBA    = 1 // LBA assisted translation
-	ModeLarge  = 2 // "Large" / ECHS: heads doubled, cylinders halved
+	ModeLBA    = 1 // LBA, heads doubled until the cylinders fit (early BIOSes)
+	ModeAssist = 2 // LBA-assisted translation, up to 255 heads (later BIOSes)
+	ModeLarge  = 3 // "Large" / ECHS: heads doubled, cylinders halved
 )
 
 func TranslationModes() []string {
-	return []string{T("NORMAL (CHS, LBA off)"), T("LBA (LBA mode on)"), T("LARGE / ECHS")}
+	return []string{
+		T("NORMAL (CHS, LBA off)"),
+		T("LBA, heads doubled (e.g. Phoenix 1995)"),
+		T("LBA-assisted, up to 255 heads (most BIOSes from 1996)"),
+		T("LARGE / ECHS"),
+	}
 }
+
+// maxFAT16 is the most sectors one MS-DOS 6.x FAT16 partition may have
+// (2 GB with 32 KB clusters, a little room left).
+const maxFAT16 = 4192000
 
 // DOSGeometry works out the geometry to give this program from the values
 // shown in BIOS setup (the drive's own C/H/S) and the translation mode.
 //
-// The BIOS gives DOS one cylinder less than its translated geometry (the
-// last one is kept for diagnostics), and DOS FDISK does not use the last
-// cylinder the BIOS reports either; that is the number MSD shows. Example:
-// a 1 GB CF card shown as 2030/16/63 with LBA on becomes 1015/32/63 in the
-// BIOS, and DOS partitions 1013/32/63. The same card with LBA off: 1024
-// cylinders at most, so 1022/16/63.
+// The BIOS keeps the last cylinder of its translated geometry, and DOS FDISK
+// does not use the last one it reports either: DOS gets two cylinders fewer.
+// That is the number MSD and GEOM.COM show. Measured on an Amstrad Integra
+// 486 (Phoenix BIOS 1995, LBA on), which doubles the heads and halves the
+// cylinders until fewer than 1024 cylinders are left:
+//
+//	2030/16/63 (1 GB CF card)    -> 1015/32/63  -> DOS 1013/32/63
+//	15506/16/63 (8 GB CF card)   -> 969/256/63  -> DOS 967/256/63
+//	4096/16/63 (the same, User)  -> 512/128/63  -> DOS 510/128/63
+//
+// With LBA off the 1 GB card is cut to 1024 cylinders: DOS 1022/16/63.
 func DOSGeometry(setup Geometry, mode int) Geometry {
 	total := setup.Sectors()
 	g := setup
 	switch mode {
+	case ModeLBA:
+		for g.C > 1023 && g.H*2 <= 256 {
+			g.C /= 2
+			g.H *= 2
+		}
 	case ModeLarge:
 		for g.C > 1024 && g.H*2 <= 255 {
 			g.C /= 2
@@ -32,7 +52,7 @@ func DOSGeometry(setup Geometry, mode int) Geometry {
 		if g.H == 256 {
 			g.H = 255
 		}
-	case ModeLBA:
+	case ModeAssist:
 		g.S = 63
 		mib := total / 2048
 		switch {
@@ -54,6 +74,32 @@ func DOSGeometry(setup Geometry, mode int) Geometry {
 	}
 	if g.C > 2 {
 		g.C -= 2
+	}
+	return g
+}
+
+// UserCylinders is for a BIOS that would give DOS 256 heads, which MS-DOS 6.x
+// and Windows 9x cannot use: the most cylinders to type in BIOS setup (drive
+// type User, heads and sectors unchanged) so that DOS gets at most 255 heads
+// and the disk fits one FAT16 partition. Example: the 8 GB card above, 4175
+// instead of 15506 cylinders: DOS 519/128/63, 2 GB.
+func UserCylinders(setup Geometry, mode int) (uint32, Geometry, bool) {
+	for c := setup.C; c > 0; c-- {
+		g := DOSGeometry(Geometry{c, setup.H, setup.S}, mode)
+		if g.H <= 255 && g.Sectors()-int64(g.S) <= maxFAT16 {
+			return c, g, true
+		}
+	}
+	return 0, Geometry{}, false
+}
+
+// FitFAT16 cuts a geometry to the cylinders one FAT16 partition can use.
+func FitFAT16(g Geometry) Geometry {
+	if g.H == 0 || g.S == 0 {
+		return g
+	}
+	if max := uint32((maxFAT16 + int64(g.S)) / int64(g.H*g.S)); g.C > max {
+		g.C = max
 	}
 	return g
 }

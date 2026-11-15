@@ -204,6 +204,9 @@ type HDDPlan struct {
 }
 
 func PlanHDD(g Geometry) (*HDDPlan, error) {
+	if g.H == 256 {
+		return nil, fmt.Errorf("%s", T("256 heads: MS-DOS 6.x and Windows 9x cannot use a disk that the BIOS gives like this. In BIOS setup, set the drive to type User with fewer cylinders (\"From BIOS setup...\" tells how many), then check it again with GEOM.COM."))
+	}
 	if g.H < 1 || g.H > 255 || g.S < 1 || g.S > 63 || g.C < 1 {
 		return nil, fmt.Errorf("%s", T("Heads must be 1-255, sectors 1-63, cylinders at least 1."))
 	}
@@ -216,7 +219,7 @@ func PlanHDD(g Geometry) (*HDDPlan, error) {
 		return nil, fmt.Errorf("%s", T("The disk is too small."))
 	}
 	size := total - int64(g.S)
-	if size > 4192000 {
+	if size > maxFAT16 {
 		return nil, fmt.Errorf(T("The partition would be %s; FAT16 (MS-DOS 6.x) allows at most 2 GB. Use fewer cylinders."), humanSize(size*512))
 	}
 	p.Size = uint32(size)

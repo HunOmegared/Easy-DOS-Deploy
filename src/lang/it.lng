@@ -598,9 +598,6 @@ TR: Mantieni il menu dell'origine del sistema (non scrivere alcun menu)
 EN: LARGE / ECHS
 TR: LARGE / ECHS
 
-EN: LBA (LBA mode on)
-TR: LBA (modalità LBA attiva)
-
 EN: Letter:
 TR: Lettera:
 
@@ -1365,3 +1362,27 @@ TR: » Parte comune (dopo ogni voce)
 
 EN: » Common part (before every item)
 TR: » Parte comune (prima di ogni voce)
+
+EN: 256 heads: MS-DOS 6.x and Windows 9x cannot use a disk that the BIOS gives like this. In BIOS setup, set the drive to type User with fewer cylinders ("From BIOS setup..." tells how many), then check it again with GEOM.COM.
+TR: 256 testine: MS-DOS 6.x e Windows 9x non possono usare un disco che il BIOS presenta così. Nel setup del BIOS imposta il disco sul tipo User con meno cilindri ("Dal setup del BIOS..." dice quanti), poi ricontrolla con GEOM.COM.
+
+EN: 256 heads: MS-DOS cannot use this disk.
+TR: 256 testine: MS-DOS non può usare questo disco.
+
+EN: 256 heads: MS-DOS cannot use this. In BIOS setup, set the drive to type User with %d cylinders (heads and sectors unchanged); DOS then gets %d / %d / %d. "Use these values" takes this.
+TR: 256 testine: MS-DOS non può usarlo. Nel setup del BIOS imposta il disco sul tipo User con %d cilindri (testine e settori invariati); DOS avrà allora %d / %d / %d. "Usa questi valori" prende questo risultato.
+
+EN: LBA, heads doubled (e.g. Phoenix 1995)
+TR: LBA, testine raddoppiate (ad es. Phoenix 1995)
+
+EN: LBA-assisted, up to 255 heads (most BIOSes from 1996)
+TR: LBA assistito, fino a 255 testine (la maggior parte dei BIOS dal 1996)
+
+EN: One MS-DOS partition can be 2 GB at most: the image uses %d cylinders of them.
+TR: Una partizione MS-DOS può essere al massimo di 2 GB: l'immagine ne usa %d cilindri.
+
+EN: A backup of such a card (an image file)
+TR: Un backup di una scheda così (un file immagine)
+
+EN: Made earlier with this program or another tool. For a different card, change the geometry afterwards.
+TR: Fatto in precedenza con questo programma o un altro strumento. Per un'altra scheda, cambia poi la geometria.

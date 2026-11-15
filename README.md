@@ -17,9 +17,13 @@ working 1 GB CompactFlash card (MS-DOS 6.22) was made through a USB card
 reader, a new bootable image with a generated boot menu was built from it
 with the geometry the BIOS gives to DOS (1013/32/63, LBA mode), tried in
 86Box, written back to the card, and an **Amstrad Integra 486 (Phoenix BIOS)**
-booted from it with the menu working. The file generation, the importer, the
-FAT12/16/32 writer and the image builder also have automated tests.
-FreeDOS images and other machines have not been tested on real hardware yet.
+booted from it with the menu working. The same system was then put onto an
+8 GB Lexar card with a different geometry (510/128/63, 2 GB) and booted on the
+same machine. `GEOM.COM` and a FreeDOS boot floppy made by the program's own
+FAT code were also tried there. The file generation, the importer, the
+FAT12/16/32 writer, the image builder and the 16-bit code also have automated
+tests. FreeDOS hard disk images and other machines have not been tested on real
+hardware yet.
 **Keep a copy of every disk image and card you work on.**
 
 ## What it does

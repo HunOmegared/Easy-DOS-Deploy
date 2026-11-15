@@ -27,12 +27,19 @@ g = [
   ('b',[0x88,0xF0]),            # mov al,dh
   ('b',[0x30,0xE4]),            # xor ah,ah
   ('b',[0x40]),                 # inc ax       heads = last head + 1
+  ('b',[0x89,0xC6]),            # mov si,ax    (kept for the 256-head check)
   ('call16','num'),
   *prt('m_sec'),
   ('b',[0x59]),                 # pop cx
   ('b',[0x88,0xC8]),            # mov al,cl
   ('b',[0x25,0x3F,0x00]),       # and ax,3Fh   sectors per track
   ('call16','num'),
+  ('b',[0x81,0xFE,0x00,0x01]),  # cmp si,256
+  ('jcc8',0x75,'ok'),           # jne ok
+  *prt('m_256'),                # 256 heads: MS-DOS cannot use it
+  ('b',[0xB8,0x02,0x4C]),       # mov ax,4C02h
+  ('b',[0xCD,0x21]),            # int 21h
+'ok:',
   *prt('m_tail'),
   ('b',[0xB8,0x00,0x4C]),       # mov ax,4C00h
   ('b',[0xCD,0x21]),            # int 21h
@@ -62,6 +69,10 @@ g = [
 'm_hd:',   ('s','   Heads: $'),
 'm_sec:',  ('s','   Sectors/track: $'),
 'm_tail:', ('s','\r\n\r\nEnter these three numbers in the program.\r\n$'),
+'m_256:',  ('s','\r\n\r\nWARNING: 256 heads. MS-DOS 6.x and Windows 9x cannot use a disk\r\n'
+                'that the BIOS gives like this. In BIOS setup, set the drive to\r\n'
+                'Type User with fewer cylinders (Easy DDT, "From BIOS setup...",\r\n'
+                'tells how many), then run GEOM again.\r\n$'),
 'm_none:', ('s','No hard disk found (INT 13h, drive 80h).\r\n$'),
 ]
 code, labels = assemble(g, 0x100)

@@ -153,7 +153,7 @@ func (c *cpu8086) step() error {
 	case 0xFA, 0xFB, 0xFC, 0x90: // cli sti cld nop
 	case 0xF4:
 		c.halted = true
-	case 0x31, 0x09, 0x30, 0x08, 0x88, 0x8B, 0x8A: // r/m forms
+	case 0x31, 0x09, 0x30, 0x08, 0x88, 0x89, 0x8B, 0x8A: // r/m forms
 		mod, reg, rm, off, err := c.modrm()
 		if err != nil {
 			return err
@@ -193,6 +193,11 @@ func (c *cpu8086) step() error {
 				return fmt.Errorf("mov to memory not supported")
 			}
 			c.set8(rm, c.get8(reg))
+		case 0x89: // mov r/m16,r16
+			if mod != 3 {
+				return fmt.Errorf("mov to memory not supported")
+			}
+			c.r[rm] = c.r[reg]
 		case 0x8A: // mov r8,r/m8
 			c.set8(reg, byte(src))
 		case 0x8B: // mov r16,r/m16

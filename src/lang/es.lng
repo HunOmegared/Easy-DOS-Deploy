@@ -598,9 +598,6 @@ TR: Conservar el menú del origen del sistema (no escribir menú)
 EN: LARGE / ECHS
 TR: LARGE / ECHS
 
-EN: LBA (LBA mode on)
-TR: LBA (modo LBA activado)
-
 EN: Letter:
 TR: Letra:
 
@@ -1365,3 +1362,27 @@ TR: » Parte común (después de cada opción)
 
 EN: » Common part (before every item)
 TR: » Parte común (antes de cada opción)
+
+EN: 256 heads: MS-DOS 6.x and Windows 9x cannot use a disk that the BIOS gives like this. In BIOS setup, set the drive to type User with fewer cylinders ("From BIOS setup..." tells how many), then check it again with GEOM.COM.
+TR: 256 cabezas: MS-DOS 6.x y Windows 9x no pueden usar un disco que la BIOS presenta así. En el setup de la BIOS, ponga el disco en tipo User con menos cilindros ("Desde el setup de la BIOS..." indica cuántos) y vuelva a comprobarlo con GEOM.COM.
+
+EN: 256 heads: MS-DOS cannot use this disk.
+TR: 256 cabezas: MS-DOS no puede usar este disco.
+
+EN: 256 heads: MS-DOS cannot use this. In BIOS setup, set the drive to type User with %d cylinders (heads and sectors unchanged); DOS then gets %d / %d / %d. "Use these values" takes this.
+TR: 256 cabezas: MS-DOS no puede usarlo. En el setup de la BIOS, ponga el disco en tipo User con %d cilindros (cabezas y sectores sin cambios); DOS obtiene entonces %d / %d / %d. "Usar estos valores" toma este resultado.
+
+EN: LBA, heads doubled (e.g. Phoenix 1995)
+TR: LBA, cabezas duplicadas (p. ej. Phoenix 1995)
+
+EN: LBA-assisted, up to 255 heads (most BIOSes from 1996)
+TR: LBA asistido, hasta 255 cabezas (la mayoría de las BIOS desde 1996)
+
+EN: One MS-DOS partition can be 2 GB at most: the image uses %d cylinders of them.
+TR: Una partición de MS-DOS puede tener como máximo 2 GB: la imagen usa %d cilindros.
+
+EN: A backup of such a card (an image file)
+TR: Una copia de una tarjeta así (un archivo de imagen)
+
+EN: Made earlier with this program or another tool. For a different card, change the geometry afterwards.
+TR: Hecha antes con este programa u otra herramienta. Para otra tarjeta, cambie después la geometría.

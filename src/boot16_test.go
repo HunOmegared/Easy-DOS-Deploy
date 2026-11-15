@@ -189,6 +189,14 @@ func TestGEOMCOM(t *testing.T) {
 	if out := runGEOM(t, Geometry{}, true); !strings.Contains(out, "No hard disk found") {
 		t.Fatal(out)
 	}
+	// the 8 GB Lexar card on the Integra with Auto: the BIOS gives 256 heads
+	out = runGEOM(t, Geometry{967, 256, 63}, false)
+	if !strings.Contains(out, "Cylinders: 967   Heads: 256   Sectors/track: 63") || !strings.Contains(out, "WARNING: 256 heads") || strings.Contains(out, "Enter these") {
+		t.Fatal(out)
+	}
+	if out = runGEOM(t, Geometry{510, 128, 63}, false); strings.Contains(out, "WARNING") || !strings.Contains(out, "Enter these") {
+		t.Fatal(out)
+	}
 }
 
 func TestDOSGeometry(t *testing.T) {
@@ -205,9 +213,44 @@ func TestDOSGeometry(t *testing.T) {
 	if g := DOSGeometry(Geometry{615, 4, 17}, ModeNormal); g != (Geometry{613, 4, 17}) {
 		t.Fatalf("small: %v", g)
 	}
-	big := Geometry{7944, 16, 63} // 4 GB card, LBA: 128 heads... capped by DOS anyway
-	if g := DOSGeometry(big, ModeLBA); g.H != 128 || g.C > 1024 {
-		t.Fatalf("big: %v", g)
+	// the 8 GB Lexar card on the Integra, measured with GEOM.COM
+	lexar := Geometry{15506, 16, 63}
+	if g := DOSGeometry(lexar, ModeLBA); g != (Geometry{967, 256, 63}) {
+		t.Fatalf("Lexar, Auto: %v", g)
+	}
+	if g := DOSGeometry(Geometry{4096, 16, 63}, ModeLBA); g != (Geometry{510, 128, 63}) {
+		t.Fatalf("Lexar, User 4096: %v", g) // MSD: 510/128/63, 2007 MB
+	}
+	// later BIOSes: LBA-assist, 255 heads
+	if g := DOSGeometry(lexar, ModeAssist); g != (Geometry{970, 255, 63}) {
+		t.Fatalf("Lexar, LBA-assist: %v", g)
+	}
+	if g := DOSGeometry(card, ModeAssist); g != (Geometry{1013, 32, 63}) {
+		t.Fatalf("1 GB, LBA-assist: %v", g)
+	}
+	// 256 heads: a User type with fewer cylinders, at most 2 GB
+	c, g, ok := UserCylinders(lexar, ModeLBA)
+	if !ok || c != 4175 || g != (Geometry{519, 128, 63}) {
+		t.Fatal(c, g, ok)
+	}
+	if _, err := PlanHDD(g); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := PlanHDD(Geometry{967, 256, 63}); err == nil || !strings.Contains(err.Error(), "256") {
+		t.Fatal(err)
+	}
+	if c, _, _ := UserCylinders(Geometry{4096, 16, 63}, ModeLBA); c != 4096 {
+		t.Fatal(c) // already fine
+	}
+	// more than one FAT16 partition can take: cut to 2 GB
+	if g := FitFAT16(Geometry{970, 255, 63}); g.C != 260 {
+		t.Fatal(g)
+	}
+	if _, err := PlanHDD(FitFAT16(Geometry{970, 255, 63})); err != nil {
+		t.Fatal(err)
+	}
+	if g := FitFAT16(Geometry{510, 128, 63}); g.C != 510 {
+		t.Fatal(g)
 	}
 }
 
