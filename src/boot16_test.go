@@ -13,6 +13,7 @@ type biosDisk struct {
 	g         Geometry
 	failReads int
 	reads     int
+	startDL   *byte // DL when the BIOS jumps to the MBR; nil: 80h
 }
 
 func (d *biosDisk) int13(c *cpu8086, out *strings.Builder) error {
@@ -21,6 +22,11 @@ func (d *biosDisk) int13(c *cpu8086, out *strings.Builder) error {
 	case 0x00:
 		c.cf = false
 	case 0x02:
+		if c.get8(2) != 0x80 { // a drive that is not there
+			c.cf = true
+			c.set8(4, 0x01)
+			return nil
+		}
 		d.reads++
 		if d.failReads > 0 {
 			d.failReads--
@@ -56,6 +62,9 @@ func bootMBR(t *testing.T, d *biosDisk) (*cpu8086, string) {
 	c := newCPU()
 	copy(c.mem[0x7C00:], d.img[:512])
 	c.r[rDX] = 0x80
+	if d.startDL != nil {
+		c.r[rDX] = uint16(*d.startDL) // a BIOS that does not pass the drive in DL
+	}
 	c.seg[sCS] = 0
 	c.ip = 0x7C00
 	var out strings.Builder
@@ -100,6 +109,16 @@ func TestOwnMBRBoots(t *testing.T) {
 	}
 	if c.get8(2) != 0x80 || c.r[rSI] != 0x07BE {
 		t.Fatalf("DL=%02X SI=%04X", c.get8(2), c.r[rSI])
+	}
+
+	// some old BIOSes do not pass the boot drive in DL: the drive comes from
+	// the partition table (80h), as in the MS-DOS MBR (Integra, 2026-11-15)
+	for _, dl := range []byte{0x00, 0x01, 0xFF} {
+		dl := dl
+		d = &biosDisk{img: img, g: g, startDL: &dl}
+		if c, out := bootMBR(t, d); c.halted || out != "" || c.get8(2) != 0x80 {
+			t.Fatalf("DL=%02X at start: %q, DL at the boot sector %02X", dl, out, c.get8(2))
+		}
 	}
 
 	// read errors are retried

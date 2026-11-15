@@ -2,6 +2,9 @@ import sys; import os; sys.path.insert(0, os.path.dirname(os.path.abspath(__file
 # MBR: loaded by the BIOS at 0000:7C00, copies itself to 0000:0600, finds the
 # active partition, loads its first sector with INT 13h (CHS from the table)
 # to 0000:7C00 and jumps there with DL = boot drive and DS:SI = table entry.
+# The drive number comes from the table entry (80h), as in the MS-DOS MBR:
+# some old BIOSes do not pass it in DL (an Amstrad Integra 486 with a Phoenix
+# BIOS from 1995 said "Disk read error" when DL was used).
 mbr = [
   ('b',[0xFA]),                 # cli
   ('b',[0x31,0xC0]),            # xor ax,ax
@@ -29,7 +32,7 @@ mbr = [
 'found:',
   ('b',[0xBF,0x05,0x00]),       # mov di,5 (tries)
 'read:',
-  ('b',[0x8A,0x74,0x01]),       # mov dh,[si+1]  head
+  ('b',[0x8B,0x14]),            # mov dx,[si]    DL = 80h (boot flag), DH = head
   ('b',[0x8B,0x4C,0x02]),       # mov cx,[si+2]  sector, cylinder
   ('b',[0xBB,0x00,0x7C]),       # mov bx,7C00h
   ('b',[0xB8,0x01,0x02]),       # mov ax,0201h   read 1 sector
