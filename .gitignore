@@ -1,0 +1,19 @@
+# Build output
+*.exe
+dist/
+
+# Created next to the program when it runs
+drivers/
+lang/
+settings.json
+
+# Disk images used for testing
+*.img
+*.ima
+*.vhd
+
+# Editor leftovers
+*.swp
+*~
+.vscode/
+.idea/
