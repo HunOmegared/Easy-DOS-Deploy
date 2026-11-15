@@ -4,7 +4,6 @@ package main
 
 import (
 	"os"
-	"path/filepath"
 	"syscall"
 	"unsafe"
 )
@@ -59,8 +58,6 @@ var (
 	pGetStockObject = gdi32.NewProc("GetStockObject")
 
 	pGetModuleHandleW = kernel32.NewProc("GetModuleHandleW")
-	pCreateActCtxW    = kernel32.NewProc("CreateActCtxW")
-	pActivateActCtx   = kernel32.NewProc("ActivateActCtx")
 
 	pGetOpenFileNameW = comdlg32.NewProc("GetOpenFileNameW")
 	pGetSaveFileNameW = comdlg32.NewProc("GetSaveFileNameW")
@@ -379,7 +376,11 @@ func hInstance() uintptr {
 
 func registerClass(name string, proc uintptr) {
 	cur, _, _ := pLoadCursorW.Call(0, IDC_ARROW)
-	icon, _, _ := pLoadIconW.Call(0, IDI_APPLICATION)
+	// icon group 1 from rsrc_windows_amd64.syso; the Windows default if missing
+	icon, _, _ := pLoadIconW.Call(hInstance(), 1)
+	if icon == 0 {
+		icon, _, _ = pLoadIconW.Call(0, IDI_APPLICATION)
+	}
 	wc := wndClassEx{
 		lpfnWndProc:   proc,
 		hInstance:     hInstance(),
@@ -397,29 +398,6 @@ func createWindow(exStyle uint32, class, title string, style uint32, x, y, w, h 
 	r, _, _ := pCreateWindowExW.Call(uintptr(exStyle), uintptr(unsafe.Pointer(u16(class))), uintptr(unsafe.Pointer(u16(title))),
 		uintptr(style), uintptr(x), uintptr(y), uintptr(w), uintptr(h), parent, id, hInstance(), 0)
 	return r
-}
-
-// enableVisualStyles activates common controls v6 from a temporary manifest,
-// so buttons and lists look like the rest of Windows.
-func enableVisualStyles() {
-	const manifest = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
-<dependency><dependentAssembly>
-<assemblyIdentity type="win32" name="Microsoft.Windows.Common-Controls" version="6.0.0.0" processorArchitecture="*" publicKeyToken="6595b64144ccf1df" language="*"/>
-</dependentAssembly></dependency>
-</assembly>`
-	p := filepath.Join(os.TempDir(), "easyrsb.manifest")
-	if os.WriteFile(p, []byte(manifest), 0644) != nil {
-		return
-	}
-	ac := actCtx{lpSource: u16(p)}
-	ac.cbSize = uint32(unsafe.Sizeof(ac))
-	h, _, _ := pCreateActCtxW.Call(uintptr(unsafe.Pointer(&ac)))
-	if h == 0 || h == ^uintptr(0) {
-		return
-	}
-	var cookie uintptr
-	pActivateActCtx.Call(h, uintptr(unsafe.Pointer(&cookie)))
 }
 
 func makeFont(face string, pt, dpi int) uintptr {

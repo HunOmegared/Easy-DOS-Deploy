@@ -110,7 +110,10 @@ GOOS=windows GOARCH=amd64 go build -ldflags="-s -w -H windowsgui" -o EasyRSB.exe
 go test ./...
 ```
 
-The tests run on any operating system. GitHub Actions builds the program for
+The icon, version information and manifest come from
+`rsrc_windows_amd64.syso`, which `go run ./tools/winres` (or `go generate`)
+writes; it is committed, so a plain `go build` includes it. The tests run on
+any operating system. GitHub Actions builds the program for
 every push and attaches it to a release for every `v*` tag.
 
 ## Translations

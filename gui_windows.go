@@ -138,7 +138,6 @@ func runGUI() {
 	runtime.LockOSThread()
 	pSetProcessDPIAware.Call()
 	pCoInitializeEx.Call(0, 2) // COINIT_APARTMENTTHREADED, for the folder dialog
-	enableVisualStyles()
 
 	exe, _ := os.Executable()
 	a := &app{c: map[int]uintptr{}, dpi: screenDPI(), exeDir: filepath.Dir(exe)}
