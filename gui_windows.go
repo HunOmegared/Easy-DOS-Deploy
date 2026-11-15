@@ -488,7 +488,7 @@ func (a *app) layout() {
 
 	top := y + rowH + s(12)
 	bottomH := s(30)
-	listW := s(270)
+	listW := s(330)
 	btnH := s(26)
 	listH := h - top - bottomH - 2*btnH - s(4) - s(3)*m
 	move(a.c[idList], m, top, listW, listH)
@@ -1273,7 +1273,7 @@ func (a *app) showPreview() {
 	}
 	if a.preview == 0 {
 		a.prevC = map[int]uintptr{}
-		a.preview = createWindow(0, "EasyRSBPreview", T("Preview"), WS_OVERLAPPEDWINDOW, cwDefault, cwDefault, a.s(1000), a.s(640), a.hwnd, 0)
+		a.preview = createWindow(0, "EasyRSBPreview", T("Preview"), WS_OVERLAPPEDWINDOW, cwDefault, cwDefault, a.s(1000), a.s(640), 0, 0) // no owner: the main window can come to the front
 		mk := func(id int, class string, style, ex uint32, font uintptr) {
 			h := createWindow(ex, class, "", WS_CHILD|WS_VISIBLE|style, 0, 0, 10, 10, a.preview, uintptr(id))
 			sendMsg(h, WM_SETFONT, font, 1)
@@ -1384,7 +1384,7 @@ func (a *app) openDrivers() {
 	}
 	d := &drvWin{c: map[int]uintptr{}}
 	a.drv = d
-	d.hwnd = createWindow(0, "EasyRSBDrivers", T("Drivers"), WS_OVERLAPPEDWINDOW, cwDefault, cwDefault, a.s(900), a.s(560), a.hwnd, 0)
+	d.hwnd = createWindow(0, "EasyRSBDrivers", T("Drivers"), WS_OVERLAPPEDWINDOW, cwDefault, cwDefault, a.s(900), a.s(560), 0, 0) // no owner, see Preview
 	mk := func(id int, class, text string, style, ex uint32) {
 		h := createWindow(ex, class, text, WS_CHILD|WS_VISIBLE|style, 0, 0, 10, 10, d.hwnd, uintptr(id))
 		sendMsg(h, WM_SETFONT, a.font, 1)
