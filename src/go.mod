@@ -1,3 +1,3 @@
-module github.com/HunOmegared/Easy-DDT
+module github.com/HunOmegared/EasyDDT
 
 go 1.24
