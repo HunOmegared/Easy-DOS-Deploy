@@ -2,7 +2,9 @@ package main
 
 import (
 	"bufio"
+	"embed"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"sort"
@@ -27,13 +29,41 @@ type Language struct {
 	Texts map[string]string // English -> translated; nil for English
 }
 
+// The German, French, Spanish and Italian files are built into the program
+// (src/lang); a file with the same name in a "lang" folder overrides them.
+//
+//go:embed lang/*.lng
+var builtinFiles embed.FS
+
 var (
-	languages = map[string]*Language{
-		"en": {Code: "en", Name: "English"},
-		"hu": {Code: "hu", Name: "Magyar", Texts: huTexts},
+	// builtin holds the languages of the program itself; a language file
+	// with the same code starts from these texts.
+	builtin   = map[string]*Language{}
+	languages = map[string]*Language{}
+	curLang   *Language
+)
+
+func init() {
+	builtin["en"] = &Language{Code: "en", Name: "English"}
+	builtin["hu"] = &Language{Code: "hu", Name: "Magyar", Texts: huTexts}
+	files, _ := builtinFiles.ReadDir("lang")
+	for _, e := range files {
+		f, err := builtinFiles.Open("lang/" + e.Name())
+		if err != nil {
+			panic(err)
+		}
+		l, err := parseLanguage(e.Name(), f)
+		f.Close()
+		if err != nil {
+			panic(err) // a test reads every built-in file
+		}
+		builtin[l.Code] = l
+	}
+	for k, l := range builtin {
+		languages[k] = l
 	}
 	curLang = languages["en"]
-)
+}
 
 // T translates s and, when args are given, formats it like fmt.Sprintf.
 func T(s string, args ...any) string {
@@ -84,9 +114,15 @@ func LoadLanguageFile(path string) (*Language, error) {
 		return nil, err
 	}
 	defer f.Close()
+	return parseLanguage(path, f)
+}
+
+// parseLanguage reads a language file; path gives its code and the name in
+// error messages.
+func parseLanguage(path string, f io.Reader) (*Language, error) {
 	code := strings.ToLower(strings.TrimSuffix(filepath.Base(path), filepath.Ext(path)))
 	l := &Language{Code: code, Name: code, Texts: map[string]string{}}
-	if base, ok := languages[code]; ok && base.Texts != nil {
+	if base, ok := builtin[code]; ok && base.Texts != nil {
 		for k, v := range base.Texts {
 			l.Texts[k] = v
 		}

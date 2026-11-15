@@ -1,0 +1,1370 @@
+# Easy Retro System Builder translation file (UTF-8).
+# Built into the program; a file with the same name in the "lang" folder overrides it.
+# Corrections are welcome: https://github.com/HunOmegared/Easy-Retro-System-Builder
+
+@name = Español
+
+EN: %d other files copied from the source.
+TR: %d archivos más copiados desde el origen.
+
+EN: %q contains a character that is not allowed
+TR: %q contiene un carácter no permitido
+
+EN: %q is a reserved name
+TR: %q es un nombre reservado
+
+EN: %q is not an 8.3 name
+TR: %q no es un nombre 8.3
+
+EN: %q is too long (at most 8 characters)
+TR: %q es demasiado largo (8 caracteres como máximo)
+
+EN: %q may only contain A-Z, 0-9 and _
+TR: %q solo puede contener A-Z, 0-9 y _
+
+EN: %s (already there, not overwritten)
+TR: %s (ya existe, no se sobrescribe)
+
+EN: %s (not in the catalog)
+TR: %s (no está en el catálogo)
+
+EN: %s (previous version: %s)
+TR: %s (versión anterior: %s)
+
+EN: %s (unchanged)
+TR: %s (sin cambios)
+
+EN: %s already exists. Overwrite it?
+TR: %s ya existe. ¿Sobrescribirlo?
+
+EN: %s does not belong to this driver; expected: %s
+TR: %s no pertenece a este controlador; se esperaba: %s
+
+EN: %s does not match when read back; the image may be damaged
+TR: %s no coincide al volver a leerlo; puede que la imagen esté dañada
+
+EN: %s is a file, not a folder
+TR: %s es un archivo, no una carpeta
+
+EN: %s is a folder
+TR: %s es una carpeta
+
+EN: %s is damaged, the built-in list is used: %v
+TR: %s está dañado, se usa la lista integrada: %v
+
+EN: %s is missing (%s) and was not copied. Download it or browse for it in the Drivers window.
+TR: Falta %s (%s) y no se ha copiado. Descárguelo o selecciónelo en la ventana Controladores.
+
+EN: %s is the name of a folder
+TR: %s es el nombre de una carpeta
+
+EN: %s lines for EVERY menu item, BEFORE the item's own lines:
+TR: Líneas de %s para CADA opción del menú, ANTES de las líneas propias de la opción:
+
+EN: %s lines for every menu item, AFTER the item's own lines:
+TR: Líneas de %s para cada opción del menú, DESPUÉS de las líneas propias de la opción:
+
+EN: %s lines for every menu item, BEFORE the branching:
+TR: Líneas de %s para cada opción del menú, ANTES de la bifurcación:
+
+EN: %s lines for every menu item, at the END:
+TR: Líneas de %s para cada opción del menú, al FINAL:
+
+EN: %s lines for this menu item only:
+TR: Líneas de %s solo para esta opción del menú:
+
+EN: %s not found; the AUTOEXEC part is empty.
+TR: No se encontró %s; la parte AUTOEXEC está vacía.
+
+EN: %s: the FAT chain is shorter than the file
+TR: %s: la cadena FAT es más corta que el archivo
+
+EN: &About and tips
+TR: &Acerca de y consejos
+
+EN: &Back up a card to an image file...
+TR: &Copiar una tarjeta a un archivo de imagen...
+
+EN: &Drivers
+TR: C&ontroladores
+
+EN: &File
+TR: &Archivo
+
+EN: &Help
+TR: Ay&uda
+
+EN: &Import
+TR: I&mportar
+
+EN: &Language
+TR: &Idioma
+
+EN: &Make a translation file...
+TR: &Crear un archivo de traducción...
+
+EN: &Manage drivers...
+TR: &Gestionar controladores...
+
+EN: &New bootable disk image...
+TR: &Nueva imagen de disco de arranque...
+
+EN: &New from template
+TR: &Nuevo desde plantilla
+
+EN: &No
+TR: &No
+
+EN: &Open project...
+TR: A&brir proyecto...
+
+EN: &Output
+TR: &Salida
+
+EN: &Preview
+TR: &Vista previa
+
+EN: &Reload language files
+TR: &Recargar archivos de idioma
+
+EN: &Save project
+TR: &Guardar proyecto
+
+EN: &Write an image to a card...
+TR: &Escribir una imagen en una tarjeta...
+
+EN: &Yes
+TR: &Sí
+
+EN: (as set below)
+TR: (según lo indicado abajo)
+
+EN: (copy)
+TR: (copia)
+
+EN: (no card found)
+TR: (no se encontró ninguna tarjeta)
+
+EN: (system from your own boot disk or card)
+TR: (sistema de su propio disco o tarjeta de arranque)
+
+EN: . Missing: %s. Download it yourself from %s and browse for it, or put it here: %s
+TR: . Falta: %s. Descárguelo usted mismo desde %s y selecciónelo, o colóquelo aquí: %s
+
+EN: 3Com 3C509 packet driver (Crynwr)
+TR: Controlador de paquetes 3Com 3C509 (Crynwr)
+
+EN: 437 (US)
+TR: 437 (EE. UU.)
+
+EN: 852 (Central European)
+TR: 852 (Europa Central)
+
+EN: < Back
+TR: < Atrás
+
+EN: A DOS boot floppy image
+TR: Una imagen de disquete de arranque de DOS
+
+EN: A MENU line that is not a menu item was left out: %s
+TR: Se omitió una línea MENU que no es una opción del menú: %s
+
+EN: A card or disk that already boots DOS on that machine
+TR: Una tarjeta o disco que ya arranca DOS en esa máquina
+
+EN: A disk image you can write to a floppy with WinImage or Greaseweazle.
+TR: Una imagen de disco que puede escribir en un disquete con WinImage o Greaseweazle.
+
+EN: A floppy or hard disk image, a card backup or a fixed-size VHD.
+TR: Una imagen de disquete o de disco duro, una copia de una tarjeta o un VHD de tamaño fijo.
+
+EN: A hard disk image for 86Box or PCem.
+TR: Una imagen de disco duro para 86Box o PCem.
+
+EN: A line with the 0? prefix (start without menu) was left out: %s
+TR: Se omitió una línea con el prefijo 0? (arranque sin menú): %s
+
+EN: A single empty menu item, for writing everything by hand.
+TR: Una sola opción vacía, para escribirlo todo a mano.
+
+EN: A small bootable system from the floppy: its system files and tools are copied.
+TR: Un pequeño sistema de arranque desde el disquete: se copian sus archivos de sistema y herramientas.
+
+EN: ASCII (no accents, safe)
+TR: ASCII (sin acentos, seguro)
+
+EN: AUTOEXEC file:
+TR: Archivo AUTOEXEC:
+
+EN: AUTOEXEC.BAT does not branch on %%CONFIG%%, so all of it went into the common part.
+TR: AUTOEXEC.BAT no se bifurca según %%CONFIG%%, así que todo ha ido a la parte común.
+
+EN: Accents:
+TR: Acentos:
+
+EN: Added: %s
+TR: Añadido: %s
+
+EN: All %d drivers of this menu are here.
+TR: Están los %d controladores de este menú.
+
+EN: All files
+TR: Todos los archivos
+
+EN: An empty image with the right geometry; install DOS on it in 86Box with its own Setup.
+TR: Una imagen vacía con la geometría correcta; instale DOS en ella en 86Box con su propio programa de instalación.
+
+EN: At most %d menu items are allowed (there are %d).
+TR: Se permiten como máximo %d opciones de menú (hay %d).
+
+EN: Back it up first: geometry, boot code and system are taken from it (recommended).
+TR: Haga primero una copia: de ella se toman la geometría, el código de arranque y el sistema (recomendado).
+
+EN: Back up a card to an image file
+TR: Copiar una tarjeta a un archivo de imagen
+
+EN: Backup saved: %s\n\nRead the card geometry and system from it now (New bootable disk image)?
+TR: Copia guardada: %s\n\n¿Leer ahora de ella la geometría y el sistema de la tarjeta (Nueva imagen de disco de arranque)?
+
+EN: Basic mTCP setup (packet driver at 0x60, DHCP fills in the rest). An existing file is not overwritten.
+TR: Configuración básica de mTCP (controlador de paquetes en 0x60, DHCP completa el resto). Un archivo existente no se sobrescribe.
+
+EN: Block [%s] got a new ID: %s (at most 8 letters/digits).
+TR: El bloque [%s] recibió un nuevo ID: %s (8 letras/cifras como máximo).
+
+EN: Boot menu project (*.bmp.json)
+TR: Proyecto de menú de arranque (*.bmp.json)
+
+EN: Boot menu:
+TR: Menú de arranque:
+
+EN: Bootable DOS floppy image to put GEOM.COM on
+TR: Imagen de disquete de arranque de DOS donde poner GEOM.COM
+
+EN: Browse for it from your own release; it has no download address.
+TR: Selecciónelo desde su propia versión; no tiene dirección de descarga.
+
+EN: Browse...
+TR: Examinar...
+
+EN: Building blocks of %s
+TR: Bloques de %s
+
+EN: Building blocks...
+TR: Bloques...
+
+EN: CONFIG file:
+TR: Archivo CONFIG:
+
+EN: CONFIG.SYS / FDCONFIG.SYS not found
+TR: No se encontró CONFIG.SYS / FDCONFIG.SYS
+
+EN: Cancel
+TR: Cancelar
+
+EN: Card backup or hard disk image
+TR: Copia de tarjeta o imagen de disco duro
+
+EN: Card profile:
+TR: Perfil de tarjeta:
+
+EN: Card:
+TR: Tarjeta:
+
+EN: Change the boot menu of an existing system
+TR: Cambiar el menú de arranque de un sistema existente
+
+EN: Check the imported text before writing it back.
+TR: Revise el texto importado antes de volver a escribirlo.
+
+EN: Checking (reading back)
+TR: Comprobando (volviendo a leer)
+
+EN: Choose the folder with CONFIG.SYS and AUTOEXEC.BAT (for example the root of a mounted disk image):
+TR: Elija la carpeta con CONFIG.SYS y AUTOEXEC.BAT (por ejemplo la raíz de una imagen de disco montada):
+
+EN: Choose where to save the new image.
+TR: Elija dónde guardar la nueva imagen.
+
+EN: Circular INCLUDE: %s
+TR: INCLUDE circular: %s
+
+EN: Clean boot (nothing loaded)
+TR: Arranque limpio (no se carga nada)
+
+EN: Close
+TR: Cerrar
+
+EN: Copy
+TR: Copiar
+
+EN: Copy all other files of the source too (e.g. the DOS folder)
+TR: Copiar también todos los demás archivos del origen (p. ej. la carpeta DOS)
+
+EN: Copy the selected drivers into the folder too (DRIVERS, MTCP, EC subfolders)?
+TR: ¿Copiar también los controladores seleccionados en la carpeta (subcarpetas DRIVERS, MTCP, EC)?
+
+EN: Could not create the image:
+TR: No se pudo crear la imagen:
+
+EN: Could not open:
+TR: No se pudo abrir:
+
+EN: Could not read it:
+TR: No se pudo leer:
+
+EN: Could not save:
+TR: No se pudo guardar:
+
+EN: Create
+TR: Crear
+
+EN: CuteMouse mouse driver
+TR: Controlador de ratón CuteMouse
+
+EN: Cylinders:
+TR: Cilindros:
+
+EN: DOS + mouse
+TR: DOS + ratón
+
+EN: DOS + mouse + CD-ROM
+TR: DOS + ratón + CD-ROM
+
+EN: DOS boot floppy image
+TR: Imagen de disquete de arranque de DOS
+
+EN: DOS can only use 1024 cylinders. Use the geometry the BIOS gives in LBA/LARGE mode (more heads, fewer cylinders).
+TR: DOS solo puede usar 1024 cilindros. Use la geometría que da la BIOS en modo LBA/LARGE (más cabezas, menos cilindros).
+
+EN: DOS install disks (MS-DOS Setup or FreeDOS)
+TR: Discos de instalación de DOS (MS-DOS Setup o FreeDOS)
+
+EN: DOS program (*.com)
+TR: Programa de DOS (*.com)
+
+EN: DOS will most likely get: %d / %d / %d\nDisk size: %d sectors (%s)
+TR: Lo más probable es que DOS obtenga: %d / %d / %d\nTamaño del disco: %d sectores (%s)
+
+EN: Default:
+TR: Predeterminada:
+
+EN: Delete
+TR: Eliminar
+
+EN: Delete menu item %s?
+TR: ¿Eliminar la opción de menú %s?
+
+EN: Delete profile
+TR: Eliminar perfil
+
+EN: Delete profile %s?
+TR: ¿Eliminar el perfil %s?
+
+EN: Description:
+TR: Descripción:
+
+EN: Did not work:
+TR: No funcionó:
+
+EN: Dis&k image
+TR: Imagen de dis&co
+
+EN: Disk
+TR: Disco
+
+EN: Disk image to read the menu from
+TR: Imagen de disco de la que leer el menú
+
+EN: Disk image to write to
+TR: Imagen de disco en la que escribir
+
+EN: Disk images (*.img, *.ima, *.vhd, *.hdd, *.dsk)
+TR: Imágenes de disco (*.img, *.ima, *.vhd, *.hdd, *.dsk)
+
+EN: Done:
+TR: Hecho:
+
+EN: Done: %d succeeded, %d failed.
+TR: Hecho: %d correctos, %d fallidos.
+
+EN: Down
+TR: Bajar
+
+EN: Download addresses, one per line (zip or the file itself; may be empty):
+TR: Direcciones de descarga, una por línea (zip o el propio archivo; puede quedar vacío):
+
+EN: Download from:
+TR: Descargar de:
+
+EN: Download missing
+TR: Descargar los que faltan
+
+EN: Downloading %d driver(s)...
+TR: Descargando %d controlador(es)...
+
+EN: Driver file, zip or disk image
+TR: Archivo de controlador, zip o imagen de disco
+
+EN: Driver:
+TR: Controlador:
+
+EN: Drivers
+TR: Controladores
+
+EN: Drivers...
+TR: Controladores...
+
+EN: Drivers:
+TR: Controladores:
+
+EN: E&xit
+TR: &Salir
+
+EN: EVERYTHING on this disk will be overwritten, including its partition table:\n\n%s\n\nIt holds now:\n%s\n\nImage: %s (%s)\n\nAreas that are empty in the image are skipped; everything written is read back and checked.
+TR: TODO lo que hay en este disco se sobrescribirá, incluida su tabla de particiones:\n\n%s\n\nAhora contiene:\n%s\n\nImagen: %s (%s)\n\nLas zonas vacías de la imagen se omiten; todo lo escrito se vuelve a leer y se comprueba.
+
+EN: Easy Commander client (EC.EXE)
+TR: Cliente de Easy Commander (EC.EXE)
+
+EN: Easy Retro System Builder
+TR: Easy Retro System Builder
+
+EN: Edit driver
+TR: Editar controlador
+
+EN: Edit...
+TR: Editar...
+
+EN: Empty (FreeDOS)
+TR: Vacío (FreeDOS)
+
+EN: Empty (MS-DOS 6.x)
+TR: Vacío (MS-DOS 6.x)
+
+EN: Empty image: %d sectors (%s), geometry %d/%d/%d.
+TR: Imagen vacía: %d sectores (%s), geometría %d/%d/%d.
+
+EN: Empty image: I install DOS on it myself (e.g. DOS Setup in 86Box)
+TR: Imagen vacía: instalo DOS en ella yo mismo (p. ej. DOS Setup en 86Box)
+
+EN: Enter the geometry DOS gets from the target machine's BIOS (MSD.EXE, Disk Drives), not the one in BIOS setup.
+TR: Introduzca la geometría que DOS obtiene de la BIOS de la máquina de destino (MSD.EXE, Disk Drives), no la del setup de la BIOS.
+
+EN: Error: %s
+TR: Error: %s
+
+EN: Everyday: DOS / + mouse and CD-ROM / everything
+TR: Diario: DOS / + ratón y CD-ROM / todo
+
+EN: Everyday: DOS / + mouse and CD-ROM / everything (FreeDOS)
+TR: Diario: DOS / + ratón y CD-ROM / todo (FreeDOS)
+
+EN: Everyday: DOS / + mouse and CD-ROM / everything (MS-DOS 6.x)
+TR: Diario: DOS / + ratón y CD-ROM / todo (MS-DOS 6.x)
+
+EN: Everything: mouse + CD-ROM + sound
+TR: Todo: ratón + CD-ROM + sonido
+
+EN: Existing menu from &disk image...
+TR: Menú existente desde una imagen de &disco...
+
+EN: Existing menu from &folder...
+TR: Menú existente desde una &carpeta...
+
+EN: FAT%d, %s (no partition table)
+TR: FAT%d, %s (sin tabla de particiones)
+
+EN: Failed:
+TR: Fallidos:
+
+EN: File for: %s (%s)
+TR: Archivo para: %s (%s)
+
+EN: File name %s: %v
+TR: Nombre de archivo %s: %v
+
+EN: Files on the disk:
+TR: Archivos en el disco:
+
+EN: Files, one per line:  NAME.EXT = FOLDER\\NAME.EXT  (place on the DOS disk; without "=" it goes to DRIVERS):
+TR: Archivos, uno por línea:  NOMBRE.EXT = CARPETA\\NOMBRE.EXT  (ubicación en el disco DOS; sin "=" va a DRIVERS):
+
+EN: Floppy %s, FAT12.
+TR: Disquete %s, FAT12.
+
+EN: For 3Com EtherLink III cards.
+TR: Para tarjetas 3Com EtherLink III.
+
+EN: For IDE/ATAPI CD drives (CONFIG.SYS DEVICE= line).
+TR: Para unidades de CD IDE/ATAPI (línea DEVICE= de CONFIG.SYS).
+
+EN: For example the CF card in the card reader, by its drive letter.
+TR: Por ejemplo la tarjeta CF en el lector de tarjetas, por su letra de unidad.
+
+EN: For the default network card of 86Box/PCem and real NE2000 cards.
+TR: Para la tarjeta de red predeterminada de 86Box/PCem y tarjetas NE2000 reales.
+
+EN: Free HIMEM.SYS replacement.
+TR: Sustituto libre de HIMEM.SYS.
+
+EN: Free MSCDEX replacement.
+TR: Sustituto libre de MSCDEX.
+
+EN: Free space: %s
+TR: Espacio libre: %s
+
+EN: FreeDOS boot code is different for FAT12 and FAT16: the source is FAT%d, the new disk FAT%d. Use a FreeDOS source with FAT%d.
+TR: El código de arranque de FreeDOS es distinto para FAT12 y FAT16: el origen es FAT%d, el nuevo disco FAT%d. Use un origen FreeDOS con FAT%d.
+
+EN: FreeDOS: these lines get the "%d?" prefix, and %%CONFIG%% will be %d.
+TR: FreeDOS: estas líneas reciben el prefijo "%d?", y %%CONFIG%% valdrá %d.
+
+EN: Freeware by JazeFox: sets up ISA PnP sound cards (ESS, Creative, Yamaha, Crystal, Aztech, OPTi...) and their mixer. Download it from the Vogons forum topic and browse for UNISOUND.COM or the zip.
+TR: Freeware de JazeFox: configura tarjetas de sonido ISA PnP (ESS, Creative, Yamaha, Crystal, Aztech, OPTi...) y su mezclador. Descárguelo del tema del foro de Vogons y seleccione UNISOUND.COM o el zip.
+
+EN: From BIOS setup...
+TR: Desde el setup de la BIOS...
+
+EN: From a card backup...
+TR: Desde una copia de tarjeta...
+
+EN: GEOM.COM is now on %s.\n\nWrite the image to a floppy (WinImage, Greaseweazle), boot the target machine from it with the card or disk in place, and type GEOM.
+TR: GEOM.COM está ahora en %s.\n\nEscriba la imagen en un disquete (WinImage, Greaseweazle), arranque desde él la máquina de destino con la tarjeta o el disco colocados y escriba GEOM.
+
+EN: Games with EMS: mouse + sound
+TR: Juegos con EMS: ratón + sonido
+
+EN: Games without EMS: mouse + sound
+TR: Juegos sin EMS: ratón + sonido
+
+EN: Games: everything / EMS / no EMS / clean
+TR: Juegos: todo / EMS / sin EMS / limpio
+
+EN: Games: everything / EMS / no EMS / clean (FreeDOS)
+TR: Juegos: todo / EMS / sin EMS / limpio (FreeDOS)
+
+EN: Games: everything / EMS / no EMS / clean (MS-DOS 6.x)
+TR: Juegos: todo / EMS / sin EMS / limpio (MS-DOS 6.x)
+
+EN: Geometry %d/%d/%d, %s.
+TR: Geometría %d/%d/%d, %s.
+
+EN: Geometry from BIOS setup
+TR: Geometría desde el setup de la BIOS
+
+EN: Give at least one file.
+TR: Indique al menos un archivo.
+
+EN: Give the geometry or choose a profile.
+TR: Indique la geometría o elija un perfil.
+
+EN: Hard disk / CF card
+TR: Disco duro / tarjeta CF
+
+EN: Heads must be 1-255, sectors 1-63, cylinders at least 1.
+TR: Las cabezas deben ser 1-255, los sectores 1-63 y los cilindros al menos 1.
+
+EN: Heads:
+TR: Cabezas:
+
+EN: HimemX XMS manager
+TR: Gestor XMS HimemX
+
+EN: ID (lower case, used for the folder name):
+TR: ID (minúsculas, se usa como nombre de carpeta):
+
+EN: ID:
+TR: ID:
+
+EN: ISA PnP card: set it up with UNISOUND
+TR: Tarjeta ISA PnP: configurarla con UNISOUND
+
+EN: Image size in sectors (empty: cylinders × heads × sectors):
+TR: Tamaño de la imagen en sectores (vacío: cilindros × cabezas × sectores):
+
+EN: Image to write to the card
+TR: Imagen que se escribirá en la tarjeta
+
+EN: In a disk image
+TR: En una imagen de disco
+
+EN: JemmEx / Jemm386 memory manager
+TR: Gestor de memoria JemmEx / Jemm386
+
+EN: Just open the editor
+TR: Abrir solo el editor
+
+EN: Keep the menu of the system source (write no menu)
+TR: Conservar el menú del origen del sistema (no escribir menú)
+
+EN: LARGE / ECHS
+TR: LARGE / ECHS
+
+EN: LBA (LBA mode on)
+TR: LBA (modo LBA activado)
+
+EN: Letter:
+TR: Letra:
+
+EN: Local folder:
+TR: Carpeta local:
+
+EN: MBR: the program's own boot code (the source has no MBR).
+TR: MBR: el código de arranque propio del programa (el origen no tiene MBR).
+
+EN: MISSING
+TR: FALTA
+
+EN: MS-DOS: this is the [%s] block, and %%CONFIG%% will be %s.
+TR: MS-DOS: este es el bloque [%s], y %%CONFIG%% valdrá %s.
+
+EN: MTCP.CFG sample
+TR: Ejemplo de MTCP.CFG
+
+EN: Make a bootable CF card or IDE disk
+TR: Crear una tarjeta CF o un disco IDE de arranque
+
+EN: Make a bootable floppy
+TR: Crear un disquete de arranque
+
+EN: Make a disk image for an emulator
+TR: Crear una imagen de disco para un emulador
+
+EN: Makes a CONFIG.SYS / FDCONFIG.SYS and AUTOEXEC.BAT boot menu for MS-DOS 6.x and FreeDOS, and can write it straight into a disk image.\n\nTips:\n• The two "Common part" rows in the list run for every menu item, before and after the item's own lines.\n• A menu item ID is at most 8 letters/digits: it is the CONFIG.SYS block name and the AUTOEXEC.BAT label.\n• The boot menu appears before any codepage is loaded, so ASCII mode (no accents) is the safe choice.\n• Disk images: raw .img/.ima (floppy, or hard disk with MBR) and fixed-size .vhd; FAT12/16/32.\n• Drivers are kept in the "drivers" folder; the list can be edited in the Drivers window.\n• Translations: Language > Make a translation file.\n\nAlways try the menu in 86Box before using it on a real machine.
+TR: Crea un menú de arranque CONFIG.SYS / FDCONFIG.SYS y AUTOEXEC.BAT para MS-DOS 6.x y FreeDOS, y puede escribirlo directamente en una imagen de disco.\n\nConsejos:\n• Las dos filas "Parte común" de la lista se ejecutan en cada opción del menú, antes y después de las líneas propias de la opción.\n• El ID de una opción tiene como máximo 8 letras/cifras: es el nombre del bloque en CONFIG.SYS y la etiqueta en AUTOEXEC.BAT.\n• El menú de arranque aparece antes de cargar ninguna página de códigos, así que el modo ASCII (sin acentos) es la opción segura.\n• Imágenes de disco: .img/.ima sin formato (disquete, o disco duro con MBR) y .vhd de tamaño fijo; FAT12/16/32.\n• Los controladores se guardan en la carpeta "drivers"; la lista se edita en la ventana Controladores.\n• Traducciones: Idioma > Crear un archivo de traducción.\n\nPruebe siempre el menú en 86Box antes de usarlo en una máquina real.
+
+EN: Memory:
+TR: Memoria:
+
+EN: Menu colour:
+TR: Color del menú:
+
+EN: Menu item %d was missing; an empty one was added.
+TR: Faltaba la opción de menú %d; se añadió una vacía.
+
+EN: Menu item %s has no branch in AUTOEXEC.BAT.
+TR: La opción de menú %s no tiene bifurcación en AUTOEXEC.BAT.
+
+EN: Menu items:
+TR: Opciones del menú:
+
+EN: Missing drivers: %d (Drivers menu).
+TR: Faltan controladores: %d (menú Controladores).
+
+EN: Missing drivers: %s
+TR: Faltan controladores: %s
+
+EN: Mode:
+TR: Modo:
+
+EN: Mouse (CuteMouse)
+TR: Ratón (CuteMouse)
+
+EN: NE2000 packet driver (Crynwr)
+TR: Controlador de paquetes NE2000 (Crynwr)
+
+EN: NE2000 packet driver, mTCP DHCP and Easy Commander, or plain DOS.
+TR: Controlador de paquetes NE2000, mTCP DHCP y Easy Commander, o DOS simple.
+
+EN: NORMAL (CHS, LBA off)
+TR: NORMAL (CHS, LBA desactivado)
+
+EN: Name:
+TR: Nombre:
+
+EN: Network (packet driver + mTCP)
+TR: Red (controlador de paquetes + mTCP)
+
+EN: Network with Easy Commander / plain DOS
+TR: Red con Easy Commander / DOS simple
+
+EN: Network with Easy Commander / plain DOS (FreeDOS)
+TR: Red con Easy Commander / DOS simple (FreeDOS)
+
+EN: Network with Easy Commander / plain DOS (MS-DOS 6.x)
+TR: Red con Easy Commander / DOS simple (MS-DOS 6.x)
+
+EN: Network: packet driver + mTCP + Easy Commander
+TR: Red: controlador de paquetes + mTCP + Easy Commander
+
+EN: New bootable disk image
+TR: Nueva imagen de disco de arranque
+
+EN: New driver
+TR: Nuevo controlador
+
+EN: New image file
+TR: Nuevo archivo de imagen
+
+EN: New image file:
+TR: Nuevo archivo de imagen:
+
+EN: New menu item
+TR: Nueva opción de menú
+
+EN: New...
+TR: Nuevo...
+
+EN: Next >
+TR: Siguiente >
+
+EN: Next:\n1. 86Box: add the image as a hard disk with %d cylinders, %d heads, %d sectors.\n2. Boot your DOS Setup disk 1 (or a boot floppy: FDISK, FORMAT C: /S) and install DOS.\n3. Here: Output > Write to disk image... puts the boot menu and drivers on it.\n4. Disk image > Write an image to a card.
+TR: A continuación:\n1. 86Box: añada la imagen como disco duro con %d cilindros, %d cabezas, %d sectores.\n2. Arranque con el disco 1 de DOS Setup (o con un disquete de arranque: FDISK, FORMAT C: /S) e instale DOS.\n3. Aquí: Salida > Escribir en una imagen de disco... coloca en ella el menú de arranque y los controladores.\n4. Imagen de disco > Escribir una imagen en una tarjeta.
+
+EN: No menu and no drivers are written; the files of the source stay as they are.
+TR: No se escriben menú ni controladores; los archivos del origen quedan como están.
+
+EN: No menu item refers to block [%s]; it was left out.
+TR: Ninguna opción del menú hace referencia al bloque [%s]; se omitió.
+
+EN: No place on the disk for %s.
+TR: No hay sitio en el disco para %s.
+
+EN: No system source was given: the disk is formatted but does not boot.
+TR: No se indicó ningún origen del sistema: el disco se formatea pero no arranca.
+
+EN: No warnings. The files are written with DOS (CRLF) line endings.
+TR: Sin advertencias. Los archivos se escriben con finales de línea de DOS (CRLF).
+
+EN: None of the selected entries can be downloaded. Add entries without a download address (such as EC.EXE) with the Browse button.
+TR: Ninguna de las entradas seleccionadas se puede descargar. Añada las entradas sin dirección de descarga (como EC.EXE) con el botón Examinar.
+
+EN: Not a web address: %s
+TR: No es una dirección web: %s
+
+EN: Not copied (unreadable): %s
+TR: No copiado (ilegible): %s
+
+EN: Note: %s
+TR: Nota: %s
+
+EN: Notes:
+TR: Notas:
+
+EN: Nothing (no memory manager)
+TR: Nada (sin gestor de memoria)
+
+EN: OAKCDROM.SYS (from Windows 98)
+TR: OAKCDROM.SYS (de Windows 98)
+
+EN: OAKCDROM.SYS generic ATAPI CD-ROM driver
+TR: OAKCDROM.SYS, controlador genérico de CD-ROM ATAPI
+
+EN: OK
+TR: Aceptar
+
+EN: OK.
+TR: Correcto.
+
+EN: On a drive or in a folder
+TR: En una unidad o en una carpeta
+
+EN: One menu item: DOS with HIMEM and upper memory, nothing else.
+TR: Una sola opción: DOS con HIMEM y memoria superior, nada más.
+
+EN: Only removable, USB and SD disks are listed; the Windows disk never. Insert the card in the reader, then Refresh.
+TR: Solo se muestran discos extraíbles, USB y SD; nunca el disco de Windows. Inserte la tarjeta en el lector y pulse Actualizar.
+
+EN: Open driver &folder
+TR: Abrir la &carpeta de controladores
+
+EN: Open folder
+TR: Abrir carpeta
+
+EN: Open language &folder
+TR: Abrir la carpeta de &idiomas
+
+EN: Open project
+TR: Abrir proyecto
+
+EN: Overwrite
+TR: Sobrescribir
+
+EN: Overwrite disk
+TR: Sobrescribir disco
+
+EN: PS/2 and serial mouse; small and free.
+TR: Ratón PS/2 y serie; pequeño y libre.
+
+EN: Parameters:
+TR: Parámetros:
+
+EN: Partition: %s, FAT%d, %d KB clusters
+TR: Partición: %s, FAT%d, clústeres de %d KB
+
+EN: Place on the disk %s: %v
+TR: Ubicación en el disco %s: %v
+
+EN: Plain DOS
+TR: DOS simple
+
+EN: Plain DOS (FreeDOS)
+TR: DOS simple (FreeDOS)
+
+EN: Plain DOS (MS-DOS 6.x)
+TR: DOS simple (MS-DOS 6.x)
+
+EN: Please fix these first:
+TR: Corrija esto primero:
+
+EN: Preview
+TR: Vista previa
+
+EN: Put GEOM.COM onto a boot &floppy image...
+TR: Poner GEOM.COM en una imagen de &disquete de arranque...
+
+EN: Put the card or disk into the target machine, let BIOS setup detect it (Auto), and copy the values it shows. The program works out what DOS will get. To be sure, run GEOM.COM on the target machine (Disk image menu) and compare.
+TR: Coloque la tarjeta o el disco en la máquina de destino, deje que el setup de la BIOS lo detecte (Auto) y copie los valores que muestra. El programa calcula lo que obtendrá DOS. Para estar seguro, ejecute GEOM.COM en la máquina de destino (menú Imagen de disco) y compare.
+
+EN: Read from %s: %d menu items, %s.
+TR: Leído de %s: %d opciones de menú, %s.
+
+EN: Read from the image:\n\nGeometry (as FDISK recorded it): %d / %d / %d\nSize: %d sectors (%s)\nVolume: %s\nSystem: %s\n\nCheck that heads and sectors match what MSD shows on the target machine.
+TR: Leído de la imagen:\n\nGeometría (tal como la registró FDISK): %d / %d / %d\nTamaño: %d sectores (%s)\nVolumen: %s\nSistema: %s\n\nCompruebe que las cabezas y los sectores coinciden con lo que muestra MSD en la máquina de destino.
+
+EN: Read the menu from a disk image or a drive, edit it and write it back.
+TR: Leer el menú de una imagen de disco o de una unidad, editarlo y volver a escribirlo.
+
+EN: Reading
+TR: Leyendo
+
+EN: Reading %s...
+TR: Leyendo %s...
+
+EN: Reading and writing a card directly needs administrator rights.\n\nRestart the program as administrator? Your project is kept.
+TR: Leer y escribir una tarjeta directamente requiere derechos de administrador.\n\n¿Reiniciar el programa como administrador? Su proyecto se conserva.
+
+EN: Refresh
+TR: Actualizar
+
+EN: Remove
+TR: Quitar
+
+EN: Remove %s from the list?\n\nDownloaded files stay in the driver folder.
+TR: ¿Quitar %s de la lista?\n\nLos archivos descargados permanecen en la carpeta de controladores.
+
+EN: Replaces HIMEM+EMM386, also works with MS-DOS (386+).
+TR: Sustituye a HIMEM+EMM386, funciona también con MS-DOS (386+).
+
+EN: Restore built-in list
+TR: Restaurar la lista integrada
+
+EN: Restore the built-in driver list? Your own entries and changes are lost; downloaded files stay.
+TR: ¿Restaurar la lista de controladores integrada? Se pierden sus propias entradas y cambios; los archivos descargados permanecen.
+
+EN: SHSUCDX CD-ROM extension
+TR: Extensión de CD-ROM SHSUCDX
+
+EN: Save &GEOM.COM (shows the geometry on the target machine)...
+TR: Guardar &GEOM.COM (muestra la geometría en la máquina de destino)...
+
+EN: Save GEOM.COM
+TR: Guardar GEOM.COM
+
+EN: Save card backup
+TR: Guardar copia de la tarjeta
+
+EN: Save profile
+TR: Guardar perfil
+
+EN: Save project
+TR: Guardar proyecto
+
+EN: Save project &as...
+TR: Guardar proyecto &como...
+
+EN: Save to &folder...
+TR: Guardar en una &carpeta...
+
+EN: Save to folder...
+TR: Guardar en una carpeta...
+
+EN: Save translation file
+TR: Guardar archivo de traducción
+
+EN: Saved to: %s
+TR: Guardado en: %s
+
+EN: Saved: %s\n\nFill in the TR: lines with a text editor (UTF-8), name the file after the language code (for example de.lng), keep it in the lang folder, then choose Language > Reload language files.
+TR: Guardado: %s\n\nRellene las líneas TR: con un editor de texto (UTF-8), nombre el archivo según el código del idioma (por ejemplo de.lng), déjelo en la carpeta lang y elija Idioma > Recargar archivos de idioma.
+
+EN: Saved: %s\n\nRun GEOM on the target machine from a DOS boot floppy, with the card or disk in place; it shows the cylinders, heads and sectors to enter here.
+TR: Guardado: %s\n\nEjecute GEOM en la máquina de destino desde un disquete de arranque de DOS, con la tarjeta o el disco colocados; muestra los cilindros, cabezas y sectores que debe introducir aquí.
+
+EN: Sectors/track:
+TR: Sectores/pista:
+
+EN: Select what goes onto the disk (several can be selected). Missing files can be downloaded, or browse for them (a single file or a zip).
+TR: Seleccione lo que va al disco (se pueden elegir varios). Los archivos que faltan se pueden descargar o seleccionar (un solo archivo o un zip).
+
+EN: Show this at start
+TR: Mostrar al iniciar
+
+EN: Some language files could not be read:
+TR: No se pudieron leer algunos archivos de idioma:
+
+EN: Sound (Sound Blaster compatible)
+TR: Sonido (compatible con Sound Blaster)
+
+EN: Standard floppy format (FAT12), as DOS FORMAT makes it.
+TR: Formato de disquete estándar (FAT12), como lo crea FORMAT de DOS.
+
+EN: Start &wizard...
+TR: Iniciar el &asistente...
+
+EN: Start Easy Commander
+TR: Iniciar Easy Commander
+
+EN: Start from:
+TR: Empezar desde:
+
+EN: Still missing: %s
+TR: Todavía falta: %s
+
+EN: Submenus (SUBMENU) are not supported, left out: %s
+TR: Los submenús (SUBMENU) no son compatibles, omitido: %s
+
+EN: Succeeded:
+TR: Correctos:
+
+EN: System source
+TR: Origen del sistema
+
+EN: System source: a bootable disk image or card backup (empty: not bootable):
+TR: Origen del sistema: una imagen de disco de arranque o una copia de tarjeta (vacío: no arranca):
+
+EN: System:
+TR: Sistema:
+
+EN: System: %s (boot code and system files from %s).
+TR: Sistema: %s (código de arranque y archivos de sistema de %s).
+
+EN: TCP/IP programs by Michael Brutman; Easy Commander needs DHCP.
+TR: Programas TCP/IP de Michael Brutman; Easy Commander necesita DHCP.
+
+EN: Text in the menu:
+TR: Texto en el menú:
+
+EN: The ID %s is already in the list.
+TR: El ID %s ya está en la lista.
+
+EN: The ID %s is used twice.
+TR: El ID %s se usa dos veces.
+
+EN: The ID must be 1-32 lower-case letters, digits, - or _.
+TR: El ID debe tener 1-32 letras minúsculas, cifras, - o _.
+
+EN: The NUMLOCK setting was left out: %s
+TR: Se omitió el ajuste NUMLOCK: %s
+
+EN: The backup failed:
+TR: La copia falló:
+
+EN: The block named in INCLUDE does not exist: %s
+TR: El bloque indicado en INCLUDE no existe: %s
+
+EN: The card does not hold what was written (at %s). The card or the reader may be faulty.
+TR: La tarjeta no contiene lo que se escribió (en %s). Puede que la tarjeta o el lector estén defectuosos.
+
+EN: The card is ready. Written: %s, skipped as empty: %s, read back and checked.\n\nPut it in the target machine; the BIOS settings must be the same as when the geometry was taken.
+TR: La tarjeta está lista. Escrito: %s, omitido por vacío: %s, vuelto a leer y comprobado.\n\nColóquela en la máquina de destino; los ajustes de la BIOS deben ser los mismos que cuando se tomó la geometría.
+
+EN: The card may now be unusable until it is written again.
+TR: Puede que la tarjeta quede inutilizable hasta que se vuelva a escribir.
+
+EN: The classic games menu, mouse and sound in every game item.
+TR: El menú de juegos clásico, con ratón y sonido en cada opción de juego.
+
+EN: The disk image is ready.
+TR: La imagen de disco está lista.
+
+EN: The disk is too small.
+TR: El disco es demasiado pequeño.
+
+EN: The empty image is ready: %s
+TR: La imagen vacía está lista: %s
+
+EN: The file had no menu; its content went into the common part. Add menu items.
+TR: El archivo no tenía menú; su contenido ha ido a la parte común. Añada opciones de menú.
+
+EN: The full CONFIG.SYS / AUTOEXEC.BAT editor, starting with a plain DOS menu.
+TR: El editor completo de CONFIG.SYS / AUTOEXEC.BAT, empezando con un menú de DOS simple.
+
+EN: The image (%s) is bigger than the card (%s).
+TR: La imagen (%s) es más grande que la tarjeta (%s).
+
+EN: The image has no DOS system files (IO.SYS or KERNEL.SYS), so it will not boot by itself. Put a system on it first (SYS A: / SYS C:).
+TR: La imagen no tiene archivos de sistema de DOS (IO.SYS o KERNEL.SYS), así que no arrancará por sí sola. Póngale primero un sistema (SYS A: / SYS C:).
+
+EN: The image is empty: in 86Box set the hard disk to %d cylinders, %d heads, %d sectors, then partition and install DOS with its own Setup or FDISK and FORMAT /S.
+TR: La imagen está vacía: en 86Box configure el disco duro con %d cilindros, %d cabezas, %d sectores, luego particione e instale DOS con su propio programa de instalación o con FDISK y FORMAT /S.
+
+EN: The image is ready: %s
+TR: La imagen está lista: %s
+
+EN: The lines of %s were edited by hand. Replace them with the lines of the building blocks?
+TR: Las líneas de %s se editaron a mano. ¿Sustituirlas por las líneas de los bloques?
+
+EN: The lines this makes (for %s):
+TR: Las líneas que se generan (para %s):
+
+EN: The menu in the editor: %s
+TR: El menú del editor: %s
+
+EN: The menu was made for FreeDOS, but the image has an MS-DOS system.
+TR: El menú se hizo para FreeDOS, pero la imagen tiene un sistema MS-DOS.
+
+EN: The menu was made for MS-DOS, but the image has a FreeDOS system.
+TR: El menú se hizo para MS-DOS, pero la imagen tiene un sistema FreeDOS.
+
+EN: The name is empty.
+TR: El nombre está vacío.
+
+EN: The partition would be %s; FAT16 (MS-DOS 6.x) allows at most 2 GB. Use fewer cylinders.
+TR: La partición sería de %s; FAT16 (MS-DOS 6.x) permite como máximo 2 GB. Use menos cilindros.
+
+EN: The program makes this file itself; there is nothing to browse for.
+TR: El programa crea este archivo por sí mismo; no hay nada que seleccionar.
+
+EN: The project has changed. Save it?
+TR: El proyecto ha cambiado. ¿Guardarlo?
+
+EN: The size is smaller than cylinders × heads × sectors; that is used instead.
+TR: El tamaño es menor que cilindros × cabezas × sectores; se usa este valor en su lugar.
+
+EN: The system source and the new image must be different files.
+TR: El origen del sistema y la nueva imagen deben ser archivos distintos.
+
+EN: The system source has no DOS system files (IO.SYS/MSDOS.SYS, IBMBIO.COM/IBMDOS.COM or KERNEL.SYS).
+TR: El origen del sistema no tiene archivos de sistema de DOS (IO.SYS/MSDOS.SYS, IBMBIO.COM/IBMDOS.COM o KERNEL.SYS).
+
+EN: The system source is FAT32; its boot code does not fit a FAT12/FAT16 disk.
+TR: El origen del sistema es FAT32; su código de arranque no sirve para un disco FAT12/FAT16.
+
+EN: The timeout must be a whole number (empty: forever).
+TR: El tiempo de espera debe ser un número entero (vacío: sin límite).
+
+EN: There is no [MENU] block; the other blocks were left out.
+TR: No hay bloque [MENU]; se omitieron los demás bloques.
+
+EN: There is no card in the reader (size 0).
+TR: No hay ninguna tarjeta en el lector (tamaño 0).
+
+EN: These files are not here yet:
+TR: Estos archivos aún no están:
+
+EN: These menu items were edited by hand, so their lines were not changed for %s: %s\n\nCheck the paths in them (for example C:\\DOS and C:\\FREEDOS\\BIN).
+TR: Estas opciones de menú se editaron a mano, así que sus líneas no se cambiaron para %s: %s\n\nRevise las rutas que contienen (por ejemplo C:\\DOS y C:\\FREEDOS\\BIN).
+
+EN: This disk is not a removable card; refusing to write to it.
+TR: Este disco no es una tarjeta extraíble; no se escribirá en él.
+
+EN: This entry also makes: %s (generated by the program, not editable here).
+TR: Esta entrada también crea: %s (generado por el programa, no editable aquí).
+
+EN: This is a floppy image (no partition table); it has no card geometry. It can still be the system source of a floppy.
+TR: Es una imagen de disquete (sin tabla de particiones); no tiene geometría de tarjeta. Aun así puede ser el origen del sistema de un disquete.
+
+EN: This menu needs no extra drivers.
+TR: Este menú no necesita controladores adicionales.
+
+EN: Three items, from plain DOS to mouse + CD-ROM + sound.
+TR: Tres opciones, del DOS simple a ratón + CD-ROM + sonido.
+
+EN: Timeout (s):
+TR: Espera (s):
+
+EN: To confirm, type the disk number (%s):
+TR: Para confirmar, escriba el número del disco (%s):
+
+EN: Translation file (*.lng)
+TR: Archivo de traducción (*.lng)
+
+EN: Try it in 86Box with the same geometry (%d/%d/%d) first.\n\nWrite it to a card now?
+TR: Pruébela primero en 86Box con la misma geometría (%d/%d/%d).\n\n¿Escribirla ahora en una tarjeta?
+
+EN: Two labels point to the same menu item: %s
+TR: Dos etiquetas apuntan a la misma opción del menú: %s
+
+EN: Type a name for the profile into the profile box first (for example: Integra 486, 1 GB CF).
+TR: Escriba primero un nombre para el perfil en el cuadro de perfil (por ejemplo: Integra 486, CF de 1 GB).
+
+EN: Type the cylinders, heads and sectors shown in BIOS setup.
+TR: Escriba los cilindros, cabezas y sectores que muestra el setup de la BIOS.
+
+EN: Type:
+TR: Tipo:
+
+EN: UDVD2 (free, for UDMA controllers)
+TR: UDVD2 (libre, para controladoras UDMA)
+
+EN: UDVD2 CD/DVD driver
+TR: Controlador de CD/DVD UDVD2
+
+EN: UNISOUND ISA PnP sound card driver
+TR: Controlador de tarjetas de sonido ISA PnP UNISOUND
+
+EN: Unknown driver: %s
+TR: Controlador desconocido: %s
+
+EN: Unknown line in the [MENU] block: %s
+TR: Línea desconocida en el bloque [MENU]: %s
+
+EN: Up
+TR: Subir
+
+EN: Use these values
+TR: Usar estos valores
+
+EN: Volume label:
+TR: Etiqueta del volumen:
+
+EN: Volume: %s
+TR: Volumen: %s
+
+EN: WARNING: this disk has a modern partition (Windows, Linux or GPT). It is almost certainly NOT the disk of your retro PC.
+TR: ADVERTENCIA: este disco tiene una partición moderna (Windows, Linux o GPT). Casi con seguridad NO es el disco de su PC retro.
+
+EN: Warnings:
+TR: Advertencias:
+
+EN: Web page
+TR: Página web
+
+EN: Web page (shown when the download fails):
+TR: Página web (se muestra si falla la descarga):
+
+EN: Web page:
+TR: Página web:
+
+EN: What would you like to do?
+TR: ¿Qué desea hacer?
+
+EN: Where is the system whose menu you want to change?
+TR: ¿Dónde está el sistema cuyo menú quiere cambiar?
+
+EN: Where should DOS come from?
+TR: ¿De dónde debe venir DOS?
+
+EN: Where should the files go? (For example the root of a disk image mounted with ImDisk/OSFMount.)
+TR: ¿Dónde deben ir los archivos? (Por ejemplo la raíz de una imagen de disco montada con ImDisk/OSFMount.)
+
+EN: Which DOS, and what should the boot menu offer?
+TR: ¿Qué DOS, y qué debe ofrecer el menú de arranque?
+
+EN: With a card reader or a USB-IDE adapter, using the geometry of the target machine.
+TR: Con un lector de tarjetas o un adaptador USB-IDE, usando la geometría de la máquina de destino.
+
+EN: Works with nearly every IDE/ATAPI CD drive, also on old ISA controllers. Part of Windows 98, not free: browse for it on your Windows 98 boot disk (or its image), or in WINDOWS\\COMMAND\\EBD.
+TR: Funciona con casi cualquier unidad de CD IDE/ATAPI, también con controladoras ISA antiguas. Forma parte de Windows 98, no es libre: selecciónelo en su disco de arranque de Windows 98 (o su imagen), o en WINDOWS\\COMMAND\\EBD.
+
+EN: Write image to card
+TR: Escribir imagen en la tarjeta
+
+EN: Write to disk &image...
+TR: Escribir en una &imagen de disco...
+
+EN: Write to disk image...
+TR: Escribir en una imagen de disco...
+
+EN: Writing (empty areas are skipped)
+TR: Escribiendo (las zonas vacías se omiten)
+
+EN: Writing the card failed:
+TR: La escritura de la tarjeta falló:
+
+EN: Writing to %s...
+TR: Escribiendo en %s...
+
+EN: Writing to:\n%s\n\nThe existing %s and %s are kept as .BAK.\nImportant: the image must not be attached in the emulator (86Box) while writing, and keep a copy of any image that matters.\n\nGo ahead?
+TR: Escribiendo en:\n%s\n\nLos %s y %s existentes se conservan como .BAK.\nImportante: la imagen no debe estar conectada en el emulador (86Box) mientras se escribe, y guarde una copia de cualquier imagen importante.\n\n¿Continuar?
+
+EN: XMS + upper memory + EMS (386+)
+TR: XMS + memoria superior + EMS (386+)
+
+EN: XMS + upper memory, no EMS (386+)
+TR: XMS + memoria superior, sin EMS (386+)
+
+EN: XMS only (HIMEM), DOS high
+TR: Solo XMS (HIMEM), DOS en memoria alta
+
+EN: Yes: continue without them\nNo: open the Drivers window (download or browse)\nCancel: go back
+TR: Sí: continuar sin ellos\nNo: abrir la ventana Controladores (descargar o seleccionar)\nCancelar: volver
+
+EN: You can change everything later in the editor (New..., Building blocks...).
+TR: Puede cambiarlo todo más tarde en el editor (Nuevo..., Bloques...).
+
+EN: [default]
+TR: [predeterminada]
+
+EN: already here
+TR: ya está aquí
+
+EN: an existing file is not overwritten
+TR: un archivo existente no se sobrescribe
+
+EN: automatic
+TR: automático
+
+EN: built-in
+TR: integrado
+
+EN: cannot read %s from the source: %v
+TR: no se puede leer %s del origen: %v
+
+EN: could not save %s: %v
+TR: no se pudo guardar %s: %v
+
+EN: could not write %s: %v
+TR: no se pudo escribir %s: %v
+
+EN: damaged FAT (circular chain)
+TR: FAT dañada (cadena circular)
+
+EN: damaged FAT chain
+TR: cadena FAT dañada
+
+EN: downloaded
+TR: descargado
+
+EN: drive %c: is in use (close Explorer windows and programs using it): %v
+TR: la unidad %c: está en uso (cierre las ventanas del Explorador y los programas que la usen): %v
+
+EN: e.g. 15,1
+TR: p. ej. 15,1
+
+EN: empty ID
+TR: ID vacío
+
+EN: empty path
+TR: ruta vacía
+
+EN: extended
+TR: extendida
+
+EN: failed
+TR: falló
+
+EN: forever
+TR: sin límite
+
+EN: invalid boot sector (BPB)
+TR: sector de arranque no válido (BPB)
+
+EN: invalid name: %q
+TR: nombre no válido: %q
+
+EN: invalid project file: %v
+TR: archivo de proyecto no válido: %v
+
+EN: label: %s
+TR: etiqueta: %s
+
+EN: mTCP (DHCP, PING, FTP, HTGET)
+TR: mTCP (DHCP, PING, FTP, HTGET)
+
+EN: made by the program
+TR: creado por el programa
+
+EN: missing
+TR: falta
+
+EN: mouse
+TR: ratón
+
+EN: network
+TR: red
+
+EN: no DOS
+TR: sin DOS
+
+EN: no download address; browse for it
+TR: sin dirección de descarga; selecciónelo
+
+EN: no memory manager
+TR: sin gestor de memoria
+
+EN: no partitions (empty or unknown content)
+TR: sin particiones (vacío o contenido desconocido)
+
+EN: no valid FAT boot sector
+TR: no hay un sector de arranque FAT válido
+
+EN: not a zip file: %v
+TR: no es un archivo zip: %v
+
+EN: partition %d, FAT%d, %s
+TR: partición %d, FAT%d, %s
+
+EN: partition %d: 
+TR: partición %d: 
+
+EN: present
+TR: presente
+
+EN: read error at %s: %v
+TR: error de lectura en %s: %v
+
+EN: read-back error at %s: %v
+TR: error al volver a leer en %s: %v
+
+EN: sound
+TR: sonido
+
+EN: system source: %v
+TR: origen del sistema: %v
+
+EN: the FAT cannot be read: %v
+TR: no se puede leer la FAT: %v
+
+EN: the FAT partition cannot be read: %v
+TR: no se puede leer la partición FAT: %v
+
+EN: the disk image does not contain the needed files
+TR: la imagen de disco no contiene los archivos necesarios
+
+EN: the file is too short to be a disk image
+TR: el archivo es demasiado corto para ser una imagen de disco
+
+EN: the image does not have enough free space
+TR: la imagen no tiene suficiente espacio libre
+
+EN: the new image cannot be opened: %v
+TR: no se puede abrir la nueva imagen: %v
+
+EN: the partition table has no FAT partition (is the image formatted?)
+TR: la tabla de particiones no tiene ninguna partición FAT (¿está formateada la imagen?)
+
+EN: the root directory is full (at most %d entries)
+TR: el directorio raíz está lleno (%d entradas como máximo)
+
+EN: the zip does not contain the needed files
+TR: el zip no contiene los archivos necesarios
+
+EN: this is a dynamic (growing) VHD; only fixed-size VHDs are supported. Convert it to fixed size or use a raw .img image
+TR: es un VHD dinámico (que crece); solo se admiten VHD de tamaño fijo. Conviértalo a tamaño fijo o use una imagen .img sin formato
+
+EN: this is not a fixed-size VHD; only fixed-size VHDs are supported
+TR: no es un VHD de tamaño fijo; solo se admiten VHD de tamaño fijo
+
+EN: type %02Xh
+TR: tipo %02Xh
+
+EN: unknown image format (no boot sector and no partition table)
+TR: formato de imagen desconocido (sin sector de arranque ni tabla de particiones)
+
+EN: untitled project
+TR: proyecto sin título
+
+EN: whole disk, no partition table: 
+TR: disco completo, sin tabla de particiones: 
+
+EN: write error at %s: %v
+TR: error de escritura en %s: %v
+
+EN: » Common part (after every item)
+TR: » Parte común (después de cada opción)
+
+EN: » Common part (before every item)
+TR: » Parte común (antes de cada opción)

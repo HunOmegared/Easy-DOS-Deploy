@@ -261,26 +261,39 @@ func (b *bootWin) layout() {
 	rh := s(23)
 	lh := s(18)
 	cw := w - 2*m
+	lp, bp := s(6), s(24) // padding of labels and buttons
+	col := fitW(s(110), lp, b.c[bwLblKind], b.c[bwLblProfile], b.c[bwLblMenu], b.c[bwLblLabel])
+	sb := fitW(s(100), bp, b.c[bwSrcBrowse], b.c[bwMenuEdit], b.c[bwDrvBtn], b.c[bwOutBrowse])
 	y := m
 	lbl := func(id, x, ww int) { move(b.c[id], x, y+s(4), ww, lh) }
-	lbl(bwLblKind, m, s(110))
-	move(b.c[bwKind], m+s(110), y, s(220), rh+s(160))
+	lbl(bwLblKind, m, col)
+	move(b.c[bwKind], m+col, y, s(220), rh+s(160))
 	y += rh + s(10)
-	lbl(bwLblProfile, m, s(110))
-	move(b.c[bwProfile], m+s(110), y, cw-s(110)-2*s(116), rh+s(160))
-	move(b.c[bwSaveProf], w-m-2*s(110)-s(6), y, s(110), rh)
-	move(b.c[bwDelProf], w-m-s(110), y, s(110), rh)
+	lbl(bwLblProfile, m, col)
+	pb := fitW(s(110), bp, b.c[bwSaveProf], b.c[bwDelProf])
+	move(b.c[bwProfile], m+col, y, cw-col-2*pb-s(12), rh+s(160))
+	move(b.c[bwSaveProf], w-m-2*pb-s(6), y, pb, rh)
+	move(b.c[bwDelProf], w-m-pb, y, pb, rh)
 	y += rh + s(8)
 	x := m
 	for _, p := range []struct{ l, e, lw int }{{bwLblC, bwC, 70}, {bwLblH, bwH, 50}, {bwLblS, bwS, 100}} {
-		move(b.c[p.l], x, y+s(4), s(p.lw), lh)
-		x += s(p.lw)
+		lw := fitW(s(p.lw), lp, b.c[p.l])
+		move(b.c[p.l], x, y+s(4), lw, lh)
+		x += lw
 		move(b.c[p.e], x, y, s(60), rh)
 		x += s(60) + s(14)
 	}
-	half := (w - m - x - s(6)) / 2
-	move(b.c[bwFromImg], x, y, half, rh)
-	move(b.c[bwFromBios], x+half+s(6), y, w-m-x-half-s(6), rh)
+	// the two geometry buttons go on the same row if they fit, else below
+	g1 := fitW(0, bp, b.c[bwFromImg])
+	g2 := fitW(0, bp, b.c[bwFromBios])
+	if half := (w - m - x - s(6)) / 2; g1 <= half && g2 <= half {
+		move(b.c[bwFromImg], x, y, half, rh)
+		move(b.c[bwFromBios], x+half+s(6), y, w-m-x-half-s(6), rh)
+	} else {
+		y += rh + s(4)
+		move(b.c[bwFromImg], m, y, g1, rh)
+		move(b.c[bwFromBios], m+g1+s(6), y, g2, rh)
+	}
 	y += rh + s(6)
 	move(b.c[bwHelp], m, y, cw, 2*lh)
 	y += 2*lh + s(4)
@@ -293,28 +306,29 @@ func (b *bootWin) layout() {
 	y += rh + s(6)
 	move(b.c[bwLblSource], m, y, cw, lh)
 	y += lh + s(2)
-	move(b.c[bwSource], m, y, cw-s(110), rh)
-	move(b.c[bwSrcBrowse], w-m-s(100), y, s(100), rh)
+	move(b.c[bwSource], m, y, cw-sb-s(10), rh)
+	move(b.c[bwSrcBrowse], w-m-sb, y, sb, rh)
 	y += rh + s(6)
 	move(b.c[bwCopyAll], m, y, cw, rh)
 	y += rh
 	y += s(6)
-	move(b.c[bwLblMenu], m, y+s(4), s(110), lh)
-	move(b.c[bwMenuKind], m+s(110), y, cw-s(110)-s(110), rh+s(160))
-	move(b.c[bwMenuEdit], w-m-s(100), y, s(100), rh)
+	move(b.c[bwLblMenu], m, y+s(4), col, lh)
+	move(b.c[bwMenuKind], m+col, y, cw-col-sb-s(10), rh+s(160))
+	move(b.c[bwMenuEdit], w-m-sb, y, sb, rh)
 	y += rh + s(6)
-	move(b.c[bwDrvInfo], m+s(110), y+s(4), cw-s(110)-s(110), 2*lh)
-	move(b.c[bwDrvBtn], w-m-s(100), y, s(100), rh)
+	move(b.c[bwDrvInfo], m+col, y+s(4), cw-col-sb-s(10), 2*lh)
+	move(b.c[bwDrvBtn], w-m-sb, y, sb, rh)
 	y += 2*lh + s(10)
-	move(b.c[bwLblLabel], m, y+s(4), s(110), lh)
-	move(b.c[bwLabel], m+s(110), y, s(140), rh)
+	move(b.c[bwLblLabel], m, y+s(4), col, lh)
+	move(b.c[bwLabel], m+col, y, s(140), rh)
 	y += rh + s(10)
 	move(b.c[bwLblOut], m, y, cw, lh)
 	y += lh + s(2)
-	move(b.c[bwOut], m, y, cw-s(110), rh)
-	move(b.c[bwOutBrowse], w-m-s(100), y, s(100), rh)
-	move(b.c[bwCreate], w-m-2*s(110)-s(8), h-m-s(28), s(110), s(28))
-	move(b.c[bwClose], w-m-s(110), h-m-s(28), s(110), s(28))
+	move(b.c[bwOut], m, y, cw-sb-s(10), rh)
+	move(b.c[bwOutBrowse], w-m-sb, y, sb, rh)
+	bw := fitW(s(110), bp, b.c[bwCreate], b.c[bwClose])
+	move(b.c[bwCreate], w-m-2*bw-s(8), h-m-s(28), bw, s(28))
+	move(b.c[bwClose], w-m-bw, h-m-s(28), bw, s(28))
 }
 
 func atoiU(s string) uint32 {
@@ -672,9 +686,10 @@ func (p *pickWin) layout() {
 	bh := s(28)
 	move(p.c[pkHead], m, m, w-2*m, s(36))
 	move(p.c[pkList], m, m+s(40), w-2*m, h-3*m-s(40)-bh)
-	move(p.c[pkRefresh], m, h-m-bh, s(110), bh)
-	move(p.c[pkOK], w-m-2*s(100)-s(8), h-m-bh, s(100), bh)
-	move(p.c[pkCancel], w-m-s(100), h-m-bh, s(100), bh)
+	move(p.c[pkRefresh], m, h-m-bh, fitW(s(110), s(24), p.c[pkRefresh]), bh)
+	bw := fitW(s(100), s(24), p.c[pkOK], p.c[pkCancel])
+	move(p.c[pkOK], w-m-2*bw-s(8), h-m-bh, bw, bh)
+	move(p.c[pkCancel], w-m-bw, h-m-bh, bw, bh)
 }
 
 func (p *pickWin) refresh() {
@@ -999,8 +1014,9 @@ func (a *app) confirmTyped(text, want string, alarm bool, onOK func()) {
 	move(cw.c[cfText], m, m, w-2*m, h-3*m-s(28)-s(60))
 	move(cw.c[cfLbl], m, h-2*m-s(28)-s(50), w-2*m, s(18))
 	move(cw.c[cfEdit], m, h-2*m-s(28)-s(28), s(120), s(23))
-	move(cw.c[cfOK], w-m-2*s(110)-s(8), h-m-s(28), s(110), s(28))
-	move(cw.c[cfCancel], w-m-s(110), h-m-s(28), s(110), s(28))
+	bw := fitW(s(110), s(24), cw.c[cfOK], cw.c[cfCancel])
+	move(cw.c[cfOK], w-m-2*bw-s(8), h-m-s(28), bw, s(28))
+	move(cw.c[cfCancel], w-m-bw, h-m-s(28), bw, s(28))
 	enable(cw.c[cfOK], false)
 	enable(a.hwnd, false)
 	if a.boot != nil {
@@ -1116,18 +1132,22 @@ func (a *app) openCalc() {
 	y := m + s(82)
 	x := m
 	for _, p := range []struct{ l, e, lw int }{{gcLblC, gcC, 70}, {gcLblH, gcH, 50}, {gcLblS, gcS, 100}} {
-		move(w.c[p.l], x, y+s(4), s(p.lw), s(18))
-		x += s(p.lw)
+		lw := fitW(s(p.lw), s(6), w.c[p.l])
+		move(w.c[p.l], x, y+s(4), lw, s(18))
+		x += lw
 		move(w.c[p.e], x, y, s(60), s(23))
 		x += s(60) + s(14)
 	}
 	y += s(36)
-	move(w.c[gcLblMode], m, y+s(4), s(70), s(18))
-	move(w.c[gcMode], m+s(70), y, s(260), s(120))
+	ml := fitW(s(70), s(6), w.c[gcLblMode])
+	move(w.c[gcLblMode], m, y+s(4), ml, s(18))
+	move(w.c[gcMode], m+ml, y, s(260), s(120))
 	y += s(40)
 	move(w.c[gcResult], m, y, cw-2*m, s(60))
-	move(w.c[gcOK], cw-m-s(150)-s(8)-s(100), ch-m-s(28), s(150), s(28))
-	move(w.c[gcCancel], cw-m-s(100), ch-m-s(28), s(100), s(28))
+	ow := fitW(s(150), s(24), w.c[gcOK])
+	cnw := fitW(s(100), s(24), w.c[gcCancel])
+	move(w.c[gcOK], cw-m-ow-s(8)-cnw, ch-m-s(28), ow, s(28))
+	move(w.c[gcCancel], cw-m-cnw, ch-m-s(28), cnw, s(28))
 	w.update()
 	enable(a.boot.hwnd, false)
 	pShowWindow.Call(w.hwnd, SW_SHOW)

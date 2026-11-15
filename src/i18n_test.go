@@ -85,24 +85,32 @@ func TestLanguageFileRoundTrip(t *testing.T) {
 			t.Fatalf("%q: %q vs %q", k, l.Texts[k], v)
 		}
 	}
-	// a partial German file
-	de := "@name = Deutsch\n\nEN: &File\nTR: &Datei\n\nEN: Volume: %s\nTR: Laufwerk: %s\n\nEN: OK\nTR: \n"
-	os.WriteFile(filepath.Join(dir, "de.lng"), []byte("\ufeff"+de), 0644)
+	// a partial file of a new language
+	nl := "@name = Nederlands\n\nEN: &File\nTR: &Bestand\n\nEN: Volume: %s\nTR: Volume: %s!\n\nEN: OK\nTR: \n"
+	os.WriteFile(filepath.Join(dir, "nl.lng"), []byte("\ufeff"+nl), 0644)
 	if errs := LoadLanguages(dir); len(errs) > 0 {
 		t.Fatal(errs)
 	}
 	defer SetLanguage("hu")
-	if !SetLanguage("de") || T("&File") != "&Datei" || T("Volume: %s", "C:") != "Laufwerk: C:" || T("OK") != "OK" || T("Close") != "Close" {
+	if !SetLanguage("nl") || T("&File") != "&Bestand" || T("Volume: %s", "C:") != "Volume: C:!" || T("OK") != "OK" || T("Close") != "Close" {
 		t.Fatal(T("&File"), T("Volume: %s", "C:"))
+	}
+	// a file for a built-in language overrides some of its texts only
+	os.WriteFile(filepath.Join(dir, "de.lng"), []byte("EN: OK\nTR: Gut\n"), 0644)
+	if errs := LoadLanguages(dir); len(errs) > 0 {
+		t.Fatal(errs)
+	}
+	if !SetLanguage("de") || T("OK") != "Gut" || T("&File") != "&Datei" || T("Close") != "Schließen" {
+		t.Fatal(T("OK"), T("&File"), T("Close"))
 	}
 	found := false
 	for _, l := range LanguageList() {
-		if l.Name == "Deutsch" {
+		if l.Name == "Nederlands" {
 			found = true
 		}
 	}
 	if !found {
-		t.Fatal("de not listed")
+		t.Fatal("nl not listed")
 	}
 	os.WriteFile(filepath.Join(dir, "bad.lng"), []byte("TR: x\n"), 0644)
 	if errs := LoadLanguages(dir); len(errs) != 1 {
@@ -174,5 +182,70 @@ func TestCatalogEditing(t *testing.T) {
 	os.WriteFile(filepath.Join(s.Dir, catalogFile), []byte("{broken"), 0644)
 	if err := s2.Reload(); err == nil || s2.Find("ne2000") == nil {
 		t.Fatal("broken json")
+	}
+}
+
+// The built-in language files have every text, with the same placeholders,
+// and no text that the program does not use.
+func TestBuiltinLanguages(t *testing.T) {
+	for _, code := range []string{"de", "fr", "es", "it"} {
+		l := builtin[code]
+		if l == nil || l.Name == code {
+			t.Fatalf("%s is not built in", code)
+		}
+		for k := range huTexts {
+			tr, ok := l.Texts[k]
+			if !ok || tr == "" {
+				t.Errorf("%s: not translated: %q", code, k)
+				continue
+			}
+			a := strings.Join(rePlace.FindAllString(k, -1), " ")
+			b := strings.Join(rePlace.FindAllString(tr, -1), " ")
+			if a != b {
+				t.Errorf("%s: placeholders differ in %q: %q vs %q", code, k, a, b)
+			}
+			if strings.Contains(k, "&") != strings.Contains(tr, "&") {
+				t.Errorf("%s: menu key (&) missing or extra in %q: %q", code, k, tr)
+			}
+		}
+		for k := range l.Texts {
+			if _, ok := huTexts[k]; !ok {
+				t.Errorf("%s: unused translation: %q", code, k)
+			}
+		}
+	}
+}
+
+// Menu items of one menu need different keys (the letter after &).
+func TestMenuKeys(t *testing.T) {
+	menus := [][]string{
+		{"&File", "&Import", "&Output", "Dis&k image", "&Drivers", "&Language", "&Help"},
+		{"Start &wizard...", "&New from template", "&Open project...", "&Save project", "Save project &as...", "E&xit"},
+		{"Existing menu from &disk image...", "Existing menu from &folder..."},
+		{"&Preview", "Save to &folder...", "Write to disk &image..."},
+		{"&New bootable disk image...", "&Back up a card to an image file...", "&Write an image to a card...",
+			"Save &GEOM.COM (shows the geometry on the target machine)...", "Put GEOM.COM onto a boot &floppy image..."},
+		{"&Manage drivers...", "Open driver &folder"},
+		{"&Make a translation file...", "&Reload language files", "Open language &folder"},
+		{"&Yes", "&No"},
+	}
+	defer SetLanguage("hu")
+	for _, l := range LanguageList() {
+		SetLanguage(l.Code)
+		for _, m := range menus {
+			seen := map[rune]string{}
+			for _, k := range m {
+				s := []rune(strings.ToLower(T(k)))
+				for i, r := range s {
+					if r == '&' && i+1 < len(s) {
+						if o, ok := seen[s[i+1]]; ok {
+							t.Errorf("%s: %q and %q use the same key", l.Code, o, T(k))
+						}
+						seen[s[i+1]] = T(k)
+						break
+					}
+				}
+			}
+		}
 	}
 }

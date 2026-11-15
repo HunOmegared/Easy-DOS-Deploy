@@ -138,27 +138,29 @@ func (w *wizardWin) layout() {
 		move(w.c[id], m, y, lw, s(70))
 		y += s(76)
 	}
-	move(w.c[wzShowStart], m, ch-m-s(24), s(300), s(24))
+	move(w.c[wzShowStart], m, ch-m-s(24), fitW(s(300), s(28), w.c[wzShowStart]), s(24))
+	col := fitW(s(110), s(6), w.c[wzLblDOS], w.c[wzLblMenu])
+	bw := fitW(s(110), s(24), w.c[wzBack], w.c[wzNext])
 
 	move(w.c[wzHead2], m, m, lw, s(24))
-	move(w.c[wzLblDOS], m, m+s(48), s(110), s(20))
-	move(w.c[wzDOS], m+s(110), m+s(44), lw-s(110), s(200))
-	move(w.c[wzLblMenu], m, m+s(88), s(110), s(20))
-	move(w.c[wzMenu], m+s(110), m+s(84), lw-s(110), s(200))
-	move(w.c[wzMenuDesc], m+s(110), m+s(120), lw-s(110), s(200))
-	move(w.c[wzBack], cw-m-2*s(110)-s(8), ch-m-s(28), s(110), s(28))
-	move(w.c[wzNext], cw-m-s(110), ch-m-s(28), s(110), s(28))
+	move(w.c[wzLblDOS], m, m+s(48), col, s(20))
+	move(w.c[wzDOS], m+col, m+s(44), lw-col, s(200))
+	move(w.c[wzLblMenu], m, m+s(88), col, s(20))
+	move(w.c[wzMenu], m+col, m+s(84), lw-col, s(200))
+	move(w.c[wzMenuDesc], m+col, m+s(120), lw-col, s(200))
+	move(w.c[wzBack], cw-m-2*bw-s(8), ch-m-s(28), bw, s(28))
+	move(w.c[wzNext], cw-m-bw, ch-m-s(28), bw, s(28))
 
 	move(w.c[wzHead3], m, m, lw, s(24))
 	move(w.c[wzFromImage], m, m+s(40), lw, s(70))
 	move(w.c[wzFromDir], m, m+s(116), lw, s(70))
-	move(w.c[wzBack3], cw-m-s(110), ch-m-s(28), s(110), s(28))
+	move(w.c[wzBack3], cw-m-bw, ch-m-s(28), bw, s(28))
 
 	move(w.c[wzHead4], m, m, lw, s(24))
 	move(w.c[wzHasCard], m, m+s(40), lw, s(70))
 	move(w.c[wzSetup], m, m+s(116), lw, s(70))
 	move(w.c[wzBootFloppy], m, m+s(192), lw, s(70))
-	move(w.c[wzBack4], cw-m-s(110), ch-m-s(28), s(110), s(28))
+	move(w.c[wzBack4], cw-m-bw, ch-m-s(28), bw, s(28))
 }
 
 func (w *wizardWin) show(page int) {

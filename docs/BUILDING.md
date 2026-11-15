@@ -25,10 +25,10 @@ it. To make it again (for example after changing the version number):
 
 ```
 cd src
-go generate
+go run ./tools/winres
 ```
 
-(`go generate` runs `go run ./tools/winres`.)
+(On Windows, `go generate` does the same.)
 
 ## 16-bit code
 
@@ -39,3 +39,11 @@ assembler in Python; see [asm/README.md](../asm/README.md).
 
 Every push is tested and built; the program is attached to the run as an
 artifact. A `v*` tag (for example `v0.5.0`) also makes a release with a zip.
+
+## Texts and translations
+
+Every text the user sees is written as `T("English text")` in the code. A
+test checks that each of them is in the Hungarian table (`src/i18n_hu.go`) and
+in the built-in German, French, Spanish and Italian files (`src/lang/*.lng`),
+with the same `%s` / `%d` placeholders, and that no menu has two items with the
+same `&` key. So a new or changed text needs all five translations.

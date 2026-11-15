@@ -265,7 +265,7 @@ var huTexts = map[string]string{
 	"&Preview":                               "&Előnézet",
 	"Save to &folder...":                     "Mentés &mappába...",
 	"Write to disk &image...":                "Írás &lemezképbe...",
-	"Dis&k image":                            "Lemez&kép",
+	"Dis&k image":                            "&Lemezkép",
 	"&New bootable disk image...":            "Új &bootolható lemezkép...",
 	"&Back up a card to an image file...":    "Kártya &mentése képfájlba...",
 	"&Write an image to a card...":           "Kép &kiírása kártyára...",

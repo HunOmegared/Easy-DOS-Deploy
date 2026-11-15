@@ -485,6 +485,7 @@ func (a *app) layout() {
 	x := m
 	y := m
 	place := func(lbl, lw, cw int, id int, comboExtra int) {
+		lw = fitW(lw, s(6), a.c[lbl])
 		move(a.c[lbl], x, y+s(4), lw, lblH)
 		x += lw
 		move(a.c[id], x, y, cw, rowH+comboExtra)
@@ -501,22 +502,29 @@ func (a *app) layout() {
 
 	top := y + rowH + s(12)
 	bottomH := s(30)
-	listW := s(330)
+	listBtns := []int{idAdd, idBlocks, idCopy, idDel, idUp, idDown}
+	bw := (s(330) - 2*s(4)) / 3
+	for _, id := range listBtns {
+		bw = fitW(bw, s(20), a.c[id])
+	}
+	listW := 3*bw + 2*s(4)
 	btnH := s(26)
 	listH := h - top - bottomH - 2*btnH - s(4) - s(3)*m
 	move(a.c[idList], m, top, listW, listH)
-	bw := (listW - 2*s(4)) / 3
-	for i, id := range []int{idAdd, idBlocks, idCopy, idDel, idUp, idDown} {
+	for i, id := range listBtns {
 		move(a.c[id], m+(i%3)*(bw+s(4)), top+listH+s(6)+(i/3)*(btnH+s(4)), bw, btnH)
 	}
 
 	ex := m + listW + m
 	ew := w - ex - m
 	yy := top
-	move(a.c[idLblID], ex, yy+s(4), s(72), lblH)
-	move(a.c[idID], ex+s(72), yy, s(90), rowH)
-	move(a.c[idLblTitle], ex+s(180), yy+s(4), s(116), lblH)
-	move(a.c[idTitle], ex+s(296), yy, ew-s(296), rowH)
+	lw1 := fitW(s(72), s(6), a.c[idLblID])
+	lw2 := fitW(s(116), s(6), a.c[idLblTitle])
+	move(a.c[idLblID], ex, yy+s(4), lw1, lblH)
+	move(a.c[idID], ex+lw1, yy, s(90), rowH)
+	tx := ex + lw1 + s(108)
+	move(a.c[idLblTitle], tx, yy+s(4), lw2, lblH)
+	move(a.c[idTitle], tx+lw2, yy, ex+ew-tx-lw2, rowH)
 	yy += rowH + s(10)
 	rest := h - yy - bottomH - 2*m - 2*lblH - s(26)
 	cfgH := rest * 45 / 100
@@ -532,7 +540,7 @@ func (a *app) layout() {
 	move(a.c[idHint], ex, yy, ew, lblH)
 
 	by := h - m - bottomH
-	bw2 := s(150)
+	bw2 := fitW(s(150), s(24), a.c[idWriteImg], a.c[idSaveDir], a.c[idPreview])
 	move(a.c[idWriteImg], w-m-bw2, by, bw2, bottomH)
 	move(a.c[idSaveDir], w-m-2*bw2-s(8), by, bw2, bottomH)
 	move(a.c[idPreview], w-m-3*bw2-s(16), by, bw2, bottomH)
@@ -1339,8 +1347,9 @@ func (a *app) layoutPreview() {
 	move(a.prevC[pvLblA], 2*m+half, m, half, lh)
 	move(a.prevC[pvConfig], m, m+lh+s(4), half, eh)
 	move(a.prevC[pvAuto], 2*m+half, m+lh+s(4), half, eh)
-	move(a.prevC[pvNotes], m, h-m-bh+s(6), w-3*m-s(110), bh)
-	move(a.prevC[pvClose], w-m-s(110), h-m-bh, s(110), bh)
+	cbw := fitW(s(110), s(24), a.prevC[pvClose])
+	move(a.prevC[pvNotes], m, h-m-bh+s(6), w-3*m-cbw, bh)
+	move(a.prevC[pvClose], w-m-cbw, h-m-bh, cbw, bh)
 }
 
 func previewProc(hwnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {
@@ -1441,8 +1450,9 @@ func (d *drvWin) layout() {
 	row := func(y int, ids []int, widths []int) int {
 		x := m
 		for i, id := range ids {
-			move(d.c[id], x, y, s(widths[i]), bh)
-			x += s(widths[i]) + s(6)
+			bw := fitW(s(widths[i]), s(24), d.c[id])
+			move(d.c[id], x, y, bw, bh)
+			x += bw + s(6)
 		}
 		return x
 	}
@@ -1450,8 +1460,9 @@ func (d *drvWin) layout() {
 	row(y1, []int{dvNew, dvEdit, dvDelete, dvReset}, []int{90, 90, 90, 170})
 	y2 := h - m - bh
 	x := row(y2, []int{dvDownload, dvBrowse, dvWeb, dvFolder}, []int{150, 100, 90, 120})
-	move(d.c[dvStatus], x+s(6), y2+s(6), w-x-s(130)-2*m, bh)
-	move(d.c[dvClose], w-m-s(110), y2, s(110), bh)
+	cw := fitW(s(110), s(24), d.c[dvClose])
+	move(d.c[dvStatus], x+s(6), y2+s(6), w-x-cw-s(20)-2*m, bh)
+	move(d.c[dvClose], w-m-cw, y2, cw, bh)
 }
 
 func (d *drvWin) selected(i int) bool {
@@ -1904,8 +1915,9 @@ func (e *editWin) layout() {
 	lab(edLblInfo)
 	field(edInfo, rh)
 	move(e.c[edNote], m, y, cw, lh)
-	move(e.c[edOK], w-m-2*s(100)-s(8), h-m-bh, s(100), bh)
-	move(e.c[edCancel], w-m-s(100), h-m-bh, s(100), bh)
+	bw := fitW(s(100), s(24), e.c[edOK], e.c[edCancel])
+	move(e.c[edOK], w-m-2*bw-s(8), h-m-bh, bw, bh)
+	move(e.c[edCancel], w-m-bw, h-m-bh, bw, bh)
 }
 
 func (e *editWin) close() {

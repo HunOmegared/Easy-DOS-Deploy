@@ -1,7 +1,14 @@
 # Translating
 
-The program is in English, with a built-in Hungarian translation. Other
-languages can be added with a plain text file, without building the program.
+The program is in English, with built-in German, French, Spanish, Italian and
+Hungarian translations. Other languages can be added with a plain text file,
+without building the program.
+
+The German, French, Spanish and Italian translations were made with the help of
+an AI and have not been checked by native speakers yet. Corrections are very
+welcome. Their files are in [src/lang](../src/lang); a file with the same name
+in the program's `lang` folder overrides the built-in one, text by text, so a
+correction can be tried without building the program.
 
 1. *Language > Make a translation file.* The program writes a UTF-8 text file
    with every English text on an `EN:` line and an empty `TR:` line under it.

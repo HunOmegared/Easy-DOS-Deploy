@@ -15,8 +15,8 @@ import (
 )
 
 const (
-	version     = "0.5.0"
-	versionMS   = 0<<16 | 5 // major.minor
+	version     = "0.6.0"
+	versionMS   = 0<<16 | 6 // major.minor
 	versionLS   = 0<<16 | 0 // patch.build
 	productName = "Easy Retro System Builder"
 	company     = "HunOmegared"
@@ -27,7 +27,7 @@ const (
 
 const manifest = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
-  <assemblyIdentity type="win32" name="HunOmegared.EasyRetroSystemBuilder" version="0.5.0.0" processorArchitecture="amd64"/>
+  <assemblyIdentity type="win32" name="HunOmegared.EasyRetroSystemBuilder" version="0.6.0.0" processorArchitecture="amd64"/>
   <description>Easy Retro System Builder</description>
   <dependency>
     <dependentAssembly>

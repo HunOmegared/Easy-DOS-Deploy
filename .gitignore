@@ -3,9 +3,11 @@
 dist/
 
 # Created next to the program when it runs
-drivers/
-lang/
-settings.json
+/drivers/
+/src/drivers/
+/lang/
+/settings.json
+/src/settings.json
 
 # Disk images used for testing
 *.img

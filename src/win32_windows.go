@@ -4,7 +4,9 @@ package main
 
 import (
 	"os"
+	"strings"
 	"syscall"
+	"unicode/utf16"
 	"unsafe"
 )
 
@@ -56,6 +58,8 @@ var (
 	pCreateFontW    = gdi32.NewProc("CreateFontW")
 	pGetDeviceCaps  = gdi32.NewProc("GetDeviceCaps")
 	pGetStockObject = gdi32.NewProc("GetStockObject")
+	pSelectObject   = gdi32.NewProc("SelectObject")
+	pGetTextExtent  = gdi32.NewProc("GetTextExtentPoint32W")
 
 	pGetModuleHandleW = kernel32.NewProc("GetModuleHandleW")
 
@@ -77,6 +81,7 @@ const (
 	WM_CLOSE          = 0x0010
 	WM_GETMINMAXINFO  = 0x0024
 	WM_SETFONT        = 0x0030
+	WM_GETFONT        = 0x0031
 	WM_KEYDOWN        = 0x0100
 	WM_COMMAND        = 0x0111
 	WM_CTLCOLORSTATIC = 0x0138
@@ -292,6 +297,45 @@ func enable(h uintptr, on bool) {
 		v = 1
 	}
 	pEnableWindow.Call(h, v)
+}
+
+// textWidth is the width of a control's text in its own font, in pixels
+// (the & of menu keys left out, longest line of a multi-line text).
+func textWidth(h uintptr) int {
+	dc, _, _ := pGetDC.Call(h)
+	if dc == 0 {
+		return 0
+	}
+	defer pReleaseDC.Call(h, dc)
+	if f := sendMsg(h, WM_GETFONT, 0, 0); f != 0 {
+		old, _, _ := pSelectObject.Call(dc, f)
+		defer pSelectObject.Call(dc, old)
+	}
+	max := 0
+	for _, line := range strings.Split(strings.ReplaceAll(getText(h), "&", ""), "\n") {
+		u := utf16.Encode([]rune(strings.TrimRight(line, "\r")))
+		if len(u) == 0 {
+			continue
+		}
+		var sz struct{ cx, cy int32 }
+		pGetTextExtent.Call(dc, uintptr(unsafe.Pointer(&u[0])), uintptr(len(u)), uintptr(unsafe.Pointer(&sz)))
+		if int(sz.cx) > max {
+			max = int(sz.cx)
+		}
+	}
+	return max
+}
+
+// fitW is the width a control needs: at least min, or its text plus pad
+// (the frame of a button, the box of a check box).
+func fitW(min, pad int, hs ...uintptr) int {
+	w := min
+	for _, h := range hs {
+		if t := textWidth(h) + pad; t > w {
+			w = t
+		}
+	}
+	return w
 }
 
 func move(h uintptr, x, y, w, hh int) {

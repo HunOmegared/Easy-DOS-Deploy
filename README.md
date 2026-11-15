@@ -46,8 +46,9 @@ FreeDOS images and other machines have not been tested on real hardware yet.
   program.
 * **CF cards and IDE disks:** back up a card to an image, and write an image
   back, safely. See the [CF card guide](docs/CF-GUIDE.md).
-* **English and Hungarian** user interface; other languages can be added with a
-  text file. See [Translating](docs/TRANSLATING.md).
+* **User interface in English, German, French, Spanish, Italian and
+  Hungarian;** other languages can be added with a text file. See
+  [Translating](docs/TRANSLATING.md).
 
 ## Quick start
 
@@ -75,6 +76,7 @@ that folder is writable (portable use), otherwise in
 | Folder | Content |
 |---|---|
 | `src/` | the Windows program (Go) and its tests |
+| `src/lang/` | the built-in German, French, Spanish and Italian translations |
 | `src/tools/winres/` | makes the icon, version information and manifest of the exe |
 | `asm/` | the 16-bit code: the MBR boot code and `GEOM.COM`, with a tiny assembler |
 | `docs/` | the guides above and the screenshot |
