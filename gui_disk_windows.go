@@ -24,6 +24,8 @@ const (
 	bwS
 	bwTotal
 	bwFromImg
+	bwFromBios
+	bwBlank
 	bwPlan
 	bwSource
 	bwSrcBrowse
@@ -66,7 +68,7 @@ func (a *app) openBootWin() {
 	}
 	b := &bootWin{c: map[int]uintptr{}}
 	a.boot = b
-	b.hwnd = createWindow(0, "EasyRSBBoot", T("New bootable disk image"), WS_OVERLAPPEDWINDOW&^0x00050000, cwDefault, cwDefault, a.s(700), a.s(650), 0, 0) // no owner, so it does not stay above the main window
+	b.hwnd = createWindow(0, "EasyRSBBoot", T("New bootable disk image"), WS_OVERLAPPEDWINDOW&^0x00050000, cwDefault, cwDefault, a.s(700), a.s(690), 0, 0) // no owner, so it does not stay above the main window
 	mk := func(id int, class, text string, style, ex uint32) uintptr {
 		h := createWindow(ex, class, text, WS_CHILD|WS_VISIBLE|style, 0, 0, 10, 10, b.hwnd, uintptr(id))
 		sendMsg(h, WM_SETFONT, a.font, 1)
@@ -87,6 +89,8 @@ func (a *app) openBootWin() {
 	mk(bwLblS, "STATIC", T("Sectors/track:"), 0, 0)
 	mk(bwS, "EDIT", "", edit, WS_EX_CLIENTEDGE)
 	mk(bwFromImg, "BUTTON", T("From a card backup..."), WS_TABSTOP, 0)
+	mk(bwFromBios, "BUTTON", T("From BIOS setup..."), WS_TABSTOP, 0)
+	mk(bwBlank, "BUTTON", T("Empty image: I install DOS on it myself (e.g. DOS Setup in 86Box)"), WS_TABSTOP|BS_AUTOCHECKBOX, 0)
 	mk(bwLblTotal, "STATIC", T("Image size in sectors (empty: cylinders × heads × sectors):"), 0, 0)
 	mk(bwTotal, "EDIT", "", edit, WS_EX_CLIENTEDGE)
 	mk(bwHelp, "STATIC", T("Enter the geometry DOS gets from the target machine's BIOS (MSD.EXE, Disk Drives), not the one in BIOS setup."), 0, 0)
@@ -274,7 +278,9 @@ func (b *bootWin) layout() {
 		move(b.c[p.e], x, y, s(60), rh)
 		x += s(60) + s(14)
 	}
-	move(b.c[bwFromImg], x, y, w-m-x, rh)
+	half := (w - m - x - s(6)) / 2
+	move(b.c[bwFromImg], x, y, half, rh)
+	move(b.c[bwFromBios], x+half+s(6), y, w-m-x-half-s(6), rh)
 	y += rh + s(6)
 	move(b.c[bwHelp], m, y, cw, 2*lh)
 	y += 2*lh + s(4)
@@ -282,7 +288,9 @@ func (b *bootWin) layout() {
 	move(b.c[bwTotal], w-m-s(120), y, s(120), rh)
 	y += rh + s(6)
 	move(b.c[bwPlan], m, y, cw, 2*lh)
-	y += 2*lh + s(10)
+	y += 2*lh + s(4)
+	move(b.c[bwBlank], m, y, cw, rh)
+	y += rh + s(6)
 	move(b.c[bwLblSource], m, y, cw, lh)
 	y += lh + s(2)
 	move(b.c[bwSource], m, y, cw-s(110), rh)
@@ -329,6 +337,7 @@ func (b *bootWin) options() BootOptions {
 	if t, err := strconv.ParseInt(strings.TrimSpace(getText(b.c[bwTotal])), 10, 64); err == nil {
 		o.Total = t
 	}
+	o.Blank = o.Kind == MediaHDD && checked(b.c[bwBlank])
 	return o
 }
 
@@ -339,8 +348,11 @@ func (b *bootWin) update() {
 	}
 	o := b.options()
 	hdd := o.Kind == MediaHDD
-	for _, id := range []int{bwProfile, bwSaveProf, bwDelProf, bwC, bwH, bwS, bwTotal, bwFromImg} {
+	for _, id := range []int{bwProfile, bwSaveProf, bwDelProf, bwC, bwH, bwS, bwTotal, bwFromImg, bwFromBios, bwBlank} {
 		enable(b.c[id], hdd)
+	}
+	for _, id := range []int{bwSource, bwSrcBrowse, bwCopyAll, bwMenuKind, bwMenuEdit, bwDrvBtn, bwLabel} {
+		enable(b.c[id], !o.Blank)
 	}
 	if !hdd {
 		setText(b.c[bwPlan], T("Standard floppy format (FAT12), as DOS FORMAT makes it."))
@@ -473,6 +485,17 @@ func (b *bootWin) create() {
 		msgBox(b.hwnd, T("The system source and the new image must be different files."), appTitle(), MB_ICONWARNING)
 		return
 	}
+	if o.Blank {
+		r, err := CreateBootImage(o)
+		if err != nil {
+			msgBox(b.hwnd, T("Could not create the image:")+"\n"+err.Error(), appTitle(), MB_ICONERROR)
+			return
+		}
+		msgBox(b.hwnd, reportText(r, T("The empty image is ready: %s", o.Path))+"\n\n"+
+			T("Next:\n1. 86Box: add the image as a hard disk with %d cylinders, %d heads, %d sectors.\n2. Boot your DOS Setup disk 1 (or a boot floppy: FDISK, FORMAT C: /S) and install DOS.\n3. Here: Output > Write to disk image... puts the boot menu and drivers on it.\n4. Disk image > Write an image to a card.", o.Geom.C, o.Geom.H, o.Geom.S),
+			appTitle(), MB_ICONINFORMATION)
+		return
+	}
 	withMenu := b.menuChoice() != menuKeep
 	if withMenu && (!a.ready() || !a.checkDrivers()) {
 		return
@@ -568,6 +591,12 @@ func bootProc(hwnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {
 			b.deleteProfile()
 		case bwFromImg:
 			b.fromImage()
+		case bwFromBios:
+			a.openCalc()
+		case bwBlank:
+			if code == BN_CLICKED {
+				b.update()
+			}
 		case bwSrcBrowse:
 			if p := fileDialog(hwnd, false, T("System source"), "", "", imgFilter()...); p != "" {
 				setText(b.c[bwSource], p)
@@ -1029,4 +1058,184 @@ func confirmProc(hwnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {
 	}
 	r, _, _ := pDefWindowProcW.Call(hwnd, uintptr(msg), wParam, lParam)
 	return r
+}
+
+// ---- geometry from BIOS setup values ----
+
+const (
+	gcC = 10 + iota
+	gcH
+	gcS
+	gcMode
+	gcResult
+	gcOK
+	gcCancel
+	gcHelp
+	gcLblC
+	gcLblH
+	gcLblS
+	gcLblMode
+)
+
+type calcWin struct {
+	hwnd uintptr
+	c    map[int]uintptr
+}
+
+func (a *app) openCalc() {
+	if a.calc != nil || a.boot == nil {
+		return
+	}
+	w := &calcWin{c: map[int]uintptr{}}
+	a.calc = w
+	w.hwnd = createWindow(WS_EX_DLGMODALFRAME, "EasyRSBCalc", T("Geometry from BIOS setup"), 0x00C00000|0x00080000, cwDefault, cwDefault, a.s(560), a.s(380), a.boot.hwnd, 0)
+	mk := func(id int, class, text string, style, ex uint32) uintptr {
+		h := createWindow(ex, class, text, WS_CHILD|WS_VISIBLE|style, 0, 0, 10, 10, w.hwnd, uintptr(id))
+		sendMsg(h, WM_SETFONT, a.font, 1)
+		w.c[id] = h
+		return h
+	}
+	edit := uint32(WS_TABSTOP | ES_AUTOHSCROLL)
+	mk(gcHelp, "STATIC", T("Put the card or disk into the target machine, let BIOS setup detect it (Auto), and copy the values it shows. The program works out what DOS will get. To be sure, run GEOM.COM on the target machine (Disk image menu) and compare."), 0, 0)
+	mk(gcLblC, "STATIC", T("Cylinders:"), 0, 0)
+	mk(gcC, "EDIT", "", edit, WS_EX_CLIENTEDGE)
+	mk(gcLblH, "STATIC", T("Heads:"), 0, 0)
+	mk(gcH, "EDIT", "", edit, WS_EX_CLIENTEDGE)
+	mk(gcLblS, "STATIC", T("Sectors/track:"), 0, 0)
+	mk(gcS, "EDIT", "63", edit, WS_EX_CLIENTEDGE)
+	mk(gcLblMode, "STATIC", T("Mode:"), 0, 0)
+	mk(gcMode, "COMBOBOX", "", WS_TABSTOP|CBS_DROPDOWNLIST|WS_VSCROLL, 0)
+	mk(gcResult, "STATIC", "", 0, 0)
+	mk(gcOK, "BUTTON", T("Use these values"), WS_TABSTOP|BS_DEFPUSHBUTTON, 0)
+	mk(gcCancel, "BUTTON", T("Cancel"), WS_TABSTOP, 0)
+	fillCombo(w.c[gcMode], TranslationModes(), ModeLBA)
+	s := a.s
+	cw, ch := clientSize(w.hwnd)
+	m := s(14)
+	move(w.c[gcHelp], m, m, cw-2*m, s(72))
+	y := m + s(82)
+	x := m
+	for _, p := range []struct{ l, e, lw int }{{gcLblC, gcC, 70}, {gcLblH, gcH, 50}, {gcLblS, gcS, 100}} {
+		move(w.c[p.l], x, y+s(4), s(p.lw), s(18))
+		x += s(p.lw)
+		move(w.c[p.e], x, y, s(60), s(23))
+		x += s(60) + s(14)
+	}
+	y += s(36)
+	move(w.c[gcLblMode], m, y+s(4), s(70), s(18))
+	move(w.c[gcMode], m+s(70), y, s(260), s(120))
+	y += s(40)
+	move(w.c[gcResult], m, y, cw-2*m, s(60))
+	move(w.c[gcOK], cw-m-s(150)-s(8)-s(100), ch-m-s(28), s(150), s(28))
+	move(w.c[gcCancel], cw-m-s(100), ch-m-s(28), s(100), s(28))
+	w.update()
+	enable(a.boot.hwnd, false)
+	pShowWindow.Call(w.hwnd, SW_SHOW)
+	pSetFocus.Call(w.c[gcC])
+}
+
+func (w *calcWin) values() (Geometry, Geometry, bool) {
+	setup := Geometry{atoiU(getText(w.c[gcC])), atoiU(getText(w.c[gcH])), atoiU(getText(w.c[gcS]))}
+	if setup.C == 0 || setup.H == 0 || setup.S == 0 || setup.H > 255 || setup.S > 63 {
+		return setup, Geometry{}, false
+	}
+	mode := clampIdx(int(sendMsg(w.c[gcMode], CB_GETCURSEL, 0, 0)), 3)
+	return setup, DOSGeometry(setup, mode), true
+}
+
+func (w *calcWin) update() {
+	setup, g, ok := w.values()
+	if !ok {
+		setText(w.c[gcResult], T("Type the cylinders, heads and sectors shown in BIOS setup."))
+		enable(w.c[gcOK], false)
+		return
+	}
+	enable(w.c[gcOK], true)
+	setText(w.c[gcResult], T("DOS will most likely get: %d / %d / %d\nDisk size: %d sectors (%s)", g.C, g.H, g.S, setup.Sectors(), humanSize(setup.Sectors()*512)))
+}
+
+func (w *calcWin) close(use bool) {
+	a := theApp
+	setup, g, ok := w.values()
+	if a.boot != nil {
+		enable(a.boot.hwnd, true)
+		if use && ok {
+			sendMsg(a.boot.c[bwKind], CB_SETCURSEL, uintptr(MediaHDD), 0)
+			a.boot.setGeom(g, setup.Sectors())
+		}
+		pSetForegroundWindow.Call(a.boot.hwnd)
+	}
+	pDestroyWindow.Call(w.hwnd)
+	a.calc = nil
+}
+
+func calcProc(hwnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {
+	a := theApp
+	w := a.calc
+	switch msg {
+	case WM_COMMAND:
+		if w == nil {
+			return 0
+		}
+		code := hiword(wParam)
+		switch int(loword(wParam)) {
+		case gcC, gcH, gcS:
+			if code == EN_CHANGE {
+				w.update()
+			}
+		case gcMode:
+			if code == CBN_SELCHANGE {
+				w.update()
+			}
+		case gcOK, 1:
+			if code == 0 {
+				if _, _, ok := w.values(); ok {
+					w.close(true)
+				}
+			}
+		case gcCancel, IDCANCEL:
+			if code == 0 {
+				w.close(false)
+			}
+		}
+		return 0
+	case WM_CLOSE:
+		if w != nil {
+			w.close(false)
+		}
+		return 0
+	}
+	r, _, _ := pDefWindowProcW.Call(hwnd, uintptr(msg), wParam, lParam)
+	return r
+}
+
+// ---- GEOM.COM ----
+
+func (a *app) saveGeom() {
+	p := fileDialog(a.hwnd, true, T("Save GEOM.COM"), "com", "GEOM.COM", T("DOS program (*.com)"), "*.com", T("All files"), "*.*")
+	if p == "" {
+		return
+	}
+	if err := os.WriteFile(p, geomCOM, 0644); err != nil {
+		msgBox(a.hwnd, T("Could not save:")+"\n"+err.Error(), appTitle(), MB_ICONERROR)
+		return
+	}
+	msgBox(a.hwnd, T("Saved: %s\n\nRun GEOM on the target machine from a DOS boot floppy, with the card or disk in place; it shows the cylinders, heads and sectors to enter here.", p), appTitle(), MB_ICONINFORMATION)
+}
+
+func (a *app) geomToFloppy() {
+	p := fileDialog(a.hwnd, false, T("Bootable DOS floppy image to put GEOM.COM on"), "", "", imgFilter()...)
+	if p == "" {
+		return
+	}
+	v, err := OpenImage(p, true)
+	if err == nil {
+		err = v.WriteFile("GEOM.COM", geomCOM)
+		v.Close()
+	}
+	if err != nil {
+		msgBox(a.hwnd, T("Did not work:")+"\n"+err.Error(), appTitle(), MB_ICONERROR)
+		return
+	}
+	msgBox(a.hwnd, T("GEOM.COM is now on %s.\n\nWrite the image to a floppy (WinImage, Greaseweazle), boot the target machine from it with the card or disk in place, and type GEOM.", filepath.Base(p)), appTitle(), MB_ICONINFORMATION)
 }

@@ -178,10 +178,14 @@ func TestCreateFloppies(t *testing.T) {
 	if _, err := CreateBootImage(BootOptions{Path: filepath.Join(t.TempDir(), "x.img"), Kind: MediaHDD, Geom: Geometry{100, 16, 63}, Source: donor}); err == nil {
 		t.Fatal("FAT12 FreeDOS code accepted for FAT16")
 	}
-	// a floppy has no MBR code for a hard disk
+	// a floppy has no MBR code: the hard disk gets the program's own
 	ms := makeDonor(t, MediaF144, Geometry{}, DOSMS)
-	if _, err := CreateBootImage(BootOptions{Path: filepath.Join(t.TempDir(), "x.img"), Kind: MediaHDD, Geom: Geometry{100, 16, 63}, Source: ms}); err == nil {
-		t.Fatal("floppy source accepted for hard disk")
+	hd := filepath.Join(t.TempDir(), "x.img")
+	if _, err := CreateBootImage(BootOptions{Path: hd, Kind: MediaHDD, Geom: Geometry{100, 16, 63}, Source: ms}); err != nil {
+		t.Fatal(err)
+	}
+	if b, _ := os.ReadFile(hd); !bytes.Equal(b[:len(mbrCode)], mbrCode) {
+		t.Fatal("own MBR not written")
 	}
 	// but an MS-DOS floppy is fine for a floppy
 	out := filepath.Join(t.TempDir(), "m.img")

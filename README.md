@@ -54,6 +54,13 @@ FreeDOS images and other machines have not been tested on real hardware yet.
   machine's BIOS gives to DOS. The boot code and system files are taken from a
   bootable image you already have (for example a backup of a working card), so
   no MS-DOS files are distributed with the program.
+* **Starting from an empty or unwanted card or disk:** the geometry comes
+  from the values in BIOS setup (the program works out what DOS gets in
+  NORMAL, LBA or LARGE mode) or, exactly, from `GEOM.COM`, a tiny DOS
+  program the program can put on a boot floppy image. Then either an empty
+  image of the right size to install DOS on in 86Box with its own Setup, or a
+  bootable system made from a DOS boot floppy image (the program writes its
+  own MBR boot code when the source has none).
 * **CF cards:** back up a card from a card reader to an image file, read its
   geometry from the backup, and write an image back to a card. Only removable,
   USB and SD disks are offered, never the Windows disk. Before writing, the

@@ -75,6 +75,8 @@ const (
 	mLangReload
 	mNewImage
 	mWizard
+	mGeomSave
+	mGeomFloppy
 	mBackupCard
 	mWriteCard
 	mTemplate = 3000 // + index
@@ -107,6 +109,7 @@ type app struct {
 	confirm *confirmWin
 	blocks  *blockWin
 	wiz     *wizardWin
+	calc    *calcWin
 	preview uintptr
 	prevC   map[int]uintptr
 }
@@ -162,6 +165,7 @@ func runGUI() {
 	registerClass("EasyRSBConfirm", syscall.NewCallback(confirmProc))
 	registerClass("EasyRSBBlocks", syscall.NewCallback(blocksProc))
 	registerClass("EasyRSBWizard", syscall.NewCallback(wizardProc))
+	registerClass("EasyRSBCalc", syscall.NewCallback(calcProc))
 
 	a.hwnd = createWindow(0, "EasyRSBMain", appTitle(), WS_OVERLAPPEDWINDOW,
 		cwDefault, cwDefault, a.s(980), a.s(680), 0, 0)
@@ -198,7 +202,7 @@ func runGUI() {
 			continue
 		}
 		handled := false
-		for _, h := range []uintptr{a.hwnd, a.preview, a.drvHwnd(), a.editHwnd(), a.bootHwnd(), a.pickHwnd(), a.confirmHwnd(), a.blocksHwnd(), a.wizardHwnd()} {
+		for _, h := range []uintptr{a.hwnd, a.preview, a.drvHwnd(), a.editHwnd(), a.bootHwnd(), a.pickHwnd(), a.confirmHwnd(), a.blocksHwnd(), a.wizardHwnd(), a.calcHwnd()} {
 			if h != 0 {
 				if r, _, _ := pIsDialogMessageW.Call(h, uintptr(unsafe.Pointer(&m))); r != 0 {
 					handled = true
@@ -223,6 +227,13 @@ func (a *app) drvHwnd() uintptr {
 func (a *app) bootHwnd() uintptr {
 	if a.boot != nil {
 		return a.boot.hwnd
+	}
+	return 0
+}
+
+func (a *app) calcHwnd() uintptr {
+	if a.calc != nil {
+		return a.calc.hwnd
 	}
 	return 0
 }
@@ -327,6 +338,9 @@ func (a *app) buildMenu() {
 	sep(dk)
 	add(dk, mBackupCard, T("&Back up a card to an image file..."), false)
 	add(dk, mWriteCard, T("&Write an image to a card..."), false)
+	sep(dk)
+	add(dk, mGeomSave, T("Save &GEOM.COM (shows the geometry on the target machine)..."), false)
+	add(dk, mGeomFloppy, T("Put GEOM.COM onto a boot &floppy image..."), false)
 	dr := popup(T("&Drivers"))
 	add(dr, mDrivers, T("&Manage drivers..."), false)
 	add(dr, mDrvFolder, T("Open driver &folder"), false)
@@ -1190,6 +1204,10 @@ func (a *app) onCommand(id int, code uint32) {
 		a.openBootWin()
 	case mWizard:
 		a.openWizard()
+	case mGeomSave:
+		a.saveGeom()
+	case mGeomFloppy:
+		a.geomToFloppy()
 	case mBackupCard:
 		a.backupCard()
 	case mWriteCard:

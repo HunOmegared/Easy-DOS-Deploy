@@ -64,6 +64,9 @@ type BootOptions struct {
 	Source  string
 	CopyAll bool   // copy all other files of the source too
 	Label   string // volume label, optional
+	// Blank makes an all-zero hard disk image of the right size, for
+	// partitioning and installing DOS in an emulator (DOS Setup, FDISK).
+	Blank bool
 }
 
 // DOS kinds found on a source disk.
@@ -411,9 +414,7 @@ func CreateBootImage(o BootOptions) (*Report, error) {
 		if src != nil && src.dos == DOSFree && src.v.FatType != plan.FatType {
 			return nil, fmt.Errorf(T("FreeDOS boot code is different for FAT12 and FAT16: the source is FAT%d, the new disk FAT%d. Use a FreeDOS source with FAT%d."), src.v.FatType, plan.FatType, plan.FatType)
 		}
-		if src != nil && src.mbr == nil {
-			return nil, fmt.Errorf("%s", T("A hard disk needs MBR boot code, and a floppy image has none. Use a hard disk image or a card backup as the system source."))
-		}
+
 	} else {
 		ff, ok := floppyFormats[o.Kind]
 		if !ok {
@@ -427,6 +428,26 @@ func CreateBootImage(o BootOptions) (*Report, error) {
 		}
 	}
 
+	if o.Blank {
+		if o.Kind != MediaHDD {
+			return nil, fmt.Errorf("unknown media")
+		}
+		f, err := os.OpenFile(o.Path, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
+		if err != nil {
+			return nil, err
+		}
+		err = f.Truncate(total * 512)
+		if cerr := f.Close(); err == nil {
+			err = cerr
+		}
+		if err != nil {
+			os.Remove(o.Path)
+			return nil, err
+		}
+		r.Done = append(r.Done, T("Empty image: %d sectors (%s), geometry %d/%d/%d.", total, humanSize(total*512), o.Geom.C, o.Geom.H, o.Geom.S))
+		r.Warnings = append(r.Warnings, T("The image is empty: in 86Box set the hard disk to %d cylinders, %d heads, %d sectors, then partition and install DOS with its own Setup or FDISK and FORMAT /S.", o.Geom.C, o.Geom.H, o.Geom.S))
+		return r, nil
+	}
 	f, err := os.OpenFile(o.Path, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
 		return nil, err
@@ -443,10 +464,14 @@ func CreateBootImage(o BootOptions) (*Report, error) {
 	}
 	if o.Kind == MediaHDD {
 		mbr := make([]byte, 512)
-		if src != nil {
+		if src != nil && src.mbr != nil {
 			copy(mbr[:440], src.mbr[:440]) // boot code; not the disk signature or the table
 		} else {
-			copy(mbr, noBootCode)
+			// the program's own boot code: load the active partition's boot sector
+			copy(mbr, mbrCode)
+			if src != nil {
+				r.Done = append(r.Done, T("MBR: the program's own boot code (the source has no MBR)."))
+			}
 		}
 		e := mbr[446:]
 		e[0] = 0x80

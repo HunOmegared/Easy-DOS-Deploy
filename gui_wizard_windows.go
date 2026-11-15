@@ -33,6 +33,12 @@ const (
 	wzFromImage
 	wzFromDir
 	wzBack3
+	// page 4: card - is there a working one?
+	wzHead4
+	wzHasCard
+	wzSetup
+	wzBootFloppy
+	wzBack4
 )
 
 type wizTask int
@@ -108,6 +114,12 @@ func (a *app) openWizard() {
 	mk(wzFromDir, "BUTTON", T("On a drive or in a folder"), link, T("For example the CF card in the card reader, by its drive letter."))
 	mk(wzBack3, "BUTTON", T("< Back"), WS_TABSTOP, "")
 
+	mk(wzHead4, "STATIC", T("Where should DOS come from?"), 0, "")
+	mk(wzHasCard, "BUTTON", T("A card or disk that already boots DOS on that machine"), link, T("Back it up first: geometry, boot code and system are taken from it (recommended)."))
+	mk(wzSetup, "BUTTON", T("DOS install disks (MS-DOS Setup or FreeDOS)"), link, T("An empty image with the right geometry; install DOS on it in 86Box with its own Setup."))
+	mk(wzBootFloppy, "BUTTON", T("A DOS boot floppy image"), link, T("A small bootable system from the floppy: its system files and tools are copied."))
+	mk(wzBack4, "BUTTON", T("< Back"), WS_TABSTOP, "")
+
 	w.layout()
 	w.show(1)
 	enable(a.hwnd, false)
@@ -141,6 +153,12 @@ func (w *wizardWin) layout() {
 	move(w.c[wzFromImage], m, m+s(40), lw, s(70))
 	move(w.c[wzFromDir], m, m+s(116), lw, s(70))
 	move(w.c[wzBack3], cw-m-s(110), ch-m-s(28), s(110), s(28))
+
+	move(w.c[wzHead4], m, m, lw, s(24))
+	move(w.c[wzHasCard], m, m+s(40), lw, s(70))
+	move(w.c[wzSetup], m, m+s(116), lw, s(70))
+	move(w.c[wzBootFloppy], m, m+s(192), lw, s(70))
+	move(w.c[wzBack4], cw-m-s(110), ch-m-s(28), s(110), s(28))
 }
 
 func (w *wizardWin) show(page int) {
@@ -149,6 +167,7 @@ func (w *wizardWin) show(page int) {
 		1: {wzHead, wzFloppy, wzCard, wzEmu, wzExisting, wzEditor, wzShowStart},
 		2: {wzHead2, wzLblDOS, wzDOS, wzLblMenu, wzMenu, wzMenuDesc, wzBack, wzNext},
 		3: {wzHead3, wzFromImage, wzFromDir, wzBack3},
+		4: {wzHead4, wzHasCard, wzSetup, wzBootFloppy, wzBack4},
 	}
 	for p, ids := range pages {
 		for _, id := range ids {
@@ -203,21 +222,19 @@ func (w *wizardWin) next() {
 	a := theApp
 	task := w.task
 	tid := w.templateID()
-	w.close()
 	if !a.askSave() {
 		return
 	}
 	a.proj, a.path, a.dirty, a.sel = TemplateByID(tid).Make(), "", false, 1
 	a.loadProject()
+	if task == taskCard {
+		w.show(4)
+		return
+	}
+	w.close()
 	switch task {
 	case taskFloppy:
 		a.openBootWinWith(MediaF144, nil)
-	case taskCard:
-		if msgBox(a.hwnd, T("Is there a card or disk that already boots DOS on the target machine?\n\nYes: back it up first; its geometry and system are then taken from the backup (recommended).\nNo: enter the geometry by hand (MSD.EXE on the target machine shows it)."), appTitle(), MB_YESNO|MB_ICONQUESTION) == IDYES {
-			a.backupCard()
-		} else {
-			a.openBootWinWith(MediaHDD, nil)
-		}
 	case taskEmu:
 		// a geometry every BIOS and emulator agrees on, about 500 MB
 		a.openBootWinWith(MediaHDD, &Geometry{1015, 16, 63})
@@ -243,6 +260,26 @@ func wizardProc(hwnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {
 			w.close()
 		case wzBack, wzBack3:
 			w.show(1)
+		case wzBack4:
+			w.show(2)
+		case wzHasCard:
+			w.close()
+			a.backupCard()
+		case wzSetup:
+			w.close()
+			a.openBootWinWith(MediaHDD, nil)
+			setCheck(a.boot.c[bwBlank], true)
+			a.boot.update()
+			a.openCalc()
+		case wzBootFloppy:
+			w.close()
+			a.openBootWinWith(MediaHDD, nil)
+			if p := fileDialog(a.boot.hwnd, false, T("DOS boot floppy image"), "", "", imgFilter()...); p != "" {
+				setText(a.boot.c[bwSource], p)
+				setCheck(a.boot.c[bwCopyAll], true)
+				a.boot.followSource()
+			}
+			a.openCalc()
 		case wzNext:
 			w.next()
 		case wzDOS, wzMenu:
