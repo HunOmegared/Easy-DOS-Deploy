@@ -5,6 +5,8 @@ on:
     branches: [main]
     tags: ['v*']
   pull_request:
+  release:
+    types: [published] # a release made on the GitHub page gets the zip too
 
 permissions:
   contents: write
