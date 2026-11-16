@@ -178,7 +178,7 @@ func versionInfo() []byte {
 		str("OriginalFilename", exeName),
 		str("ProductName", productName),
 		str("ProductVersion", version),
-		str("Comments", "https://github.com/HunOmegared/EasyDOSDeploy"),
+		str("Comments", "https://github.com/HunOmegared/Easy-DOS-Deploy"),
 	)
 	sfi := vnode("StringFileInfo", nil, 0, 1, table)
 	tr := []byte{0x09, 0x04, 0xB0, 0x04}

@@ -1,3 +1,3 @@
-module github.com/HunOmegared/EasyDOSDeploy
+module github.com/HunOmegared/Easy-DOS-Deploy
 
 go 1.24
