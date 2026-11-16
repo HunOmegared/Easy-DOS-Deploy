@@ -5,7 +5,7 @@ calls, without cgo. The Go code is in the `src` folder.
 
 ```
 cd src
-GOOS=windows GOARCH=amd64 go build -trimpath -ldflags="-s -w -H windowsgui" -o EasyDDT.exe .
+GOOS=windows GOARCH=amd64 go build -trimpath -ldflags="-s -w -H windowsgui" -o EasyDOSDeploy.exe .
 go test ./...
 ```
 

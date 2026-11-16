@@ -34,7 +34,7 @@ func MakeGeomFloppy(path string, files map[string][]byte) (*Report, error) {
 		return nil, fmt.Errorf("%s", T("FreeDOS: the kernel (KERNEL.SYS) or the command shell (COMMAND.COM) is missing."))
 	}
 	sys["GEOM.COM"] = geomCOM
-	sys["AUTOEXEC.BAT"] = []byte("@ECHO OFF\r\nPATH A:\\\r\nPROMPT $P$G\r\nCLS\r\nECHO Easy DDT - geometry floppy (FreeDOS)\r\nECHO.\r\nGEOM\r\n")
+	sys["AUTOEXEC.BAT"] = []byte("@ECHO OFF\r\nPATH A:\\\r\nPROMPT $P$G\r\nCLS\r\nECHO Easy DOS Deploy - geometry floppy (FreeDOS)\r\nECHO.\r\nGEOM\r\n")
 	return CreateBootImage(BootOptions{Path: path, Kind: MediaF144, Label: "GEOM", FreeDOS: sys})
 }
 

@@ -199,7 +199,7 @@ func AllKeys() []string {
 // a language code, its translations are pre-filled (handy for corrections).
 func WriteLanguageTemplate(path, base string) error {
 	var b strings.Builder
-	b.WriteString("# Easy DDT translation file (UTF-8).\n")
+	b.WriteString("# Easy DOS Deploy translation file (UTF-8).\n")
 	b.WriteString("# Name this file <language code>.lng (for example de.lng) and put it into the \"lang\" folder.\n")
 	b.WriteString("# Fill in the TR: lines. Keep %s, %d and similar placeholders in the same order. \\n is a line break.\n")
 	b.WriteString("# An empty TR: line leaves that text in English.\n\n")

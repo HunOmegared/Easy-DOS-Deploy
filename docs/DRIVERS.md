@@ -35,7 +35,7 @@ JemmEx, CuteMouse and SHSUCDX into `C:\FREEDOS\BIN` when the menu loads them
 from there, as on a full FreeDOS installation.
 
 Downloaded files are kept in the `drivers` folder: next to the program if that
-folder is writable, otherwise in `%APPDATA%\EasyDDT\drivers`.
+folder is writable, otherwise in `%APPDATA%\EasyDOSDeploy\drivers`.
 
 If a menu item uses a driver that is missing, the program says so before
 writing, and offers to download or browse for it.

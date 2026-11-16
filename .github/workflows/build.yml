@@ -25,10 +25,10 @@ jobs:
       - name: Vet (Windows)
         working-directory: src
         run: GOOS=windows GOARCH=amd64 go vet ./...
-      - name: Build EasyDDT.exe
+      - name: Build EasyDOSDeploy.exe
         run: |
           mkdir -p dist
-          (cd src && GOOS=windows GOARCH=amd64 go build -trimpath -ldflags="-s -w -H windowsgui" -o ../dist/EasyDDT.exe .)
+          (cd src && GOOS=windows GOARCH=amd64 go build -trimpath -ldflags="-s -w -H windowsgui" -o ../dist/EasyDOSDeploy.exe .)
           cp README.md LICENSE dist/
       - name: Check the 16-bit code is up to date
         shell: bash
@@ -37,18 +37,18 @@ jobs:
           python3 asm/geom.py 2>/dev/null | diff - <(tail -n +5 src/geomcom.go)
       - uses: actions/upload-artifact@v4
         with:
-          name: EasyDDT
+          name: EasyDOSDeploy
           path: dist/
       - name: Release
         if: startsWith(github.ref, 'refs/tags/v')
         run: |
-          cd dist && zip -9 ../EasyDDT-${GITHUB_REF_NAME}.zip *
+          cd dist && zip -9 ../EasyDOSDeploy-${GITHUB_REF_NAME}.zip *
           cd ..
           # made on the GitHub page already: add the zip; otherwise make it
           if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
-            gh release upload "$GITHUB_REF_NAME" "EasyDDT-${GITHUB_REF_NAME}.zip" --clobber
+            gh release upload "$GITHUB_REF_NAME" "EasyDOSDeploy-${GITHUB_REF_NAME}.zip" --clobber
           else
-            gh release create "$GITHUB_REF_NAME" "EasyDDT-${GITHUB_REF_NAME}.zip" --title "$GITHUB_REF_NAME" --generate-notes
+            gh release create "$GITHUB_REF_NAME" "EasyDOSDeploy-${GITHUB_REF_NAME}.zip" --title "$GITHUB_REF_NAME" --generate-notes
           fi
         env:
           GH_TOKEN: ${{ github.token }}

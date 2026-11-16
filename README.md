@@ -1,9 +1,11 @@
-# Easy DDT — DOS Deployment Tool
+# Easy DOS Deploy
 
 **Create bootable MS-DOS and FreeDOS images with boot menus, and deploy them
 to CF cards and IDE disks, from Windows.**
 
-Easy DDT makes floppy and hard disk images with the exact geometry the target
+*Formerly Easy DDT; version 0.8.6 was released under that name.*
+
+Easy DOS Deploy makes floppy and hard disk images with the exact geometry the target
 machine's BIOS gives to DOS, writes them to a CompactFlash card or an IDE disk
 through a USB reader, and builds the **boot menu** with the drivers it needs.
 It writes the CONFIG.SYS / AUTOEXEC.BAT pair for MS-DOS 6.x and the
@@ -65,7 +67,7 @@ machines have not been tested on real hardware yet.
 
 ## Quick start
 
-1. Download `EasyDDT.exe` from the [Releases](../../releases) page (Windows 10
+1. Download `EasyDOSDeploy.exe` from the [Releases](../../releases) page (Windows 10
    or later, 64-bit). It is a single file; no installation.
 2. Start it. The wizard asks what you want to make.
 3. For a CF card or an IDE disk, read the [CF card guide](docs/CF-GUIDE.md)
@@ -73,7 +75,7 @@ machines have not been tested on real hardware yet.
 
 Downloaded drivers, language files and settings are kept next to the program if
 that folder is writable (portable use), otherwise in
-`%APPDATA%\EasyDDT`.
+`%APPDATA%\EasyDOSDeploy`.
 
 ## Documentation
 

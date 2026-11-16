@@ -58,7 +58,7 @@ func (a *app) openBlocks(edit int) {
 	if edit >= 0 {
 		title = T("Building blocks of %s", a.proj.Items[edit].ID)
 	}
-	w.hwnd = createWindow(WS_EX_DLGMODALFRAME, "EasyDDTBlocks", title, 0x00C00000|0x00080000, cwDefault, cwDefault, a.s(720), a.s(600), a.hwnd, 0)
+	w.hwnd = createWindow(WS_EX_DLGMODALFRAME, "EasyDOSDeployBlocks", title, 0x00C00000|0x00080000, cwDefault, cwDefault, a.s(720), a.s(600), a.hwnd, 0)
 	mk := func(id int, class, text string, style, ex uint32) uintptr {
 		h := createWindow(ex, class, text, WS_CHILD|WS_VISIBLE|style, 0, 0, 10, 10, w.hwnd, uintptr(id))
 		sendMsg(h, WM_SETFONT, a.font, 1)

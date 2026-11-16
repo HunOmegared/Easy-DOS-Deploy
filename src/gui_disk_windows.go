@@ -79,7 +79,7 @@ func (a *app) openBootWin() {
 	}
 	b := &bootWin{c: map[int]uintptr{}}
 	a.boot = b
-	b.hwnd = createWindow(0, "EasyDDTBoot", T("New bootable disk image"), WS_OVERLAPPEDWINDOW&^0x00050000, cwDefault, cwDefault, a.s(700), a.s(860), 0, 0) // no owner, so it does not stay above the main window
+	b.hwnd = createWindow(0, "EasyDOSDeployBoot", T("New bootable disk image"), WS_OVERLAPPEDWINDOW&^0x00050000, cwDefault, cwDefault, a.s(700), a.s(860), 0, 0) // no owner, so it does not stay above the main window
 	mk := func(id int, class, text string, style, ex uint32) uintptr {
 		h := createWindow(ex, class, text, WS_CHILD|WS_VISIBLE|style, 0, 0, 10, 10, b.hwnd, uintptr(id))
 		sendMsg(h, WM_SETFONT, a.font, 1)
@@ -816,7 +816,7 @@ func (a *app) pickCard(title string, done func(PhysDisk)) {
 	}
 	p := &pickWin{c: map[int]uintptr{}, done: done}
 	a.pick = p
-	p.hwnd = createWindow(WS_EX_DLGMODALFRAME, "EasyDDTPick", title, WS_OVERLAPPEDWINDOW&^0x00050000, cwDefault, cwDefault, a.s(560), a.s(320), a.hwnd, 0)
+	p.hwnd = createWindow(WS_EX_DLGMODALFRAME, "EasyDOSDeployPick", title, WS_OVERLAPPEDWINDOW&^0x00050000, cwDefault, cwDefault, a.s(560), a.s(320), a.hwnd, 0)
 	mk := func(id int, class, text string, style, ex uint32) {
 		h := createWindow(ex, class, text, WS_CHILD|WS_VISIBLE|style, 0, 0, 10, 10, p.hwnd, uintptr(id))
 		sendMsg(h, WM_SETFONT, a.font, 1)
@@ -945,7 +945,7 @@ type job struct {
 func (a *app) startJob(what string, run func(prog Progress) error, finish func(err error)) {
 	j := &job{what: what, finish: finish}
 	a.job = j
-	j.hwnd = createWindow(WS_EX_DLGMODALFRAME, "EasyDDTJob", appTitle(), 0x00C00000|0x00080000, cwDefault, cwDefault, a.s(460), a.s(130), a.hwnd, 0) // WS_CAPTION|WS_SYSMENU
+	j.hwnd = createWindow(WS_EX_DLGMODALFRAME, "EasyDOSDeployJob", appTitle(), 0x00C00000|0x00080000, cwDefault, cwDefault, a.s(460), a.s(130), a.hwnd, 0) // WS_CAPTION|WS_SYSMENU
 	j.text = createWindow(0, "STATIC", what, WS_CHILD|WS_VISIBLE, a.s(16), a.s(18), a.s(420), a.s(60), j.hwnd, 10)
 	sendMsg(j.text, WM_SETFONT, a.font, 1)
 	enable(a.hwnd, false)
@@ -1152,7 +1152,7 @@ func (a *app) confirmTyped(text, want string, alarm bool, onOK func()) {
 	if alarm {
 		title = "!!! " + title + " !!!"
 	}
-	cw.hwnd = createWindow(WS_EX_DLGMODALFRAME, "EasyDDTConfirm", title, 0x00C00000|0x00080000, cwDefault, cwDefault, a.s(600), a.s(470), a.hwnd, 0)
+	cw.hwnd = createWindow(WS_EX_DLGMODALFRAME, "EasyDOSDeployConfirm", title, 0x00C00000|0x00080000, cwDefault, cwDefault, a.s(600), a.s(470), a.hwnd, 0)
 	mk := func(id int, class, t string, style, ex uint32) uintptr {
 		h := createWindow(ex, class, t, WS_CHILD|WS_VISIBLE|style, 0, 0, 10, 10, cw.hwnd, uintptr(id))
 		sendMsg(h, WM_SETFONT, a.font, 1)
@@ -1259,7 +1259,7 @@ func (a *app) openCalc() {
 	}
 	w := &calcWin{c: map[int]uintptr{}}
 	a.calc = w
-	w.hwnd = createWindow(WS_EX_DLGMODALFRAME, "EasyDDTCalc", T("Geometry from BIOS setup"), 0x00C00000|0x00080000, cwDefault, cwDefault, a.s(600), a.s(440), a.boot.hwnd, 0)
+	w.hwnd = createWindow(WS_EX_DLGMODALFRAME, "EasyDOSDeployCalc", T("Geometry from BIOS setup"), 0x00C00000|0x00080000, cwDefault, cwDefault, a.s(600), a.s(440), a.boot.hwnd, 0)
 	mk := func(id int, class, text string, style, ex uint32) uintptr {
 		h := createWindow(ex, class, text, WS_CHILD|WS_VISIBLE|style, 0, 0, 10, 10, w.hwnd, uintptr(id))
 		sendMsg(h, WM_SETFONT, a.font, 1)

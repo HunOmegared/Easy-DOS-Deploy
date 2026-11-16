@@ -1,5 +1,5 @@
 // Command winres writes rsrc_windows_amd64.syso: the Windows resources of
-// EasyDDT.exe (icon, version information, manifest) as a COFF object that
+// EasyDOSDeploy.exe (icon, version information, manifest) as a COFF object that
 // the Go linker includes automatically. No outside tools are needed.
 //
 //	go run ./tools/winres
@@ -18,17 +18,17 @@ const (
 	version     = "0.8.6"
 	versionMS   = 0<<16 | 8 // major.minor
 	versionLS   = 6<<16 | 0 // patch.build
-	productName = "Easy DDT"
+	productName = "Easy DOS Deploy"
 	company     = "Daniel Szentmiklosi"
-	description = "Easy DDT (DOS Deployment Tool) - DOS boot menus, bootable disk images and CF cards"
+	description = "Easy DOS Deploy - DOS boot menus, bootable disk images and CF cards"
 	copyright   = "Copyright (C) 2026 Daniel Szentmiklosi. GNU GPL v3."
-	exeName     = "EasyDDT.exe"
+	exeName     = "EasyDOSDeploy.exe"
 )
 
 const manifest = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
-  <assemblyIdentity type="win32" name="Szentmiklosi.EasyDDT" version="0.8.6.0" processorArchitecture="amd64"/>
-  <description>Easy DDT (DOS Deployment Tool)</description>
+  <assemblyIdentity type="win32" name="Szentmiklosi.EasyDOSDeploy" version="0.8.6.0" processorArchitecture="amd64"/>
+  <description>Easy DOS Deploy</description>
   <dependency>
     <dependentAssembly>
       <assemblyIdentity type="win32" name="Microsoft.Windows.Common-Controls" version="6.0.0.0" processorArchitecture="*" publicKeyToken="6595b64144ccf1df" language="*"/>
@@ -173,12 +173,12 @@ func versionInfo() []byte {
 		str("CompanyName", company),
 		str("FileDescription", description),
 		str("FileVersion", version),
-		str("InternalName", "EasyDDT"),
+		str("InternalName", "EasyDOSDeploy"),
 		str("LegalCopyright", copyright),
 		str("OriginalFilename", exeName),
 		str("ProductName", productName),
 		str("ProductVersion", version),
-		str("Comments", "https://github.com/HunOmegared/EasyDDT"),
+		str("Comments", "https://github.com/HunOmegared/EasyDOSDeploy"),
 	)
 	sfi := vnode("StringFileInfo", nil, 0, 1, table)
 	tr := []byte{0x09, 0x04, 0xB0, 0x04}

@@ -1,6 +1,6 @@
 import sys; import os; sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); from asm import *
 # GEOM.COM: prints the geometry the BIOS gives DOS for the first hard disk
-# (INT 13h, AH=08h), in the form Easy DDT wants.
+# (INT 13h, AH=08h), in the form Easy DOS Deploy wants.
 def prt(lab): return [('imm16',[0xBA],lab), ('b',[0xB4,0x09]), ('b',[0xCD,0x21])]   # mov dx,lab; mov ah,9; int 21h
 g = [
   ('imm16',[0xBA],'m_head'), ('b',[0xB4,0x09]), ('b',[0xCD,0x21]),
@@ -64,14 +64,14 @@ g = [
   ('b',[0xCD,0x21]),            # int 21h
   ('jcc8',0xE2,'n2'),           # loop n2
   ('b',[0xC3]),                 # ret
-'m_head:', ('s','GEOM - hard disk geometry for Easy DDT\r\n\r\n$'),
+'m_head:', ('s','GEOM - hard disk geometry for Easy DOS Deploy\r\n\r\n$'),
 'm_cyl:',  ('s','Cylinders: $'),
 'm_hd:',   ('s','   Heads: $'),
 'm_sec:',  ('s','   Sectors/track: $'),
 'm_tail:', ('s','\r\n\r\nEnter these three numbers in the program.\r\n$'),
 'm_256:',  ('s','\r\n\r\nWARNING: 256 heads. MS-DOS 6.x and Windows 9x cannot use a disk\r\n'
                 'that the BIOS gives like this. In BIOS setup, set the drive to\r\n'
-                'Type User with fewer cylinders (Easy DDT, "From BIOS setup...",\r\n'
+                'Type User with fewer cylinders (Easy DOS Deploy, "From BIOS setup...",\r\n'
                 'tells how many), then run GEOM again.\r\n$'),
 'm_none:', ('s','No hard disk found (INT 13h, drive 80h).\r\n$'),
 ]
