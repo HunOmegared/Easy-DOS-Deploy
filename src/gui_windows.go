@@ -103,17 +103,18 @@ type app struct {
 
 	langMenu []*Language
 
-	drv     *drvWin
-	edit    *editWin
-	boot    *bootWin
-	pick    *pickWin
-	job     *job
-	confirm *confirmWin
-	blocks  *blockWin
-	wiz     *wizardWin
-	calc    *calcWin
-	preview uintptr
-	prevC   map[int]uintptr
+	drv      *drvWin
+	edit     *editWin
+	boot     *bootWin
+	pick     *pickWin
+	job      *job
+	confirm  *confirmWin
+	blocks   *blockWin
+	wiz      *wizardWin
+	calc     *calcWin
+	setupDlg *setupWin
+	preview  uintptr
+	prevC    map[int]uintptr
 }
 
 var theApp *app
@@ -167,6 +168,7 @@ func runGUI() {
 	registerClass("EasyDOSDeployBlocks", syscall.NewCallback(blocksProc))
 	registerClass("EasyDOSDeployWizard", syscall.NewCallback(wizardProc))
 	registerClass("EasyDOSDeployCalc", syscall.NewCallback(calcProc))
+	registerClass("EasyDOSDeploySetup", syscall.NewCallback(setupProc))
 
 	a.hwnd = createWindow(0, "EasyDOSDeployMain", appTitle(), WS_OVERLAPPEDWINDOW,
 		cwDefault, cwDefault, a.s(980), a.s(680), 0, 0)

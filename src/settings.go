@@ -12,6 +12,9 @@ type Settings struct {
 	Profiles []GeomProfile `json:"profiles,omitempty"`
 	// HideWizard: do not open the start-up wizard.
 	HideWizard bool `json:"hidewizard,omitempty"`
+	// the MS-DOS Setup disks used last, and SETUP's choices
+	SetupDisks []string      `json:"setupdisks,omitempty"`
+	SetupOpt   *SetupOptions `json:"setupopt,omitempty"`
 }
 
 // GeomProfile remembers the geometry of a card in a machine.

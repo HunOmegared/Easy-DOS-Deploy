@@ -91,7 +91,7 @@ func (a *app) openWizard() {
 	link := uint32(WS_TABSTOP | bsCommandLink)
 	mk(wzHead, "STATIC", T("What would you like to do?"), 0, "")
 	mk(wzFloppy, "BUTTON", T("Make a bootable floppy"), link, T("A disk image you can write to a floppy with WinImage or Greaseweazle."))
-	mk(wzCard, "BUTTON", T("Make a bootable CF card or IDE disk"), link, T("With a card reader or a USB-IDE adapter, using the geometry of the target machine."))
+	mk(wzCard, "BUTTON", T("Build a DOS system on a CF card or IDE disk"), link, T("The geometry of the target machine, the whole disk in DOS drives, the DOS, its drivers and the boot menu. Written with a card reader or a USB-IDE adapter."))
 	mk(wzEmu, "BUTTON", T("Make a disk image for an emulator"), link, T("A hard disk image for 86Box or PCem."))
 	mk(wzExisting, "BUTTON", T("Change the boot menu of an existing system"), link, T("Read the menu from a disk image or a drive, edit it and write it back."))
 	mk(wzEditor, "BUTTON", T("Just open the editor"), link, T("The full CONFIG.SYS / AUTOEXEC.BAT editor, starting with a plain DOS menu."))
@@ -144,7 +144,7 @@ func (w *wizardWin) layout() {
 	lw := cw - 2*m
 	move(w.c[wzHead], m, m, lw, s(24))
 	y := m + s(34)
-	for _, id := range []int{wzFloppy, wzCard, wzEmu, wzExisting, wzEditor} {
+	for _, id := range []int{wzCard, wzEmu, wzFloppy, wzExisting, wzEditor} {
 		move(w.c[id], m, y, lw, s(70))
 		y += s(76)
 	}
@@ -206,7 +206,7 @@ func (w *wizardWin) setSourceTexts() {
 		link(wzBootFloppy, T("A FreeDOS boot floppy image"), T("A small bootable system from the floppy: its system files and tools are copied."))
 	} else {
 		setText(w.c[wzHead4], T("Where should MS-DOS come from?"))
-		link(wzSetup, T("MS-DOS install disks (Setup)"), setup)
+		link(wzSetup, T("MS-DOS Setup disks (disk images)"), T("The program installs MS-DOS from the images of your Setup disks into C:\\DOS, as Setup would."))
 		link(wzBootFloppy, T("An MS-DOS boot floppy image"), T("A small bootable system from the floppy: its system files and tools are copied."))
 	}
 }
@@ -344,11 +344,19 @@ func wizardProc(hwnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {
 			a.boot.followSource()
 			a.openCalc()
 		case wzSetup:
+			fd := w.freeDOS()
 			w.close()
 			a.openBootWinWith(MediaHDD, nil)
-			setCheck(a.boot.c[bwBlank], true)
-			a.boot.update()
-			a.openCalc()
+			if fd {
+				setCheck(a.boot.c[bwBlank], true)
+				a.boot.update()
+				a.openCalc()
+				break
+			}
+			// MS-DOS: the program installs it from the disks, then the geometry
+			setCheck(a.boot.c[bwSetupDOS], true)
+			a.boot.calcAfter = true
+			a.openSetupDisks()
 		case wzBootFloppy:
 			w.close()
 			a.openBootWinWith(MediaHDD, nil)

@@ -607,9 +607,6 @@ TR: MS-DOS: este es el bloque [%s], y %%CONFIG%% valdrá %s.
 EN: MTCP.CFG sample
 TR: Ejemplo de MTCP.CFG
 
-EN: Make a bootable CF card or IDE disk
-TR: Crear una tarjeta CF o un disco IDE de arranque
-
 EN: Make a bootable floppy
 TR: Crear un disquete de arranque
 
@@ -1129,9 +1126,6 @@ TR: ¿Dónde deben ir los archivos? (Por ejemplo la raíz de una imagen de disco
 EN: Which DOS, and what should the boot menu offer?
 TR: ¿Qué DOS, y qué debe ofrecer el menú de arranque?
 
-EN: With a card reader or a USB-IDE adapter, using the geometry of the target machine.
-TR: Con un lector de tarjetas o un adaptador USB-IDE, usando la geometría de la máquina de destino.
-
 EN: Works with nearly every IDE/ATAPI CD drive, also on old ISA controllers. Part of Windows 98, not free: browse for it on your Windows 98 boot disk (or its image), or in WINDOWS\\COMMAND\\EBD.
 TR: Funciona con casi cualquier unidad de CD IDE/ATAPI, también con controladoras ISA antiguas. Forma parte de Windows 98, no es libre: selecciónelo en su disco de arranque de Windows 98 (o su imagen), o en WINDOWS\\COMMAND\\EBD.
 
@@ -1420,9 +1414,6 @@ TR: Una imagen de disquete de arranque de MS-DOS
 EN: FreeDOS install disks or CD
 TR: Discos o CD de instalación de FreeDOS
 
-EN: MS-DOS install disks (Setup)
-TR: Discos de instalación de MS-DOS (Setup)
-
 EN: Where should FreeDOS come from?
 TR: ¿De dónde debe venir FreeDOS?
 
@@ -1536,3 +1527,69 @@ TR: Falta el disco de instalación 1: debe ser una imagen de disco (contiene el 
 
 EN: Setup disk %d is missing: %s
 TR: Falta el disco de instalación %d: %s
+
+EN: MS-DOS from its Setup disks: the program installs it (C:\\DOS)
+TR: MS-DOS desde sus discos de instalación: el programa lo instala (C:\\DOS)
+
+EN: Disks...
+TR: Discos...
+
+EN: System: %s from its Setup disks (%d), installed into C:\\DOS.
+TR: Sistema: %s desde sus discos de instalación (%d), instalado en C:\\DOS.
+
+EN: None
+TR: Ninguno
+
+EN: MS-DOS and Windows
+TR: MS-DOS y Windows
+
+EN: MS-DOS Setup disks
+TR: Discos de instalación de MS-DOS
+
+EN: Give the images of your MS-DOS 6.x Setup disks (or folders with their files), in any order. The program expands them into C:\\DOS as Setup would, without running Setup on the target machine.
+TR: Indique las imágenes de sus discos de instalación de MS-DOS 6.x (o carpetas con sus archivos), en cualquier orden. El programa los descomprime en C:\\DOS como lo haría Setup, sin ejecutar Setup en la máquina de destino.
+
+EN: Add images...
+TR: Añadir imágenes...
+
+EN: Add a folder...
+TR: Añadir una carpeta...
+
+EN: Backup:
+TR: Copia de seguridad:
+
+EN: Anti-Virus:
+TR: Antivirus:
+
+EN: Undelete:
+TR: Undelete:
+
+EN: DriveSpace (disk compression; not needed on a CF card)
+TR: DriveSpace (compresión de disco; no hace falta en una tarjeta CF)
+
+EN: No disks yet.
+TR: Todavía no hay discos.
+
+EN: %s, disks found: %s
+TR: %s, discos encontrados: %s
+
+EN: %d files go into C:\\DOS.
+TR: %d archivos van a C:\\DOS.
+
+EN: MS-DOS Setup disk image
+TR: Imagen de un disco de instalación de MS-DOS
+
+EN: Folder with the files of a Setup disk
+TR: Carpeta con los archivos de un disco de instalación
+
+EN: Build a DOS system on a CF card or IDE disk
+TR: Crear un sistema DOS en una tarjeta CF o un disco IDE
+
+EN: The geometry of the target machine, the whole disk in DOS drives, the DOS, its drivers and the boot menu. Written with a card reader or a USB-IDE adapter.
+TR: La geometría de la máquina de destino, todo el disco en unidades DOS, el DOS, sus controladores y el menú de arranque. Se escribe con un lector de tarjetas o un adaptador USB-IDE.
+
+EN: MS-DOS Setup disks (disk images)
+TR: Discos de instalación de MS-DOS (imágenes)
+
+EN: The program installs MS-DOS from the images of your Setup disks into C:\\DOS, as Setup would.
+TR: El programa instala MS-DOS desde las imágenes de sus discos de instalación en C:\\DOS, como lo haría Setup.

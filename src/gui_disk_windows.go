@@ -27,6 +27,8 @@ const (
 	bwFromBios
 	bwBlank
 	bwFreeDOS
+	bwSetupDOS
+	bwSetupBtn
 	bwPlan
 	bwSource
 	bwSrcBrowse
@@ -69,6 +71,11 @@ type bootWin struct {
 	machineSrc  string
 	fromSource  []string        // catalog driver files taken from the source
 	triedSource map[string]bool // catalog IDs already looked for on it
+	// MS-DOS from its Setup disks (bwSetupDOS)
+	setup      *SetupDisks
+	setupPaths []string
+	setupOpt   SetupOptions
+	calcAfter  bool // open the geometry window when the Setup disks dialog closes
 }
 
 func (a *app) openBootWin() {
@@ -79,7 +86,7 @@ func (a *app) openBootWin() {
 	}
 	b := &bootWin{c: map[int]uintptr{}}
 	a.boot = b
-	b.hwnd = createWindow(0, "EasyDOSDeployBoot", T("New bootable disk image"), WS_OVERLAPPEDWINDOW&^0x00050000, cwDefault, cwDefault, a.s(700), a.s(860), 0, 0) // no owner, so it does not stay above the main window
+	b.hwnd = createWindow(0, "EasyDOSDeployBoot", T("New bootable disk image"), WS_OVERLAPPEDWINDOW&^0x00050000, cwDefault, cwDefault, a.s(700), a.s(890), 0, 0) // no owner, so it does not stay above the main window
 	mk := func(id int, class, text string, style, ex uint32) uintptr {
 		h := createWindow(ex, class, text, WS_CHILD|WS_VISIBLE|style, 0, 0, 10, 10, b.hwnd, uintptr(id))
 		sendMsg(h, WM_SETFONT, a.font, 1)
@@ -103,6 +110,8 @@ func (a *app) openBootWin() {
 	mk(bwFromBios, "BUTTON", T("From BIOS setup..."), WS_TABSTOP, 0)
 	mk(bwBlank, "BUTTON", T("Empty image: I install DOS on it myself (e.g. DOS Setup in 86Box)"), WS_TABSTOP|BS_AUTOCHECKBOX, 0)
 	mk(bwFreeDOS, "BUTTON", T("FreeDOS without a system source: the program downloads it (kernel and FreeCOM)"), WS_TABSTOP|BS_AUTOCHECKBOX, 0)
+	mk(bwSetupDOS, "BUTTON", T("MS-DOS from its Setup disks: the program installs it (C:\\DOS)"), WS_TABSTOP|BS_AUTOCHECKBOX, 0)
+	mk(bwSetupBtn, "BUTTON", T("Disks..."), WS_TABSTOP, 0)
 	mk(bwLblTotal, "STATIC", T("Image size in sectors (empty: cylinders × heads × sectors):"), 0, 0)
 	mk(bwTotal, "EDIT", "", edit, WS_EX_CLIENTEDGE)
 	mk(bwHelp, "STATIC", T("Enter the geometry DOS gets from the target machine's BIOS (MSD.EXE, Disk Drives), not the one in BIOS setup."), 0, 0)
@@ -189,6 +198,9 @@ func (b *bootWin) sourceTarget() Target {
 	if checked(b.c[bwFreeDOS]) {
 		return TargetFreeDOS
 	}
+	if b.setupMode() {
+		return TargetMSDOS
+	}
 	src := strings.Trim(strings.TrimSpace(getText(b.c[bwSource])), `"`)
 	if src != "" {
 		if src != b.srcPath {
@@ -229,6 +241,9 @@ func (b *bootWin) menuChosen() {
 // findMachine reads the drivers of the system source, once per source.
 func (b *bootWin) findMachine() {
 	src := strings.Trim(strings.TrimSpace(getText(b.c[bwSource])), `"`)
+	if b.setupMode() || checked(b.c[bwFreeDOS]) {
+		src = "" // no drivers on Setup disks; FreeDOS has no source
+	}
 	if src == b.machineSrc {
 		return
 	}
@@ -295,6 +310,25 @@ func (b *bootWin) applyOwn() {
 		}
 	}
 	b.updateDrivers()
+}
+
+// setupMode is true when MS-DOS comes from its Setup disks.
+func (b *bootWin) setupMode() bool { return checked(b.c[bwSetupDOS]) }
+
+// setupChanged shows the Setup disks in the source line and follows the
+// DOS of the choice.
+func (b *bootWin) setupChanged() {
+	if b.setupMode() && b.setup != nil {
+		ver := b.setup.Version
+		if ver == "" {
+			ver = "MS-DOS"
+		}
+		setText(b.c[bwLblSource], T("System: %s from its Setup disks (%d), installed into C:\\DOS.", ver, len(b.setupPaths)))
+	} else {
+		setText(b.c[bwLblSource], T("System source: a bootable disk image or card backup (empty: not bootable):"))
+	}
+	b.update()
+	b.followSource()
 }
 
 // followSource switches the editor's menu to the DOS of a new source.
@@ -412,6 +446,10 @@ func (b *bootWin) layout() {
 	move(b.c[bwBlank], m, y, cw, rh)
 	y += rh + s(2)
 	move(b.c[bwFreeDOS], m, y, cw, rh)
+	y += rh + s(2)
+	db := fitW(s(100), bp, b.c[bwSetupBtn])
+	move(b.c[bwSetupDOS], m, y, cw-db-s(10), rh)
+	move(b.c[bwSetupBtn], w-m-db, y, db, rh)
 	y += rh + s(6)
 	move(b.c[bwLblSource], m, y, cw, lh)
 	y += lh + s(2)
@@ -470,6 +508,14 @@ func (b *bootWin) options() BootOptions {
 	if checked(b.c[bwFreeDOS]) && !o.Blank {
 		o.Source, o.CopyAll = "", false
 	}
+	if b.setupMode() && !o.Blank {
+		o.Source, o.CopyAll = "", false
+		if b.setup != nil {
+			o.Source = b.setup.Boot
+			o.Extra, _ = b.setup.DOSFiles(b.setupOpt)
+			o.NoDriveSpace = !b.setupOpt.DriveSpace
+		}
+	}
 	return o
 }
 
@@ -483,8 +529,8 @@ func (b *bootWin) update() {
 	for _, id := range []int{bwProfile, bwSaveProf, bwDelProf, bwC, bwH, bwS, bwTotal, bwFromImg, bwFromBios, bwBlank} {
 		enable(b.c[id], hdd)
 	}
-	fd := checked(b.c[bwFreeDOS])
-	for _, id := range []int{bwMenuKind, bwMenuEdit, bwDrvBtn, bwLabel, bwFreeDOS} {
+	fd := checked(b.c[bwFreeDOS]) || b.setupMode()
+	for _, id := range []int{bwMenuKind, bwMenuEdit, bwDrvBtn, bwLabel, bwFreeDOS, bwSetupDOS, bwSetupBtn} {
 		enable(b.c[id], !o.Blank)
 	}
 	for _, id := range []int{bwSource, bwSrcBrowse, bwCopyAll} {
@@ -633,6 +679,10 @@ func (b *bootWin) create() {
 			appTitle(), MB_ICONINFORMATION)
 		return
 	}
+	if b.setupMode() && !o.Blank && b.setup == nil {
+		a.openSetupDisks()
+		return
+	}
 	withMenu := b.menuChoice() != menuKeep
 	if withMenu && (!a.ready() || !a.checkDrivers()) {
 		return
@@ -655,6 +705,10 @@ func (b *bootWin) create() {
 	if err != nil {
 		msgBox(b.hwnd, T("Could not create the image:")+"\n"+err.Error(), appTitle(), MB_ICONERROR)
 		return
+	}
+	if b.setupMode() && b.setup != nil {
+		_, missing := b.setup.DOSFiles(b.setupOpt)
+		r.Warnings = append(r.Warnings, missing...)
 	}
 	if withMenu {
 		r2, err := WriteToImage(o.Path, a.proj, a.store, true)
@@ -757,9 +811,27 @@ func bootProc(hwnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {
 			}
 		case bwFreeDOS:
 			if code == BN_CLICKED {
+				if checked(b.c[bwFreeDOS]) {
+					setCheck(b.c[bwSetupDOS], false)
+				}
 				b.update()
 				b.followSource()
 			}
+		case bwSetupDOS:
+			if code == BN_CLICKED {
+				if checked(b.c[bwSetupDOS]) {
+					setCheck(b.c[bwFreeDOS], false)
+					if b.setup == nil {
+						a.openSetupDisks()
+						return 0
+					}
+				}
+				b.setupChanged()
+			}
+		case bwSetupBtn:
+			setCheck(b.c[bwSetupDOS], true)
+			setCheck(b.c[bwFreeDOS], false)
+			a.openSetupDisks()
 		case bwUseOwn:
 			if code == BN_CLICKED {
 				b.applyOwn()
