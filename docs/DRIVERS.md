@@ -6,8 +6,11 @@ a mirror as a fallback). The others are **browsed for**: you choose a file, a
 zip, or a disk image (for example a Windows 98 boot floppy image), and the
 program searches it for the file it needs.
 
-Open the list with *Drivers > Manage drivers*. Every entry can be edited, and new
-entries can be added; *Restore built-in list* brings it back.
+The list is step 3 of the main window, *Drivers* (also *Drivers > Manage
+drivers*). Tick what goes onto the disk; the ready menus tick what they need.
+The status column shows whether a driver is here (tick), can be downloaded
+(arrow) or has to be browsed for (folder). The gear (or a double click) edits
+an entry; *Restore built-in list* brings the list back.
 
 | Driver | What it is for | How to get it |
 |---|---|---|
@@ -39,3 +42,22 @@ folder is writable, otherwise in `%APPDATA%\EasyDOSDeploy\drivers`.
 
 If a menu item uses a driver that is missing, the program says so before
 writing, and offers to download or browse for it.
+
+## Your own drivers
+
+A driver that is not on the list (a CD-ROM driver that came with the drive,
+a sound card's own drivers ...) can be added with *Add own driver...*:
+
+1. Choose the driver file (`.SYS`, `.COM` or `.EXE`) or a zip with it. A zip
+   goes into a folder of its own, `C:\DRIVERS\NAME\`, because many drivers
+   come with several files; choose the file to load from it.
+2. Give it a name and a kind (mouse, CD-ROM, sound, keyboard, other).
+3. The program proposes the line that loads it: `DEVICE=C:\DRIVERS\X.SYS`
+   in CONFIG.SYS for a `.SYS` file, `C:\DRIVERS\X.EXE` in AUTOEXEC.BAT for
+   a program. Add the options the driver needs, for example `/D:MSCD001` for
+   a CD-ROM driver (the device name MSCDEX uses).
+4. Choose the menu items that load it (all of them by default).
+
+The driver goes into your own list, so later projects have it too. In menu
+items made of building blocks the line stays when the item is rebuilt, for
+example when the DOS changes.

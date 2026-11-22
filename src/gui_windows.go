@@ -17,6 +17,10 @@ import (
 // appTitle is the name of the program; a name, so it is not translated.
 func appTitle() string { return "Easy DOS Deploy" }
 
+// appVersion is shown in About; the exe's version information is set in
+// tools/winres.
+const appVersion = "1.0"
+
 const cwDefault = -0x80000000 // CW_USEDEFAULT
 
 // control IDs of the main window
@@ -377,8 +381,8 @@ func (a *app) buildMenu() {
 	dk := popup(T("Dis&k image"))
 	add(dk, mNewImage, T("&New bootable disk image..."), false)
 	sep(dk)
-	add(dk, mBackupCard, T("&Back up a card to an image file..."), false)
-	add(dk, mWriteCard, T("&Write an image to a card..."), false)
+	add(dk, mBackupCard, T("&Back up a disk to an image file..."), false)
+	add(dk, mWriteCard, T("&Write an image to a disk..."), false)
 	sep(dk)
 	add(dk, mGeomSave, T("Save &GEOM.COM (shows the geometry on the target machine)..."), false)
 	add(dk, mGeomFloppy, T("Put GEOM.COM onto a boot &floppy image..."), false)
@@ -1199,17 +1203,17 @@ func (a *app) saveToDir() {
 }
 
 func (a *app) about() {
-	msgBox(a.hwnd, appTitle()+"\n\n"+T(`Makes a CONFIG.SYS / FDCONFIG.SYS and AUTOEXEC.BAT boot menu for MS-DOS 6.x and FreeDOS, and can write it straight into a disk image.
+	msgBox(a.hwnd, appTitle()+" "+appVersion+"\n\n"+T(`Builds bootable MS-DOS 6.x and FreeDOS systems with boot menus: the disk with the geometry of the target machine, the DOS, the drivers, the boot menu and your own files, as a disk image or straight onto a CF card or IDE disk.
 
 Tips:
-• The two "Common part" rows in the list run for every menu item, before and after the item's own lines.
-• A menu item ID is at most 8 letters/digits: it is the CONFIG.SYS block name and the AUTOEXEC.BAT label.
+• Work through the steps on the left; a yellow mark shows what is still missing.
+• Save the project: it keeps every step, so the same system can be built again, or for another card with another geometry.
 • The boot menu appears before any codepage is loaded, so ASCII mode (no accents) is the safe choice.
+• A menu item ID is at most 8 letters/digits: it is the CONFIG.SYS block name and the AUTOEXEC.BAT label.
 • Disk images: raw .img/.ima (floppy, or hard disk with MBR) and fixed-size .vhd; FAT12/16/32.
-• Drivers are kept in the "drivers" folder; the list can be edited in the Drivers window.
 • Translations: Language > Make a translation file.
 
-Always try the menu in 86Box before using it on a real machine.`), appTitle(), MB_ICONINFORMATION)
+Always try the image in 86Box before writing it to a card.`)+"\n\nCopyright (C) 2026 Daniel Szentmiklosi, GNU GPL v3\nhttps://github.com/HunOmegared/Easy-DOS-Deploy", appTitle(), MB_ICONINFORMATION)
 }
 
 func (a *app) exportLanguage() {

@@ -849,7 +849,7 @@ func (b *bootWin) create() {
 			return
 		}
 		msgBox(b.hwnd, reportText(r, T("The empty image is ready: %s", o.Path))+"\n\n"+
-			T("Next:\n1. 86Box: add the image as a hard disk with %d cylinders, %d heads, %d sectors.\n2. Boot your DOS Setup disk 1 (or a boot floppy: FDISK, FORMAT C: /S) and install DOS.\n3. Here: Output > Write to disk image... puts the boot menu and drivers on it.\n4. Disk image > Write an image to a card.", o.Geom.C, o.Geom.H, o.Geom.S),
+			T("Next:\n1. 86Box: add the image as a hard disk with %d cylinders, %d heads, %d sectors.\n2. Boot your DOS Setup disk 1 (or a boot floppy: FDISK, FORMAT C: /S) and install DOS.\n3. Here: Output > Write to disk image... puts the boot menu and drivers on it.\n4. Disk image > Write an image to a disk.", o.Geom.C, o.Geom.H, o.Geom.S),
 			appTitle(), MB_ICONINFORMATION)
 		return
 	}
@@ -1324,7 +1324,7 @@ func (a *app) adminCheck(err error) bool {
 }
 
 func (a *app) backupCard() {
-	a.pickCard(T("Back up a card to an image file"), func(d PhysDisk) {
+	a.pickCard(T("Back up a disk to an image file"), func(d PhysDisk) {
 		path := fileDialog(a.hwnd, true, T("Save card backup"), "img", "card-backup.img", imgFilter()...)
 		if path == "" {
 			return

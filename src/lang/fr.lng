@@ -82,9 +82,6 @@ TR: %s : la chaîne FAT est plus courte que le fichier
 EN: &About and tips
 TR: À &propos et astuces
 
-EN: &Back up a card to an image file...
-TR: &Sauvegarder une carte dans un fichier image...
-
 EN: &Drivers
 TR: &Pilotes
 
@@ -129,9 +126,6 @@ TR: &Recharger les fichiers de langue
 
 EN: &Save project
 TR: &Enregistrer le projet
-
-EN: &Write an image to a card...
-TR: &Écrire une image sur une carte...
 
 EN: &Yes
 TR: &Oui
@@ -210,9 +204,6 @@ TR: %d entrées de menu au plus sont autorisées (il y en a %d).
 
 EN: Back it up first: geometry, boot code and system are taken from it (recommended).
 TR: Sauvegardez-la d'abord : la géométrie, le code d'amorçage et le système en sont repris (recommandé).
-
-EN: Back up a card to an image file
-TR: Sauvegarder une carte dans un fichier image
 
 EN: Backup saved: %s\n\nRead the card geometry and system from it now (New bootable disk image)?
 TR: Sauvegarde enregistrée : %s\n\nLire maintenant la géométrie et le système de la carte depuis celle-ci (Nouvelle image disque amorçable) ?
@@ -583,9 +574,6 @@ TR: Créer une disquette amorçable
 EN: Make a disk image for an emulator
 TR: Créer une image disque pour un émulateur
 
-EN: Makes a CONFIG.SYS / FDCONFIG.SYS and AUTOEXEC.BAT boot menu for MS-DOS 6.x and FreeDOS, and can write it straight into a disk image.\n\nTips:\n• The two "Common part" rows in the list run for every menu item, before and after the item's own lines.\n• A menu item ID is at most 8 letters/digits: it is the CONFIG.SYS block name and the AUTOEXEC.BAT label.\n• The boot menu appears before any codepage is loaded, so ASCII mode (no accents) is the safe choice.\n• Disk images: raw .img/.ima (floppy, or hard disk with MBR) and fixed-size .vhd; FAT12/16/32.\n• Drivers are kept in the "drivers" folder; the list can be edited in the Drivers window.\n• Translations: Language > Make a translation file.\n\nAlways try the menu in 86Box before using it on a real machine.
-TR: Crée un menu de démarrage CONFIG.SYS / FDCONFIG.SYS et AUTOEXEC.BAT pour MS-DOS 6.x et FreeDOS, et peut l'écrire directement dans une image disque.\n\nAstuces :\n• Les deux lignes "Partie commune" de la liste s'exécutent pour chaque entrée du menu, avant et après les lignes propres à l'entrée.\n• Un identifiant d'entrée a au plus 8 lettres/chiffres : c'est le nom du bloc dans CONFIG.SYS et l'étiquette dans AUTOEXEC.BAT.\n• Le menu de démarrage s'affiche avant le chargement de toute page de codes : le mode ASCII (sans accents) est donc le choix sûr.\n• Images disque : .img/.ima brutes (disquette, ou disque dur avec MBR) et .vhd de taille fixe ; FAT12/16/32.\n• Les pilotes sont rangés dans le dossier "drivers" ; la liste se modifie dans la fenêtre Pilotes.\n• Traductions : Langue > Créer un fichier de traduction.\n\nEssayez toujours le menu dans 86Box avant de l'utiliser sur une vraie machine.
-
 EN: Memory:
 TR: Mémoire :
 
@@ -651,9 +639,6 @@ TR: Nouveau...
 
 EN: Next >
 TR: Suivant >
-
-EN: Next:\n1. 86Box: add the image as a hard disk with %d cylinders, %d heads, %d sectors.\n2. Boot your DOS Setup disk 1 (or a boot floppy: FDISK, FORMAT C: /S) and install DOS.\n3. Here: Output > Write to disk image... puts the boot menu and drivers on it.\n4. Disk image > Write an image to a card.
-TR: Ensuite :\n1. 86Box : ajoutez l'image comme disque dur avec %d cylindres, %d têtes, %d secteurs.\n2. Démarrez sur la disquette 1 de DOS Setup (ou une disquette de démarrage : FDISK, FORMAT C: /S) et installez DOS.\n3. Ici : Sortie > Écrire dans une image disque... y place le menu de démarrage et les pilotes.\n4. Image disque > Écrire une image sur une carte.
 
 EN: No menu and no drivers are written; the files of the source stay as they are.
 TR: Aucun menu ni pilote n'est écrit ; les fichiers de la source restent tels quels.
@@ -1920,3 +1905,18 @@ TR: Les disquettes d'installation du projet sont illisibles : %v
 
 EN: The system source of the project is missing: %s
 TR: La source système du projet est introuvable : %s
+
+EN: &Back up a disk to an image file...
+TR: &Sauvegarder un disque dans un fichier image...
+
+EN: &Write an image to a disk...
+TR: &Écrire une image sur un disque...
+
+EN: Builds bootable MS-DOS 6.x and FreeDOS systems with boot menus: the disk with the geometry of the target machine, the DOS, the drivers, the boot menu and your own files, as a disk image or straight onto a CF card or IDE disk.\n\nTips:\n• Work through the steps on the left; a yellow mark shows what is still missing.\n• Save the project: it keeps every step, so the same system can be built again, or for another card with another geometry.\n• The boot menu appears before any codepage is loaded, so ASCII mode (no accents) is the safe choice.\n• A menu item ID is at most 8 letters/digits: it is the CONFIG.SYS block name and the AUTOEXEC.BAT label.\n• Disk images: raw .img/.ima (floppy, or hard disk with MBR) and fixed-size .vhd; FAT12/16/32.\n• Translations: Language > Make a translation file.\n\nAlways try the image in 86Box before writing it to a card.
+TR: Construit des systèmes MS-DOS 6.x et FreeDOS amorçables avec menu de démarrage : le disque avec la géométrie de la machine cible, le DOS, les pilotes, le menu de démarrage et vos propres fichiers, en image disque ou directement sur une carte CF ou un disque IDE.\n\nAstuces :\n• Suivez les étapes à gauche ; une marque jaune indique ce qui manque encore.\n• Enregistrez le projet : il garde chaque étape, pour reconstruire le même système, ou pour une autre carte avec une autre géométrie.\n• Le menu de démarrage s'affiche avant le chargement de toute page de codes : le mode ASCII (sans accents) est donc le choix sûr.\n• L'identifiant d'une entrée de menu a au plus 8 lettres/chiffres : c'est le nom du bloc de CONFIG.SYS et l'étiquette de AUTOEXEC.BAT.\n• Images disque : .img/.ima brutes (disquette, ou disque dur avec MBR) et .vhd de taille fixe ; FAT12/16/32.\n• Traductions : Langue > Créer un fichier de traduction.\n\nEssayez toujours l'image dans 86Box avant de l'écrire sur une carte.
+
+EN: Back up a disk to an image file
+TR: Sauvegarder un disque dans un fichier image
+
+EN: Next:\n1. 86Box: add the image as a hard disk with %d cylinders, %d heads, %d sectors.\n2. Boot your DOS Setup disk 1 (or a boot floppy: FDISK, FORMAT C: /S) and install DOS.\n3. Here: Output > Write to disk image... puts the boot menu and drivers on it.\n4. Disk image > Write an image to a disk.
+TR: Ensuite :\n1. 86Box : ajoutez l'image comme disque dur avec %d cylindres, %d têtes, %d secteurs.\n2. Démarrez sur la disquette 1 de DOS Setup (ou une disquette de démarrage : FDISK, FORMAT C: /S) et installez DOS.\n3. Ici : Sortie > Écrire dans une image disque... y place le menu de démarrage et les pilotes.\n4. Image disque > Écrire une image sur un disque.

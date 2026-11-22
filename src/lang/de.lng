@@ -82,9 +82,6 @@ TR: %s: die FAT-Kette ist kürzer als die Datei
 EN: &About and tips
 TR: &Info und Tipps
 
-EN: &Back up a card to an image file...
-TR: Karte als Image-Datei &sichern...
-
 EN: &Drivers
 TR: &Treiber
 
@@ -129,9 +126,6 @@ TR: Sprachdateien neu &laden
 
 EN: &Save project
 TR: Projekt &speichern
-
-EN: &Write an image to a card...
-TR: &Image auf eine Karte schreiben...
 
 EN: &Yes
 TR: &Ja
@@ -210,9 +204,6 @@ TR: Höchstens %d Menüpunkte sind erlaubt (es sind %d).
 
 EN: Back it up first: geometry, boot code and system are taken from it (recommended).
 TR: Zuerst sichern: Geometrie, Bootcode und System werden daraus übernommen (empfohlen).
-
-EN: Back up a card to an image file
-TR: Karte als Image-Datei sichern
 
 EN: Backup saved: %s\n\nRead the card geometry and system from it now (New bootable disk image)?
 TR: Sicherung gespeichert: %s\n\nKartengeometrie und System jetzt daraus lesen (Neues bootfähiges Disk-Image)?
@@ -583,9 +574,6 @@ TR: Eine bootfähige Diskette erstellen
 EN: Make a disk image for an emulator
 TR: Ein Disk-Image für einen Emulator erstellen
 
-EN: Makes a CONFIG.SYS / FDCONFIG.SYS and AUTOEXEC.BAT boot menu for MS-DOS 6.x and FreeDOS, and can write it straight into a disk image.\n\nTips:\n• The two "Common part" rows in the list run for every menu item, before and after the item's own lines.\n• A menu item ID is at most 8 letters/digits: it is the CONFIG.SYS block name and the AUTOEXEC.BAT label.\n• The boot menu appears before any codepage is loaded, so ASCII mode (no accents) is the safe choice.\n• Disk images: raw .img/.ima (floppy, or hard disk with MBR) and fixed-size .vhd; FAT12/16/32.\n• Drivers are kept in the "drivers" folder; the list can be edited in the Drivers window.\n• Translations: Language > Make a translation file.\n\nAlways try the menu in 86Box before using it on a real machine.
-TR: Erstellt ein Bootmenü aus CONFIG.SYS / FDCONFIG.SYS und AUTOEXEC.BAT für MS-DOS 6.x und FreeDOS und kann es direkt in ein Disk-Image schreiben.\n\nTipps:\n• Die beiden Zeilen "Gemeinsamer Teil" in der Liste gelten für jeden Menüpunkt, vor und nach den eigenen Zeilen des Punkts.\n• Eine Menüpunkt-ID hat höchstens 8 Buchstaben/Ziffern: sie ist der Blockname in CONFIG.SYS und die Sprungmarke in AUTOEXEC.BAT.\n• Das Bootmenü erscheint, bevor eine Codepage geladen ist, daher ist der ASCII-Modus (ohne Umlaute) die sichere Wahl.\n• Disk-Images: rohe .img/.ima (Diskette oder Festplatte mit MBR) und .vhd fester Größe; FAT12/16/32.\n• Treiber liegen im Ordner "drivers"; die Liste lässt sich im Fenster Treiber bearbeiten.\n• Übersetzungen: Sprache > Übersetzungsdatei erstellen.\n\nProbieren Sie das Menü immer erst in 86Box aus, bevor Sie es auf einem echten Rechner verwenden.
-
 EN: Memory:
 TR: Speicher:
 
@@ -651,9 +639,6 @@ TR: Neu...
 
 EN: Next >
 TR: Weiter >
-
-EN: Next:\n1. 86Box: add the image as a hard disk with %d cylinders, %d heads, %d sectors.\n2. Boot your DOS Setup disk 1 (or a boot floppy: FDISK, FORMAT C: /S) and install DOS.\n3. Here: Output > Write to disk image... puts the boot menu and drivers on it.\n4. Disk image > Write an image to a card.
-TR: Weiter:\n1. 86Box: das Image als Festplatte mit %d Zylindern, %d Köpfen, %d Sektoren einbinden.\n2. Von DOS-Setup-Diskette 1 booten (oder von einer Bootdiskette: FDISK, FORMAT C: /S) und DOS installieren.\n3. Hier: Ausgabe > In Disk-Image schreiben... bringt das Bootmenü und die Treiber darauf.\n4. Disk-Image > Image auf eine Karte schreiben.
 
 EN: No menu and no drivers are written; the files of the source stay as they are.
 TR: Es werden kein Menü und keine Treiber geschrieben; die Dateien der Quelle bleiben, wie sie sind.
@@ -1920,3 +1905,18 @@ TR: Die Setup-Disketten des Projekts lassen sich nicht lesen: %v
 
 EN: The system source of the project is missing: %s
 TR: Die Systemquelle des Projekts fehlt: %s
+
+EN: &Back up a disk to an image file...
+TR: Platte als Image-Datei &sichern...
+
+EN: &Write an image to a disk...
+TR: &Image auf eine Platte schreiben...
+
+EN: Builds bootable MS-DOS 6.x and FreeDOS systems with boot menus: the disk with the geometry of the target machine, the DOS, the drivers, the boot menu and your own files, as a disk image or straight onto a CF card or IDE disk.\n\nTips:\n• Work through the steps on the left; a yellow mark shows what is still missing.\n• Save the project: it keeps every step, so the same system can be built again, or for another card with another geometry.\n• The boot menu appears before any codepage is loaded, so ASCII mode (no accents) is the safe choice.\n• A menu item ID is at most 8 letters/digits: it is the CONFIG.SYS block name and the AUTOEXEC.BAT label.\n• Disk images: raw .img/.ima (floppy, or hard disk with MBR) and fixed-size .vhd; FAT12/16/32.\n• Translations: Language > Make a translation file.\n\nAlways try the image in 86Box before writing it to a card.
+TR: Baut bootfähige MS-DOS-6.x- und FreeDOS-Systeme mit Bootmenü: die Platte mit der Geometrie des Zielrechners, das DOS, die Treiber, das Bootmenü und Ihre eigenen Dateien, als Platten-Image oder direkt auf eine CF-Karte oder IDE-Platte.\n\nTipps:\n• Gehen Sie die Schritte links durch; ein gelbes Zeichen zeigt, was noch fehlt.\n• Speichern Sie das Projekt: es behält jeden Schritt, so lässt sich dasselbe System neu bauen, oder für eine andere Karte mit anderer Geometrie.\n• Das Bootmenü erscheint, bevor eine Codepage geladen ist; der ASCII-Modus (ohne Akzente) ist daher die sichere Wahl.\n• Die Kennung eines Menüpunkts hat höchstens 8 Buchstaben/Ziffern: sie ist der Blockname in CONFIG.SYS und die Sprungmarke in AUTOEXEC.BAT.\n• Platten-Images: rohe .img/.ima (Diskette oder Festplatte mit MBR) und .vhd fester Größe; FAT12/16/32.\n• Übersetzungen: Sprache > Übersetzungsdatei erstellen.\n\nProbieren Sie das Image immer erst in 86Box aus, bevor Sie es auf eine Karte schreiben.
+
+EN: Back up a disk to an image file
+TR: Platte als Image-Datei sichern
+
+EN: Next:\n1. 86Box: add the image as a hard disk with %d cylinders, %d heads, %d sectors.\n2. Boot your DOS Setup disk 1 (or a boot floppy: FDISK, FORMAT C: /S) and install DOS.\n3. Here: Output > Write to disk image... puts the boot menu and drivers on it.\n4. Disk image > Write an image to a disk.
+TR: Weiter:\n1. 86Box: das Image als Festplatte mit %d Zylindern, %d Köpfen, %d Sektoren einbinden.\n2. Von DOS-Setup-Diskette 1 booten (oder von einer Bootdiskette: FDISK, FORMAT C: /S) und DOS installieren.\n3. Hier: Ausgabe > In Disk-Image schreiben... bringt das Bootmenü und die Treiber darauf.\n4. Disk-Image > Image auf eine Platte schreiben.

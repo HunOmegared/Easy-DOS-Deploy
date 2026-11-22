@@ -223,7 +223,7 @@ func TestMenuKeys(t *testing.T) {
 		{"Start &wizard...", "&New from template", "&Open project...", "&Save project", "Save project &as...", "E&xit"},
 		{"Existing menu from &disk image...", "Existing menu from &folder..."},
 		{"&Preview", "Save to &folder...", "Write to disk &image..."},
-		{"&New bootable disk image...", "&Back up a card to an image file...", "&Write an image to a card...",
+		{"&New bootable disk image...", "&Back up a disk to an image file...", "&Write an image to a disk...",
 			"Save &GEOM.COM (shows the geometry on the target machine)...", "Put GEOM.COM onto a boot &floppy image...",
 			"&Make a FreeDOS floppy with GEOM.COM..."},
 		{"&Manage drivers...", "Open driver &folder"},
