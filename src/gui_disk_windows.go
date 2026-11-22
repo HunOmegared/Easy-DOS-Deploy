@@ -739,18 +739,25 @@ func (b *bootWin) saveProfile() {
 	a := theApp
 	name := strings.TrimSpace(getText(b.c[bwProfile]))
 	o := b.options()
-	if name == "" {
-		msgBox(b.hwnd, T("Type a name for the profile into the profile box first (for example: Integra 486, 1 GB CF)."), appTitle(), MB_ICONINFORMATION)
-		return
-	}
 	if _, err := PlanHDD(o.Geom); err != nil {
 		msgBox(b.hwnd, err.Error(), appTitle(), MB_ICONWARNING)
 		return
+	}
+	if name == "" {
+		var ok bool
+		if name, ok = inputBox(b.hwnd, T("Save profile"), T("Name of the disk profile:"), T("For example: Integra 486, 1 GB CF"), ""); !ok {
+			return
+		}
 	}
 	p := GeomProfile{Name: name, C: o.Geom.C, H: o.Geom.H, S: o.Geom.S, Total: o.Total}
 	found := false
 	for i := range a.set.Profiles {
 		if a.set.Profiles[i].Name == name {
+			old := a.set.Profiles[i]
+			if (old.C != p.C || old.H != p.H || old.S != p.S || old.Total != p.Total) &&
+				msgBox(b.hwnd, T("The profile %s already exists with %d/%d/%d. Overwrite it?", name, old.C, old.H, old.S), appTitle(), MB_YESNO|MB_ICONQUESTION) != IDYES {
+				return
+			}
 			a.set.Profiles[i], found = p, true
 		}
 	}

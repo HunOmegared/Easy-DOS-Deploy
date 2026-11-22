@@ -1021,9 +1021,6 @@ TR: Essayez-la d'abord dans 86Box avec la même géométrie (%d/%d/%d).\n\nL'éc
 EN: Two labels point to the same menu item: %s
 TR: Deux étiquettes renvoient à la même entrée de menu : %s
 
-EN: Type a name for the profile into the profile box first (for example: Integra 486, 1 GB CF).
-TR: Tapez d'abord un nom pour le profil dans la zone du profil (par exemple : Integra 486, CF 1 Go).
-
 EN: Type the cylinders, heads and sectors shown in BIOS setup.
 TR: Tapez les cylindres, têtes et secteurs affichés dans le setup du BIOS.
 
@@ -1791,3 +1788,12 @@ TR: amovible
 
 EN: No suitable disk found.
 TR: Aucun disque adapté.
+
+EN: Name of the disk profile:
+TR: Nom du profil de disque :
+
+EN: For example: Integra 486, 1 GB CF
+TR: Par exemple : Integra 486, CF 1 Go
+
+EN: The profile %s already exists with %d/%d/%d. Overwrite it?
+TR: Le profil %s existe déjà avec %d/%d/%d. Le remplacer ?

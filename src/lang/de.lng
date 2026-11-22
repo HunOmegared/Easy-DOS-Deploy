@@ -1021,9 +1021,6 @@ TR: Probieren Sie es zuerst in 86Box mit derselben Geometrie (%d/%d/%d) aus.\n\n
 EN: Two labels point to the same menu item: %s
 TR: Zwei Sprungmarken zeigen auf denselben Menüpunkt: %s
 
-EN: Type a name for the profile into the profile box first (for example: Integra 486, 1 GB CF).
-TR: Geben Sie zuerst einen Namen für das Profil in das Profilfeld ein (zum Beispiel: Integra 486, 1 GB CF).
-
 EN: Type the cylinders, heads and sectors shown in BIOS setup.
 TR: Geben Sie die Zylinder, Köpfe und Sektoren ein, die das BIOS-Setup zeigt.
 
@@ -1791,3 +1788,12 @@ TR: Wechseldatenträger
 
 EN: No suitable disk found.
 TR: Keine passende Platte gefunden.
+
+EN: Name of the disk profile:
+TR: Name des Plattenprofils:
+
+EN: For example: Integra 486, 1 GB CF
+TR: Zum Beispiel: Integra 486, 1 GB CF
+
+EN: The profile %s already exists with %d/%d/%d. Overwrite it?
+TR: Das Profil %s gibt es schon mit %d/%d/%d. Überschreiben?

@@ -200,6 +200,7 @@ func runGUI() {
 	registerClass("EasyDOSDeploySetup", syscall.NewCallback(setupProc))
 	registerClass("EasyDOSDeployOwn", syscall.NewCallback(ownProc))
 	registerClass("EasyDOSDeployGeomHelp", syscall.NewCallback(geomHelpProc))
+	registerClass("EasyDOSDeployInput", syscall.NewCallback(inputProc))
 
 	a.hwnd = createWindow(0, "EasyDOSDeployMain", appTitle(), WS_OVERLAPPEDWINDOW,
 		cwDefault, cwDefault, a.s(1200), a.s(760), 0, 0)

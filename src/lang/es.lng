@@ -1021,9 +1021,6 @@ TR: Pruébela primero en 86Box con la misma geometría (%d/%d/%d).\n\n¿Escribir
 EN: Two labels point to the same menu item: %s
 TR: Dos etiquetas apuntan a la misma opción del menú: %s
 
-EN: Type a name for the profile into the profile box first (for example: Integra 486, 1 GB CF).
-TR: Escriba primero un nombre para el perfil en el cuadro de perfil (por ejemplo: Integra 486, CF de 1 GB).
-
 EN: Type the cylinders, heads and sectors shown in BIOS setup.
 TR: Escriba los cilindros, cabezas y sectores que muestra el setup de la BIOS.
 
@@ -1791,3 +1788,12 @@ TR: extraíble
 
 EN: No suitable disk found.
 TR: No se encontró un disco adecuado.
+
+EN: Name of the disk profile:
+TR: Nombre del perfil de disco:
+
+EN: For example: Integra 486, 1 GB CF
+TR: Por ejemplo: Integra 486, CF de 1 GB
+
+EN: The profile %s already exists with %d/%d/%d. Overwrite it?
+TR: El perfil %s ya existe con %d/%d/%d. ¿Sobrescribirlo?
