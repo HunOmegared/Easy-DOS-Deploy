@@ -1611,3 +1611,48 @@ TR: Copia dei file: %d / %d
 
 EN: Writing the boot menu and the drivers...
 TR: Scrittura del menu di avvio e dei driver...
+
+EN: Add own driver
+TR: Aggiungi un driver proprio
+
+EN: Driver file: a .SYS, .COM or .EXE file, or a zip with the driver:
+TR: File del driver: un file .SYS, .COM o .EXE, o uno zip con il driver:
+
+EN: File to load:
+TR: File da caricare:
+
+EN: Kind:
+TR: Tipo:
+
+EN: Loaded in:
+TR: Caricato in:
+
+EN: Line:
+TR: Riga:
+
+EN: Menu items that load it:
+TR: Voci del menu che lo caricano:
+
+EN: Add
+TR: Aggiungi
+
+EN: Driver file or zip
+TR: File del driver o zip
+
+EN: the zip is empty
+TR: lo zip è vuoto
+
+EN: Type the line that loads the driver.
+TR: Scrivere la riga che carica il driver.
+
+EN: Add own driver...
+TR: Aggiungi un driver proprio...
+
+EN: Other
+TR: Altro
+
+EN: Give the driver a name.
+TR: Dare un nome al driver.
+
+EN: Your own driver (%s), added from %s.
+TR: Driver proprio (%s), aggiunto da %s.

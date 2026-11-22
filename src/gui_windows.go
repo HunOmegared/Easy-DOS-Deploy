@@ -113,6 +113,7 @@ type app struct {
 	wiz      *wizardWin
 	calc     *calcWin
 	setupDlg *setupWin
+	own      *ownWin
 	preview  uintptr
 	prevC    map[int]uintptr
 }
@@ -169,6 +170,7 @@ func runGUI() {
 	registerClass("EasyDOSDeployWizard", syscall.NewCallback(wizardProc))
 	registerClass("EasyDOSDeployCalc", syscall.NewCallback(calcProc))
 	registerClass("EasyDOSDeploySetup", syscall.NewCallback(setupProc))
+	registerClass("EasyDOSDeployOwn", syscall.NewCallback(ownProc))
 
 	a.hwnd = createWindow(0, "EasyDOSDeployMain", appTitle(), WS_OVERLAPPEDWINDOW,
 		cwDefault, cwDefault, a.s(980), a.s(680), 0, 0)
@@ -1449,7 +1451,7 @@ func (a *app) openDrivers() {
 	lvInsertColumn(lv, 1, T("Status"), a.s(140), false)
 	lvInsertColumn(lv, 2, "", a.s(36), true)
 	mk(dvInfo, "EDIT", "", ES_MULTILINE|ES_READONLY|ES_AUTOVSCROLL|WS_VSCROLL, WS_EX_CLIENTEDGE)
-	mk(dvNew, "BUTTON", T("New..."), WS_TABSTOP, 0)
+	mk(dvNew, "BUTTON", T("Add own driver..."), WS_TABSTOP, 0)
 	mk(dvEdit, "BUTTON", T("Edit..."), WS_TABSTOP, 0)
 	mk(dvDelete, "BUTTON", T("Remove"), WS_TABSTOP, 0)
 	mk(dvReset, "BUTTON", T("Restore built-in list"), WS_TABSTOP, 0)
@@ -1491,7 +1493,7 @@ func (d *drvWin) layout() {
 		return x
 	}
 	y1 := top + lh + s(8)
-	row(y1, []int{dvNew, dvEdit, dvDelete, dvReset}, []int{90, 90, 90, 170})
+	row(y1, []int{dvNew, dvEdit, dvDelete, dvReset}, []int{140, 90, 90, 170})
 	y2 := h - m - bh
 	x := row(y2, []int{dvDownload, dvBrowse, dvWeb, dvFolder}, []int{150, 100, 90, 120})
 	cw := fitW(s(110), s(24), d.c[dvClose])
@@ -1850,7 +1852,7 @@ func driversProc(hwnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {
 				shellOpen(a.store.DriverDir(dr.ID))
 			}
 		case dvNew:
-			a.openEditor(-1)
+			a.openOwnDriver()
 		case dvEdit:
 			if i := d.focusedIndex(); i >= 0 {
 				a.openEditor(i)

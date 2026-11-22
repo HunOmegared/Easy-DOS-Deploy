@@ -44,6 +44,7 @@ type blockWin struct {
 	c       map[int]uintptr
 	edit    int // index into Items being edited, -1 = new item
 	loading bool
+	own     []OwnLine // the item's own driver lines, kept as they are
 }
 
 func (a *app) openBlocks(edit int) {
@@ -222,6 +223,7 @@ func indexOf(list []string, s string) int {
 
 func (w *blockWin) set(b BlockSet) {
 	b.Normalize()
+	w.own = b.Own
 	w.loading = true
 	sendMsg(w.c[bkMemory], CB_SETCURSEL, uintptr(indexOf(MemoryChoices, b.Memory)), 0)
 	setCheck(w.c[bkMouse], b.Mouse)
@@ -257,6 +259,7 @@ func (w *blockWin) get() BlockSet {
 		NetCard:  netCards[clampIdx(int(sendMsg(w.c[bkNetCard], CB_GETCURSEL, 0, 0)), len(netCards))].id,
 		NetArgs:  getText(w.c[bkNetArgs]),
 		EC:       checked(w.c[bkEC]),
+		Own:      w.own,
 	}
 	b.Normalize()
 	return b

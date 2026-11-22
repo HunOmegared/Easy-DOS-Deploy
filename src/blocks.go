@@ -21,6 +21,8 @@ type BlockSet struct {
 	NetCard  string `json:"netcard,omitempty"`  // driver ID: ne2000, 3c509
 	NetArgs  string `json:"netargs,omitempty"`  // packet driver parameters
 	EC       bool   `json:"ec,omitempty"`       // start Easy Commander
+	// Own: lines of the user's own drivers (Add own driver)
+	Own []OwnLine `json:"own,omitempty"`
 }
 
 // Memory choices, in the order shown.
@@ -200,6 +202,14 @@ func (b BlockSet) BuildFor(t Target, m *Machine) (cfg, auto, drivers []string) {
 			auto = append(auto, `C:\DRIVERS\UNISOUND.COM /V70`)
 			drivers = append(drivers, "unisound")
 		}
+	}
+	for _, o := range b.Own {
+		if o.Config {
+			cfg = append(cfg, o.Line)
+		} else {
+			auto = append(auto, o.Line)
+		}
+		drivers = append(drivers, o.Driver)
 	}
 	if b.Net {
 		c := netCardByID(b.NetCard)
