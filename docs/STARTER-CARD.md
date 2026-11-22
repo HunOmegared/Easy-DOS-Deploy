@@ -109,6 +109,28 @@ same cable, or on the secondary channel), then:
    disk, reboot, run `GEOM` again and build the image with what *Disk 2* shows
    now (if the BIOS gives one or two cylinders fewer, that is what counts).
 
+### No floppy drive on your modern PC? Make the boot floppy on the old machine
+
+If your modern PC has no floppy drive (and you have no USB floppy drive) but
+the old machine has one, the starter card can make a boot floppy there. Boot
+from the starter card and type:
+
+```
+FORMAT A: /S
+COPY C:\GEOM.COM A:
+COPY C:\DOS\FDISK.EXE A:
+COPY C:\DOS\SYS.COM A:
+```
+
+Use a disk the drive can handle (360K, 720K, 1.2M or 1.44M); FORMAT formats
+it for the drive. This needs a starter card with a full DOS: MS-DOS from the
+Setup disks, or FreeDOS from a full FreeDOS source. The FreeDOS the program
+downloads by itself is only the kernel and the command line, without FORMAT.
+
+With this floppy the card or disk to measure can be **alone, as master**,
+exactly where it will be used: no master/slave jumpers, and `GEOM` shows
+what the BIOS gives it there. FDISK and SYS are useful later too.
+
 ## 4. Then
 
 * **Use it as it is:** it is a complete DOS system of about 500 MB. Add
