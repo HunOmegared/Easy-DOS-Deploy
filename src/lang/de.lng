@@ -1914,3 +1914,9 @@ TR: Laufwerk:
 
 EN: Folder:
 TR: Ordner:
+
+EN: The Setup disks of the project cannot be read: %v
+TR: Die Setup-Disketten des Projekts lassen sich nicht lesen: %v
+
+EN: The system source of the project is missing: %s
+TR: Die Systemquelle des Projekts fehlt: %s

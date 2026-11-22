@@ -63,6 +63,8 @@ type Project struct {
 	Machine *Machine `json:"machine,omitempty"`
 	// Files are the user's own files and folders for the disk (games ...).
 	Files []CopyItem `json:"files,omitempty"`
+	// Build is the rest of the recipe: disk, system and output.
+	Build *BuildSettings `json:"build,omitempty"`
 	// File names; empty means the default for the target.
 	ConfigName   string `json:"configname"`
 	AutoexecName string `json:"autoexecname"`
@@ -236,3 +238,26 @@ func (p *Project) UniqueID(base string) string {
 		}
 	}
 }
+
+// BuildSettings are the settings of the Machine and disk, System and Build
+// steps, saved with the project so that it builds the same disk again.
+type BuildSettings struct {
+	Kind  MediaKind `json:"kind"`
+	Geom  Geometry  `json:"geometry"`
+	Total int64     `json:"total,omitempty"`
+	OnlyC bool      `json:"onlyc,omitempty"`
+	// System: "setup", "freedos", "source" or "empty"
+	System     string        `json:"system"`
+	SetupDisks []string      `json:"setupdisks,omitempty"`
+	SetupOpt   *SetupOptions `json:"setupopt,omitempty"`
+	Source     string        `json:"source,omitempty"`
+	CopyAll    bool          `json:"copyall,omitempty"`
+	UseOwn     bool          `json:"useown,omitempty"`
+	WriteMenu  bool          `json:"writemenu"`
+	Label      string        `json:"label,omitempty"`
+	Output     string        `json:"output,omitempty"`
+}
+
+// SystemNames are the values of BuildSettings.System, in the order of the
+// System step's choices.
+var SystemNames = []string{"setup", "freedos", "source", "empty"}

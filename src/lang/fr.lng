@@ -1914,3 +1914,9 @@ TR: Lecteur :
 
 EN: Folder:
 TR: Dossier :
+
+EN: The Setup disks of the project cannot be read: %v
+TR: Les disquettes d'installation du projet sont illisibles : %v
+
+EN: The system source of the project is missing: %s
+TR: La source système du projet est introuvable : %s

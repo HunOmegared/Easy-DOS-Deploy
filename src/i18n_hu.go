@@ -640,4 +640,6 @@ var huTexts = map[string]string{
 	"Destination on the DOS disk":                                                                "Cél a DOS lemezen",
 	"Drive:":                                                                                     "Meghajtó:",
 	"Folder:":                                                                                    "Mappa:",
+	"The Setup disks of the project cannot be read: %v":                                          "A projekt telepítőlemezei nem olvashatók: %v",
+	"The system source of the project is missing: %s":                                            "A projekt rendszerforrása nem található: %s",
 }

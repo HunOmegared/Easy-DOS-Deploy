@@ -73,3 +73,29 @@ func TestCopyOwnFiles(t *testing.T) {
 		t.Fatal("F: accepted")
 	}
 }
+
+func TestRecipeRoundTrip(t *testing.T) {
+	p := TemplateByID("games-ms").Make()
+	p.Files = []CopyItem{{`D:\Games\Doom`, `C:\GAMES\DOOM`}}
+	p.Build = &BuildSettings{Kind: MediaHDD, Geom: Geometry{1021, 128, 63}, OnlyC: true, System: "setup",
+		SetupDisks: []string{`D:\dos\Disk1.img`, `D:\dos\Disk2.img`}, SetupOpt: &SetupOptions{Backup: CompDOS, DriveSpace: false},
+		WriteMenu: true, Label: "DOS622", Output: `D:\out\integra.img`}
+	path := filepath.Join(t.TempDir(), "x.bmp.json")
+	if err := p.Save(path); err != nil {
+		t.Fatal(err)
+	}
+	q, err := LoadProject(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if q.Build == nil || q.Build.Geom != p.Build.Geom || !q.Build.OnlyC || q.Build.System != "setup" || len(q.Build.SetupDisks) != 2 ||
+		q.Build.SetupOpt.Backup != CompDOS || q.Build.Output != p.Build.Output || len(q.Files) != 1 || q.Files[0].Dest != `C:\GAMES\DOOM` {
+		t.Fatalf("%+v", q.Build)
+	}
+	// an older project without the recipe still loads
+	old := filepath.Join(t.TempDir(), "old.bmp.json")
+	os.WriteFile(old, []byte(`{"target":0,"items":[{"id":"DOS","title":"DOS"}]}`), 0644)
+	if q, err := LoadProject(old); err != nil || q.Build != nil {
+		t.Fatal(q, err)
+	}
+}

@@ -324,6 +324,7 @@ func (a *app) handleArgs(args []string) {
 		if p, err := LoadProject(restore); err == nil {
 			a.proj, a.path, a.dirty, a.sel = p, path, path == "", 1
 			a.loadProject()
+			a.applyBuild()
 			os.Remove(restore)
 		}
 	}
@@ -989,9 +990,32 @@ func (a *app) askSaveFrom(owner uintptr) bool {
 	return false
 }
 
+// captureBuild puts the settings of the pages into the project (the recipe).
+func (a *app) captureBuild() {
+	if a.boot != nil {
+		a.proj.Build = a.boot.settings()
+	}
+}
+
+// applyBuild puts a loaded project's recipe onto the pages.
+func (a *app) applyBuild() {
+	if a.boot == nil || a.proj.Build == nil {
+		return
+	}
+	d := a.dirty
+	notes := a.boot.applySettings(a.proj.Build)
+	a.dirty = d
+	a.updateTitle()
+	a.updateSide()
+	if len(notes) > 0 {
+		msgBox(a.hwnd, strings.Join(notes, "\n"), appTitle(), MB_ICONWARNING)
+	}
+}
+
 func (a *app) saveProject(as bool) bool {
 	a.commit()
 	a.readSettingsQuiet()
+	a.captureBuild()
 	path := a.path
 	if path == "" || as {
 		path = fileDialog(a.hwnd, true, T("Save project"), "json", "menu.bmp.json", projFilter()...)
@@ -1025,6 +1049,7 @@ func (a *app) openProjectFile(path string) {
 	a.proj, a.path, a.dirty, a.sel = p, path, false, 1
 	a.menuFrom, a.menuEdited = "", false
 	a.loadProject()
+	a.applyBuild()
 }
 
 func (a *app) setProject(p *Project, notes []string, what string) {

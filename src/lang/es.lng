@@ -1914,3 +1914,9 @@ TR: Unidad:
 
 EN: Folder:
 TR: Carpeta:
+
+EN: The Setup disks of the project cannot be read: %v
+TR: No se pueden leer los discos de instalación del proyecto: %v
+
+EN: The system source of the project is missing: %s
+TR: Falta la fuente del sistema del proyecto: %s

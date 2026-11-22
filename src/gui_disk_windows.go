@@ -1304,7 +1304,8 @@ func (a *app) adminCheck(err error) bool {
 	}
 	a.commit()
 	a.readSettingsQuiet()
-	tmp := filepath.Join(os.TempDir(), "easyrsb-restore.bmp.json")
+	a.captureBuild()
+	tmp := filepath.Join(os.TempDir(), "easydosdeploy-restore.bmp.json")
 	if a.proj.Save(tmp) != nil {
 		tmp = ""
 	}
@@ -1862,4 +1863,81 @@ func (b *bootWin) showOwnLines() {
 	}
 	t = append(t, "", T("High loading (LH, DEVICEHIGH, /L:) is left out here; each menu item adds it for its memory setting."))
 	msgBox(b.hwnd, strings.Join(t, "\n"), T("Drivers of the system source"), MB_ICONINFORMATION)
+}
+
+// ---- the recipe: the pages' settings in the project ----
+
+// settings reads the Machine and disk, System and Build pages.
+func (b *bootWin) settings() *BuildSettings {
+	o := b.options()
+	bs := &BuildSettings{
+		Kind:      o.Kind,
+		Geom:      o.Geom,
+		OnlyC:     o.OnlyC,
+		System:    SystemNames[clampIdx(b.sysChoice, len(SystemNames))],
+		Source:    strings.Trim(strings.TrimSpace(getText(b.c[bwSource])), `"`),
+		CopyAll:   checked(b.c[bwCopyAll]),
+		UseOwn:    checked(b.c[bwUseOwn]),
+		WriteMenu: checked(b.c[bwWriteMenu]),
+		Label:     o.Label,
+		Output:    o.Path,
+	}
+	if checked(b.c[bwAdvanced]) {
+		bs.Total = o.Total
+	}
+	if b.setup != nil {
+		opt := b.setupOpt
+		bs.SetupDisks, bs.SetupOpt = append([]string(nil), b.setupPaths...), &opt
+	}
+	return bs
+}
+
+// applySettings puts a project's recipe onto the pages; it returns what
+// could not be restored.
+func (b *bootWin) applySettings(bs *BuildSettings) []string {
+	if bs == nil {
+		return nil
+	}
+	var notes []string
+	sendMsg(b.c[bwKind], CB_SETCURSEL, uintptr(bs.Kind), 0)
+	setCheck(b.c[bwAdvanced], bs.Total > 0)
+	b.setGeom(bs.Geom, bs.Total)
+	setCheck(b.c[bwOnlyC], bs.OnlyC)
+	setText(b.c[bwLabel], bs.Label)
+	setText(b.c[bwOut], bs.Output)
+	setText(b.c[bwSource], bs.Source)
+	setCheck(b.c[bwCopyAll], bs.CopyAll)
+	setCheck(b.c[bwWriteMenu], bs.WriteMenu)
+	k := sysSource
+	for i, n := range SystemNames {
+		if n == bs.System {
+			k = i
+		}
+	}
+	b.setup, b.setupPaths = nil, nil
+	if bs.SetupOpt != nil {
+		b.setupOpt = *bs.SetupOpt
+	}
+	if len(bs.SetupDisks) > 0 {
+		if s, err := ReadSetupDisks(bs.SetupDisks); err == nil {
+			b.setup, b.setupPaths = s, append([]string(nil), bs.SetupDisks...)
+		} else if k == sysSetup {
+			notes = append(notes, T("The Setup disks of the project cannot be read: %v", err))
+		}
+	}
+	if k == sysSource && bs.Source != "" {
+		if _, err := os.Stat(bs.Source); err != nil {
+			notes = append(notes, T("The system source of the project is missing: %s", bs.Source))
+		}
+	}
+	b.setSys(k)
+	b.machineSrc = "\x00" // read the source's drivers again
+	b.setupChanged()      // also follows the source and its drivers
+	if b.machine != nil {
+		setCheck(b.c[bwUseOwn], bs.UseOwn)
+		b.applyOwn()
+	}
+	b.fillMenus(0)
+	b.update()
+	return notes
 }
