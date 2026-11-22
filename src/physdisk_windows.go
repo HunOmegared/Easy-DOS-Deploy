@@ -47,7 +47,14 @@ func (d PhysDisk) Label() string {
 	if len(d.Letters) > 0 {
 		l = "  [" + strings.Join(d.Letters, " ") + "]"
 	}
-	return fmt.Sprintf("%s %d: %s – %s%s", T("Disk"), d.Number, strings.TrimSpace(d.Model), humanSize(d.Size), l)
+	kind := T("removable")
+	switch d.Bus {
+	case busUSB:
+		kind = "USB"
+	case busSD, busMMC:
+		kind = "SD"
+	}
+	return fmt.Sprintf("%s %d: %s – %s, %s%s", T("Disk"), d.Number, strings.TrimSpace(d.Model), humanSize(d.Size), kind, l)
 }
 
 func (d PhysDisk) Path() string { return fmt.Sprintf(`\\.\PhysicalDrive%d`, d.Number) }

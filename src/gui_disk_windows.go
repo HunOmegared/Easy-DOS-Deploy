@@ -73,6 +73,7 @@ const (
 	bwGeomHelp
 	bwOnlyC
 	bwWriteCard
+	bwAdvanced // shows the image size
 )
 
 // System choices (radio buttons of the System page).
@@ -121,7 +122,6 @@ type bootWin struct {
 	setup      *SetupDisks
 	setupPaths []string
 	setupOpt   SetupOptions
-	calcAfter  bool // open the geometry window when the Setup disks dialog closes
 }
 
 // openBootWin shows the Machine and disk page.
@@ -177,11 +177,12 @@ func (a *app) createBootPages() {
 	mk(bwNoteFree, "STATIC", T("Free and MS-DOS compatible; most DOS programs and games run on it. The program can download it, so an empty card is enough."), 0, 0)
 	mk(bwSysSource, "BUTTON", T("A disk or image that already boots DOS"), radio, 0)
 	mk(bwNoteSource, "STATIC", T("A card backup, a hard disk image or a boot floppy image: its boot code and system files are taken, and its drivers can be used."), 0, 0)
-	mk(bwBlank, "BUTTON", T("Empty image: I install DOS on it myself"), radio, 0)
+	mk(bwBlank, "BUTTON", T("I'll install DOS myself (empty image)"), radio, 0)
 	mk(bwNoteBlank, "STATIC", T("For DOS Setup in an emulator: the image has the right geometry but no system."), 0, 0)
 	mk(bwLblTotal, "STATIC", T("Image size in sectors (empty: cylinders × heads × sectors):"), 0, 0)
 	mk(bwTotal, "EDIT", "", edit, WS_EX_CLIENTEDGE)
-	mk(bwHelp, "STATIC", T("Enter the geometry DOS gets from the target machine's BIOS (MSD.EXE, Disk Drives), not the one in BIOS setup."), 0, 0)
+	mk(bwHelp, "STATIC", T("Choose a disk profile, or enter the geometry DOS gets from the target machine's BIOS (MSD or GEOM shows it), not the one in BIOS setup. Not sure? Help with the disk profile tells how to find it."), 0, 0)
+	mk(bwAdvanced, "BUTTON", T("Advanced: a different image size"), WS_TABSTOP|BS_AUTOCHECKBOX, 0)
 	mk(bwPlan, "STATIC", "", 0, 0)
 	mk(bwLblSource, "STATIC", T("System source: a bootable disk image or card backup (empty: not bootable):"), 0, 0)
 	mk(bwSource, "EDIT", "", edit, WS_EX_CLIENTEDGE)
@@ -491,7 +492,12 @@ func (b *bootWin) layout() {
 	move(b.c[bwProfile], m+col, y, cw-col-2*pb-s(12), rh+s(160))
 	move(b.c[bwSaveProf], w-m-2*pb-s(6), y, pb, rh)
 	move(b.c[bwDelProf], w-m-pb, y, pb, rh)
+	y += rh + s(4)
+	gh := fitW(s(160), bp, b.c[bwGeomHelp])
+	move(b.c[bwGeomHelp], m+col, y, gh, rh)
 	y += rh + s(10)
+	move(b.c[bwHelp], m, y, cw, 2*lh)
+	y += 2*lh + s(8)
 	x := m
 	for _, p := range []struct{ l, e, lw int }{{bwLblC, bwC, 70}, {bwLblH, bwH, 50}, {bwLblS, bwS, 100}} {
 		lw := fitW(s(p.lw), lp, b.c[p.l])
@@ -510,18 +516,23 @@ func (b *bootWin) layout() {
 		move(b.c[bwFromImg], m, y, g1, rh)
 		move(b.c[bwFromBios], m+g1+s(6), y, g2, rh)
 	}
-	y += rh + s(6)
-	gh := fitW(s(160), bp, b.c[bwGeomHelp])
-	move(b.c[bwGeomHelp], w-m-gh, y, gh, rh)
-	y += rh + s(8)
-	move(b.c[bwHelp], m, y, cw, 2*lh)
-	y += 2*lh + s(6)
-	move(b.c[bwLblTotal], m, y+s(4), cw-s(130), lh)
-	move(b.c[bwTotal], w-m-s(120), y, s(120), rh)
-	y += rh + s(10)
+	y += rh + s(12)
 	move(b.c[bwPlan], m, y, cw, 4*lh)
 	y += 4*lh + s(6)
 	move(b.c[bwOnlyC], m, y, cw, rh)
+	y += rh + s(16)
+	move(b.c[bwAdvanced], m, y, cw, rh)
+	y += rh + s(4)
+	adv := checked(b.c[bwAdvanced])
+	for _, id := range []int{bwLblTotal, bwTotal} {
+		v := uintptr(0)
+		if adv {
+			v = SW_SHOW
+		}
+		pShowWindow.Call(b.c[id], v)
+	}
+	move(b.c[bwLblTotal], m+s(22), y+s(4), cw-s(22)-s(130), lh)
+	move(b.c[bwTotal], w-m-s(120), y, s(120), rh)
 
 	// System: the four choices; the settings of the chosen one under it
 	w, _ = clientSize(b.panels[bpSystem])
@@ -702,11 +713,13 @@ func (b *bootWin) setGeom(g Geometry, total int64) {
 	setText(b.c[bwC], strconv.Itoa(int(g.C)))
 	setText(b.c[bwH], strconv.Itoa(int(g.H)))
 	setText(b.c[bwS], strconv.Itoa(int(g.S)))
-	if total > 0 {
+	if total > 0 && total != g.Sectors() {
 		setText(b.c[bwTotal], strconv.FormatInt(total, 10))
+		setCheck(b.c[bwAdvanced], true)
 	} else {
 		setText(b.c[bwTotal], "")
 	}
+	b.layout()
 	b.loading = false
 	b.update()
 }
@@ -954,6 +967,13 @@ func bootProc(hwnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {
 			if code == BN_CLICKED {
 				b.update()
 			}
+		case bwAdvanced:
+			if code == BN_CLICKED {
+				if !checked(b.c[bwAdvanced]) {
+					setText(b.c[bwTotal], "") // hidden: from the geometry again
+				}
+				b.layout()
+			}
 		case bwC, bwH, bwS, bwTotal:
 			if code == EN_CHANGE {
 				b.update()
@@ -1050,7 +1070,7 @@ func (a *app) pickCard(title string, done func(PhysDisk)) {
 		sendMsg(h, WM_SETFONT, a.font, 1)
 		p.c[id] = h
 	}
-	mk(pkHead, "STATIC", T("Only removable, USB and SD disks are listed; the Windows disk never. Insert the card in the reader, then Refresh."), 0, 0)
+	mk(pkHead, "STATIC", T("Removable disks only: CF and SD cards in a reader, IDE disks on a USB adapter, and USB drives. Insert the card or connect the adapter, then click Refresh. The Windows system disk is never listed."), 0, 0)
 	mk(pkList, "LISTBOX", "", WS_TABSTOP|LBS_NOTIFY|LBS_NOINTEGRALHEIGHT|WS_VSCROLL, WS_EX_CLIENTEDGE)
 	mk(pkRefresh, "BUTTON", T("Refresh"), WS_TABSTOP, 0)
 	mk(pkOK, "BUTTON", T("OK"), WS_TABSTOP|BS_DEFPUSHBUTTON, 0)
@@ -1086,7 +1106,7 @@ func (p *pickWin) refresh() {
 		}
 	}
 	if len(p.disks) == 0 {
-		sendMsg(lb, LB_ADDSTRING, 0, uintptr(unsafe.Pointer(u16(T("(no card found)")))))
+		sendMsg(lb, LB_ADDSTRING, 0, uintptr(unsafe.Pointer(u16(T("No suitable disk found. Insert a card into the reader or connect the USB-IDE adapter, then click Refresh.")))))
 	} else {
 		sendMsg(lb, LB_SETCURSEL, 0, 0)
 	}
@@ -1319,7 +1339,7 @@ func (a *app) writeCard(image string) {
 		msgBox(a.hwnd, err.Error(), appTitle(), MB_ICONERROR)
 		return
 	}
-	a.pickCard(T("Write image to card"), func(d PhysDisk) {
+	a.pickCard(T("Write image to disk"), func(d PhysDisk) {
 		if st.Size() > d.Size+512 {
 			msgBox(a.hwnd, T("The image (%s) is bigger than the card (%s).", humanSize(st.Size()), humanSize(d.Size)), appTitle(), MB_ICONERROR)
 			return
@@ -1482,6 +1502,7 @@ const (
 	gcLblH
 	gcLblS
 	gcLblMode
+	gcProfileHelp
 )
 
 type calcWin struct {
@@ -1503,7 +1524,8 @@ func (a *app) openCalc() {
 		return h
 	}
 	edit := uint32(WS_TABSTOP | ES_AUTOHSCROLL)
-	mk(gcHelp, "STATIC", T("Put the card or disk into the target machine, let BIOS setup detect it (Auto), and copy the values it shows. The program works out what DOS will get. To be sure, run GEOM.COM on the target machine (Disk image menu) and compare."), 0, 0)
+	mk(gcHelp, "STATIC", T("Put the card or disk into the target machine, let BIOS setup detect it (Auto), and copy the values it shows. The program works out what DOS will get. To be sure, check it with GEOM on the target machine (see Help with the disk profile)."), 0, 0)
+	mk(gcProfileHelp, "BUTTON", T("Help with the disk profile..."), WS_TABSTOP, 0)
 	mk(gcLblC, "STATIC", T("Cylinders:"), 0, 0)
 	mk(gcC, "EDIT", "", edit, WS_EX_CLIENTEDGE)
 	mk(gcLblH, "STATIC", T("Heads:"), 0, 0)
@@ -1538,6 +1560,8 @@ func (a *app) openCalc() {
 	ow := fitW(s(150), s(24), w.c[gcOK])
 	cnw := fitW(s(100), s(24), w.c[gcCancel])
 	move(w.c[gcOK], cw-m-ow-s(8)-cnw, ch-m-s(28), ow, s(28))
+	hw := fitW(s(150), s(24), w.c[gcProfileHelp])
+	move(w.c[gcProfileHelp], m, ch-m-s(28), hw, s(28))
 	move(w.c[gcCancel], cw-m-cnw, ch-m-s(28), cnw, s(28))
 	w.update()
 	enable(a.boot.hwnd, false)
@@ -1634,6 +1658,9 @@ func calcProc(hwnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {
 			if code == 0 {
 				w.close(false)
 			}
+		case gcProfileHelp:
+			w.close(false)
+			a.openGeomHelp()
 		}
 		return 0
 	case WM_CLOSE:

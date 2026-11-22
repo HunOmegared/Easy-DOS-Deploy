@@ -343,7 +343,6 @@ func wizardProc(hwnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {
 			a.boot.setSys(sysFree)
 			a.boot.update()
 			a.boot.followSource()
-			a.openCalc()
 		case wzSetup:
 			fd := w.freeDOS()
 			w.close()
@@ -351,12 +350,10 @@ func wizardProc(hwnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {
 			if fd {
 				a.boot.setSys(sysBlank)
 				a.boot.update()
-				a.openCalc()
 				break
 			}
-			// MS-DOS: the program installs it from the disks, then the geometry
+			// MS-DOS: the program installs it from the disks
 			a.boot.setSys(sysSetup)
-			a.boot.calcAfter = true
 			a.openSetupDisks()
 		case wzBootFloppy:
 			w.close()
@@ -367,7 +364,6 @@ func wizardProc(hwnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {
 				setCheck(a.boot.c[bwCopyAll], true)
 				a.boot.followSource()
 			}
-			a.openCalc()
 		case wzNext:
 			w.next()
 		case wzDOS, wzDOSFree:

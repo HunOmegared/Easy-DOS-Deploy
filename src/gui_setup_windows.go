@@ -227,12 +227,6 @@ func (w *setupWin) close(ok bool) {
 	if b != nil {
 		b.setupChanged()
 		pSetForegroundWindow.Call(b.hwnd)
-		if b.calcAfter {
-			b.calcAfter = false
-			if atoiU(getText(b.c[bwC])) == 0 {
-				a.openCalc()
-			}
-		}
 	}
 }
 

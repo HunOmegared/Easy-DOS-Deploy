@@ -142,9 +142,6 @@ TR: (comme réglé ci-dessous)
 EN: (copy)
 TR: (copie)
 
-EN: (no card found)
-TR: (aucune carte trouvée)
-
 EN: . Missing: %s. Download it yourself from %s and browse for it, or put it here: %s
 TR: . Manquant : %s. Téléchargez-le vous-même depuis %s et sélectionnez-le, ou placez-le ici : %s
 
@@ -426,9 +423,6 @@ TR: Vide (MS-DOS 6.x)
 
 EN: Empty image: %d sectors (%s), geometry %d/%d/%d.
 TR: Image vide : %d secteurs (%s), géométrie %d/%d/%d.
-
-EN: Enter the geometry DOS gets from the target machine's BIOS (MSD.EXE, Disk Drives), not the one in BIOS setup.
-TR: Saisissez la géométrie que DOS obtient du BIOS de la machine cible (MSD.EXE, Disk Drives), pas celle du setup du BIOS.
 
 EN: Error: %s
 TR: Erreur : %s
@@ -718,9 +712,6 @@ TR: Sur un lecteur ou dans un dossier
 EN: One menu item: DOS with HIMEM and upper memory, nothing else.
 TR: Une seule entrée : DOS avec HIMEM et la mémoire haute, rien d'autre.
 
-EN: Only removable, USB and SD disks are listed; the Windows disk never. Insert the card in the reader, then Refresh.
-TR: Seuls les disques amovibles, USB et SD sont listés ; jamais le disque Windows. Insérez la carte dans le lecteur, puis cliquez sur Actualiser.
-
 EN: Open driver &folder
 TR: Ouvrir le &dossier des pilotes
 
@@ -768,9 +759,6 @@ TR: Aperçu
 
 EN: Put GEOM.COM onto a boot &floppy image...
 TR: Mettre GEOM.COM sur une image de &disquette de démarrage...
-
-EN: Put the card or disk into the target machine, let BIOS setup detect it (Auto), and copy the values it shows. The program works out what DOS will get. To be sure, run GEOM.COM on the target machine (Disk image menu) and compare.
-TR: Mettez la carte ou le disque dans la machine cible, laissez le setup du BIOS le détecter (Auto) et recopiez les valeurs affichées. Le programme calcule ce que DOS obtiendra. Pour en être sûr, lancez GEOM.COM sur la machine cible (menu Image disque) et comparez.
 
 EN: Read from %s: %d menu items, %s.
 TR: Lu depuis %s : %d entrées de menu, %s.
@@ -1098,9 +1086,6 @@ TR: Quel DOS, et que doit proposer le menu de démarrage ?
 
 EN: Works with nearly every IDE/ATAPI CD drive, also on old ISA controllers. Part of Windows 98, not free: browse for it on your Windows 98 boot disk (or its image), or in WINDOWS\\COMMAND\\EBD.
 TR: Fonctionne avec presque tous les lecteurs CD IDE/ATAPI, même sur d'anciens contrôleurs ISA. Fait partie de Windows 98, non libre : sélectionnez-le sur votre disquette de démarrage Windows 98 (ou son image), ou dans WINDOWS\\COMMAND\\EBD.
-
-EN: Write image to card
-TR: Écrire l'image sur la carte
 
 EN: Write to disk &image...
 TR: Écrire dans une &image disque...
@@ -1705,9 +1690,6 @@ TR: Un disque ou une image qui démarre déjà DOS
 EN: A card backup, a hard disk image or a boot floppy image: its boot code and system files are taken, and its drivers can be used.
 TR: Une sauvegarde de carte, une image de disque dur ou une image de disquette de démarrage : son code d'amorçage et ses fichiers système sont repris, et ses pilotes peuvent servir.
 
-EN: Empty image: I install DOS on it myself
-TR: Image vide : j'installe DOS moi-même
-
 EN: For DOS Setup in an emulator: the image has the right geometry but no system.
 TR: Pour DOS Setup dans un émulateur : l'image a la bonne géométrie mais pas de système.
 
@@ -1785,3 +1767,27 @@ TR: Vue simple
 
 EN: Write to disk...
 TR: Écrire sur le disque...
+
+EN: I'll install DOS myself (empty image)
+TR: J'installe DOS moi-même (image vide)
+
+EN: Choose a disk profile, or enter the geometry DOS gets from the target machine's BIOS (MSD or GEOM shows it), not the one in BIOS setup. Not sure? Help with the disk profile tells how to find it.
+TR: Choisissez un profil de disque, ou entrez la géométrie que DOS obtient du BIOS de la machine cible (MSD ou GEOM l'affiche), pas celle du setup du BIOS. Pas sûr ? « Aide pour le profil de disque » explique comment la trouver.
+
+EN: Advanced: a different image size
+TR: Avancé : une autre taille d'image
+
+EN: Removable disks only: CF and SD cards in a reader, IDE disks on a USB adapter, and USB drives. Insert the card or connect the adapter, then click Refresh. The Windows system disk is never listed.
+TR: Disques amovibles uniquement : cartes CF et SD dans un lecteur, disques IDE sur un adaptateur USB, et lecteurs USB. Insérez la carte ou branchez l'adaptateur, puis cliquez sur Actualiser. Le disque système de Windows n'est jamais affiché.
+
+EN: No suitable disk found. Insert a card into the reader or connect the USB-IDE adapter, then click Refresh.
+TR: Aucun disque adapté. Insérez une carte dans le lecteur ou branchez l'adaptateur USB-IDE, puis cliquez sur Actualiser.
+
+EN: Write image to disk
+TR: Écrire l'image sur le disque
+
+EN: Put the card or disk into the target machine, let BIOS setup detect it (Auto), and copy the values it shows. The program works out what DOS will get. To be sure, check it with GEOM on the target machine (see Help with the disk profile).
+TR: Mettez la carte ou le disque dans la machine cible, laissez le setup du BIOS le détecter (Auto) et recopiez les valeurs affichées. Le programme calcule ce que DOS obtiendra. Pour en être sûr, vérifiez avec GEOM sur la machine cible (voir Aide pour le profil de disque).
+
+EN: removable
+TR: amovible
