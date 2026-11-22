@@ -18,6 +18,7 @@ const (
 	pageSystem
 	pageDrivers
 	pageMenu
+	pageFiles
 	pageBuild
 	pageCount
 )
@@ -90,6 +91,7 @@ func (a *app) newPanel(class string) uintptr {
 func (a *app) createPages() {
 	a.createBootPages()
 	a.createDriversPage()
+	a.createFilesPage()
 	a.layoutPages()
 }
 
@@ -104,6 +106,10 @@ func (a *app) destroyPages() {
 		pDestroyWindow.Call(a.drv.hwnd)
 		a.drv = nil
 	}
+	if a.files != nil {
+		pDestroyWindow.Call(a.files.hwnd)
+		a.files = nil
+	}
 }
 
 // pagePanel is the panel of a page (0: the editor's own controls).
@@ -117,6 +123,8 @@ func (a *app) pagePanel(p int) uintptr {
 		return a.boot.panels[bpBuild]
 	case a.drv != nil && p == pageDrivers:
 		return a.drv.hwnd
+	case a.files != nil && p == pageFiles:
+		return a.files.hwnd
 	}
 	return 0
 }
@@ -146,6 +154,8 @@ func (a *app) showPage(p int) {
 	switch p {
 	case pageDrivers:
 		a.drv.refresh()
+	case pageFiles:
+		a.files.refresh()
 	case pageBuild:
 		a.boot.fillMenus(a.boot.menuChoice())
 		a.boot.updateDrivers()
@@ -176,7 +186,7 @@ func (a *app) sideWidth() int { return a.s(236) }
 
 // stepTitles are the names of the pages, in order.
 func stepTitles() []string {
-	return []string{T("Machine and disk"), T("System"), T("Drivers"), T("Boot menu"), T("Build")}
+	return []string{T("Machine and disk"), T("System"), T("Drivers"), T("Boot menu"), T("Your files"), T("Build")}
 }
 
 // stepState is the icon and the one-line summary of a step.
@@ -248,6 +258,17 @@ func (a *app) stepState(p int) (int, string) {
 			return iconMenu, T("1 menu item")
 		}
 		return iconMenu, T("%d menu items", len(a.proj.Items))
+	case pageFiles:
+		if len(a.proj.Files) == 0 {
+			return iconBrowse, T("Optional: games, utilities")
+		}
+		var n int64
+		if a.files != nil {
+			for _, it := range a.proj.Files {
+				n += a.files.size(it.Source)
+			}
+		}
+		return iconOK, T("%d items, %s", len(a.proj.Files), humanSize(n))
 	case pageBuild:
 		return iconBuild, T("Image file, then the card")
 	}

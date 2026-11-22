@@ -1821,3 +1821,72 @@ TR: Das Programm kann FreeDOS herunterladen, eine leere Karte genügt also. Ein 
 
 EN: MS-DOS belongs to Microsoft, so it comes from your own disks or from a system that already works. The Setup disks are the easiest way for a new system.
 TR: MS-DOS gehört Microsoft, es kommt also von Ihren eigenen Disketten oder aus einem System, das schon läuft. Für ein neues System sind die Setup-Disketten am einfachsten.
+
+EN: Copying your files: %d / %d
+TR: Ihre Dateien werden kopiert: %d / %d
+
+EN: Your files
+TR: Ihre Dateien
+
+EN: Folders and files from this PC that go onto the DOS disk: games, utilities, Norton Commander... A folder's contents go into the DOS folder given for it. Long names become 8.3 names, as DOS shows them (NORTON~1).
+TR: Ordner und Dateien von diesem PC, die auf die DOS-Platte kommen: Spiele, Hilfsprogramme, Norton Commander … Der Inhalt eines Ordners kommt in den dafür angegebenen DOS-Ordner. Lange Namen werden zu 8.3-Namen, wie DOS sie zeigt (NORTON~1).
+
+EN: On this PC
+TR: Auf diesem PC
+
+EN: On the DOS disk
+TR: Auf der DOS-Platte
+
+EN: Size
+TR: Größe
+
+EN: Add a file...
+TR: Datei hinzufügen...
+
+EN: Destination...
+TR: Ziel...
+
+EN: Nothing yet. This step is optional.
+TR: Noch nichts. Dieser Schritt ist freiwillig.
+
+EN: Together: %s. They are copied after the system, the drivers and the menu.
+TR: Zusammen: %s. Sie werden nach System, Treibern und Menü kopiert.
+
+EN: Destination
+TR: Ziel
+
+EN: DOS folder for %s:
+TR: DOS-Ordner für %s:
+
+EN: For example: C:\\GAMES\\DOOM or D:\\UTIL
+TR: Zum Beispiel: C:\\GAMES\\DOOM oder D:\\UTIL
+
+EN: Folder for the DOS disk
+TR: Ordner für die DOS-Platte
+
+EN: File for the DOS disk
+TR: Datei für die DOS-Platte
+
+EN: Optional: games, utilities
+TR: Freiwillig: Spiele, Programme
+
+EN: %d items, %s
+TR: %d Einträge, %s
+
+EN: %s: the destination must start with a hard disk drive, such as C:\\
+TR: %s: das Ziel muss mit einem Festplattenlaufwerk beginnen, etwa C:\\
+
+EN: the image has no FAT drive
+TR: das Image hat kein FAT-Laufwerk
+
+EN: %s: the disk has no drive %c:
+TR: %s: die Platte hat kein Laufwerk %c:
+
+EN: Not enough space on %c: for your files: %s needed, %s free.
+TR: Nicht genug Platz auf %c: für Ihre Dateien: %s nötig, %s frei.
+
+EN: Your files: %d files, %s.
+TR: Ihre Dateien: %d Dateien, %s.
+
+EN: Long names shortened for DOS (%d): %s
+TR: Für DOS gekürzte lange Namen (%d): %s

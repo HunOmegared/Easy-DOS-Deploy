@@ -908,6 +908,14 @@ func (b *bootWin) create() {
 			}
 			menuErr = err
 		}
+		if len(proj.Files) > 0 && menuErr == nil && o.Kind == MediaHDD {
+			r3, err := CopyOwnFiles(o.Path, proj.Files, func(d, n int) { prog(phaseOwn, int64(d), int64(n)) })
+			if err != nil {
+				menuErr = err
+			} else {
+				r.Done = append(r.Done, r3.Done...)
+			}
+		}
 		return nil
 	}, func(err error) {
 		b.created(o, r, err, menuErr)
@@ -1244,10 +1252,13 @@ func jobProc(hwnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {
 			j.mu.Lock()
 			ph, d, t := j.phase, j.done, j.total
 			j.mu.Unlock()
-			if ph == phaseFiles || ph == phaseMenu {
+			if ph == phaseFiles || ph == phaseMenu || ph == phaseOwn {
 				step := T("Copying files: %d / %d", d, t)
-				if ph == phaseMenu {
+				switch ph {
+				case phaseMenu:
 					step = T("Writing the boot menu and the drivers...")
+				case phaseOwn:
+					step = T("Copying your files: %d / %d", d, t)
 				}
 				setText(j.text, j.what+"\n\n"+step)
 				return 0

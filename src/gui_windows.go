@@ -137,6 +137,7 @@ type app struct {
 	setupDlg *setupWin
 	own      *ownWin
 	geomHelp *geomHelpWin
+	files    *filesWin
 	preview  uintptr
 	prevC    map[int]uintptr
 }
@@ -201,6 +202,7 @@ func runGUI() {
 	registerClass("EasyDOSDeployOwn", syscall.NewCallback(ownProc))
 	registerClass("EasyDOSDeployGeomHelp", syscall.NewCallback(geomHelpProc))
 	registerClass("EasyDOSDeployInput", syscall.NewCallback(inputProc))
+	registerClass("EasyDOSDeployFiles", syscall.NewCallback(filesProc))
 
 	a.hwnd = createWindow(0, "EasyDOSDeployMain", appTitle(), WS_OVERLAPPEDWINDOW,
 		cwDefault, cwDefault, a.s(1200), a.s(760), 0, 0)

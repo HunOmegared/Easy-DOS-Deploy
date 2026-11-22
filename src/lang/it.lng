@@ -1821,3 +1821,72 @@ TR: Il programma può scaricare FreeDOS, quindi basta una scheda vuota. Si può 
 
 EN: MS-DOS belongs to Microsoft, so it comes from your own disks or from a system that already works. The Setup disks are the easiest way for a new system.
 TR: MS-DOS appartiene a Microsoft, quindi viene dai tuoi dischi o da un sistema che già funziona. Per un nuovo sistema i dischi di installazione sono la via più semplice.
+
+EN: Copying your files: %d / %d
+TR: Copia dei tuoi file: %d / %d
+
+EN: Your files
+TR: I tuoi file
+
+EN: Folders and files from this PC that go onto the DOS disk: games, utilities, Norton Commander... A folder's contents go into the DOS folder given for it. Long names become 8.3 names, as DOS shows them (NORTON~1).
+TR: Cartelle e file di questo PC che vanno sul disco DOS: giochi, utility, Norton Commander… Il contenuto di una cartella va nella cartella DOS indicata per essa. I nomi lunghi diventano nomi 8.3, come li mostra DOS (NORTON~1).
+
+EN: On this PC
+TR: Su questo PC
+
+EN: On the DOS disk
+TR: Sul disco DOS
+
+EN: Size
+TR: Dimensione
+
+EN: Add a file...
+TR: Aggiungi un file...
+
+EN: Destination...
+TR: Destinazione...
+
+EN: Nothing yet. This step is optional.
+TR: Ancora niente. Questo passo è facoltativo.
+
+EN: Together: %s. They are copied after the system, the drivers and the menu.
+TR: In tutto: %s. Vengono copiati dopo il sistema, i driver e il menu.
+
+EN: Destination
+TR: Destinazione
+
+EN: DOS folder for %s:
+TR: Cartella DOS per %s:
+
+EN: For example: C:\\GAMES\\DOOM or D:\\UTIL
+TR: Per esempio: C:\\GAMES\\DOOM o D:\\UTIL
+
+EN: Folder for the DOS disk
+TR: Cartella per il disco DOS
+
+EN: File for the DOS disk
+TR: File per il disco DOS
+
+EN: Optional: games, utilities
+TR: Facoltativo: giochi, utility
+
+EN: %d items, %s
+TR: %d elementi, %s
+
+EN: %s: the destination must start with a hard disk drive, such as C:\\
+TR: %s: la destinazione deve iniziare con un'unità disco rigido, come C:\\
+
+EN: the image has no FAT drive
+TR: l'immagine non ha unità FAT
+
+EN: %s: the disk has no drive %c:
+TR: %s: il disco non ha l'unità %c:
+
+EN: Not enough space on %c: for your files: %s needed, %s free.
+TR: Spazio insufficiente su %c: per i tuoi file: servono %s, liberi %s.
+
+EN: Your files: %d files, %s.
+TR: I tuoi file: %d file, %s.
+
+EN: Long names shortened for DOS (%d): %s
+TR: Nomi lunghi accorciati per DOS (%d): %s

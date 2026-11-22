@@ -61,6 +61,8 @@ type Project struct {
 	// Machine: the drivers of an existing system that block-made items use
 	// instead of the program's own (see machine.go); nil: none.
 	Machine *Machine `json:"machine,omitempty"`
+	// Files are the user's own files and folders for the disk (games ...).
+	Files []CopyItem `json:"files,omitempty"`
 	// File names; empty means the default for the target.
 	ConfigName   string `json:"configname"`
 	AutoexecName string `json:"autoexecname"`

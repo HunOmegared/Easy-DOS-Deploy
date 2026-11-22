@@ -194,6 +194,7 @@ const (
 	phaseVerify
 	phaseFiles // making an image: files written (counts, not bytes)
 	phaseMenu  // making an image: the boot menu and drivers
+	phaseOwn   // making an image: the user's own files (counts)
 )
 
 func needAdmin(err error) bool { return errors.Is(err, errAccessDenied) }
