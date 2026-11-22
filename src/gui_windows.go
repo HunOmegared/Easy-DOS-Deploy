@@ -1540,7 +1540,7 @@ func (d *drvWin) refreshFocus(focus int) {
 	for i := range a.store.Catalog {
 		dr := &a.store.Catalog[i]
 		icon, state := driverState(a.store, dr)
-		lvSetCell(lv, i, 0, dr.Name, -1)
+		lvSetCell(lv, i, 0, dr.Name, iImageNone)
 		lvSetCell(lv, i, 1, state, icon)
 		lvSetCell(lv, i, 2, "", iconGear)
 		lvSetChecked(lv, i, want[dr.ID])

@@ -180,10 +180,15 @@ func lvInsertColumn(h uintptr, i int, text string, width int, center bool) {
 	sendMsg(h, LVM_INSERTCOLUMNW, uintptr(i), uintptr(unsafe.Pointer(&c)))
 }
 
-// lvSetCell sets the text and icon (-1: none) of a cell; sub 0 inserts the row.
+// I_IMAGENONE: a cell without an icon (left out, the first column would
+// show icon 0).
+const iImageNone = -2
+
+// lvSetCell sets the text and icon (-1: not set) of a cell; sub 0 inserts
+// the row.
 func lvSetCell(h uintptr, row, sub int, text string, icon int) {
 	it := lvItem{mask: LVIF_TEXT, item: int32(row), subItem: int32(sub), text: u16(text)}
-	if icon >= 0 {
+	if icon != -1 {
 		it.mask |= LVIF_IMAGE
 		it.image = int32(icon)
 	}
