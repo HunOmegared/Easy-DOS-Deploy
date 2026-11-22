@@ -1756,9 +1756,6 @@ TR: Luego guárdela como perfil de disco: la próxima vez solo tendrá que elegi
 EN: 1 menu item
 TR: 1 entrada de menú
 
-EN: Start from a ready menu...
-TR: Empezar con un menú listo...
-
 EN: Only drive C: (2 GB at most), so that the CD-ROM stays D:
 TR: Solo la unidad C: (2 GB como máximo), para que el CD-ROM siga siendo D:
 
@@ -1767,3 +1764,21 @@ TR: El disco es mayor de 2 GB: el espacio después de C: queda sin usar.
 
 EN: Note: some CD-ROM games only work when the CD-ROM is drive D:. With D: on the disk, the CD-ROM becomes %c:. If you play such games, tick "Only drive C:".
 TR: Nota: algunos juegos en CD solo funcionan si el CD-ROM es la unidad D:. Con D: en el disco, el CD-ROM pasa a ser %c:. Si usa esos juegos, marque «Solo la unidad C:».
+
+EN: Edited in the editor or read from a project file.
+TR: Modificado en el editor o leído de un archivo de proyecto.
+
+EN: Replace your edited menu with this ready one?
+TR: ¿Reemplazar su menú editado por este menú listo?
+
+EN: The menu DOS shows at start-up, to choose what is loaded. Choose a ready one; you can change everything in the editor.
+TR: El menú que DOS muestra al arrancar, para elegir qué se carga. Elija uno listo; en el editor se puede cambiar todo.
+
+EN: Your own menu
+TR: Su menú
+
+EN: Edit the menu...
+TR: Editar el menú...
+
+EN: Simple view
+TR: Vista simple

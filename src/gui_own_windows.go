@@ -226,7 +226,7 @@ func (w *ownWin) add() {
 		return
 	}
 	a.proj.AddOwnLine(d.ID, items, o.Config, line)
-	a.setDirty()
+	a.menuEdit()
 	a.loadProject()
 	w.close()
 	if a.drv != nil {

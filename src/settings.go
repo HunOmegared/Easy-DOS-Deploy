@@ -15,6 +15,8 @@ type Settings struct {
 	// the MS-DOS Setup disks used last, and SETUP's choices
 	SetupDisks []string      `json:"setupdisks,omitempty"`
 	SetupOpt   *SetupOptions `json:"setupopt,omitempty"`
+	// MenuEditor: the menu page opens in the full editor
+	MenuEditor bool `json:"menueditor,omitempty"`
 }
 
 // GeomProfile remembers the geometry of a card in a machine.

@@ -283,6 +283,7 @@ func (w *wizardWin) next() {
 		return
 	}
 	a.proj, a.path, a.dirty, a.sel = TemplateByID(tid).Make(), "", false, 1
+	a.setMenuFrom(tid)
 	a.loadProject()
 	if task == taskCard {
 		w.show(4)

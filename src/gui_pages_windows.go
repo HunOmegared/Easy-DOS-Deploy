@@ -124,7 +124,7 @@ func (a *app) pagePanel(p int) uintptr {
 // menuPageIDs are the editor's controls, shown only on the menu page.
 var menuPageIDs = []int{idLblTarget, idTarget, idLblTimeout, idTimeout, idLblDefault, idDefault, idLblCodepage, idCodepage,
 	idLblColor, idColor, idLblCfgName, idCfgName, idLblAutoName, idAutoName, idList, idAdd, idBlocks, idCopy, idDel, idUp, idDown,
-	idLblID, idID, idLblTitle, idTitle, idLblConfig, idConfig, idLblAutoexec, idAutoexec, idHint, idPreview, idSaveDir, idWriteImg, idMenuHead, idReady, idStatus}
+	idLblID, idID, idLblTitle, idTitle, idLblConfig, idConfig, idLblAutoexec, idAutoexec, idHint, idPreview, idSaveDir, idWriteImg, idMenuHead, idStatus}
 
 // showPage switches to a page.
 func (a *app) showPage(p int) {
@@ -133,13 +133,7 @@ func (a *app) showPage(p int) {
 	}
 	a.commit()
 	a.page = p
-	for _, id := range menuPageIDs {
-		v := uintptr(0)
-		if p == pageMenu {
-			v = SW_SHOW
-		}
-		pShowWindow.Call(a.c[id], v)
-	}
+	a.showMenuView()
 	for q := 0; q < pageCount; q++ {
 		if h := a.pagePanel(q); h != 0 {
 			v := uintptr(0)
@@ -319,9 +313,133 @@ func (a *app) fillSide() {
 	sendMsg(h, LB_SETCURSEL, uintptr(a.page), 0)
 }
 
+// setMenuFrom remembers which ready menu the project's menu is (an ID
+// such as "games-ms").
+func (a *app) setMenuFrom(id string) {
+	a.menuFrom = strings.TrimSuffix(strings.TrimSuffix(id, "-ms"), "-fd")
+	a.menuEdited = false
+}
+
+// The menu page has a simple view (the ready menus) and the full editor.
+var simpleMenuIDs = []int{idMenuIntro, idTpl0, idTpl1, idTpl2, idTpl3, idTplOwn, idTplNote0, idTplNote1, idTplNote2, idTplNote3, idTplOwnNote, idEditMenu}
+
+// editorIDs are the controls of the full editor (not the heading).
+func editorIDs() []int {
+	var out []int
+	for _, id := range menuPageIDs {
+		if id != idMenuHead {
+			out = append(out, id)
+		}
+	}
+	return append(out, idSimpleView)
+}
+
+// showMenuView shows the simple view or the editor of the menu page.
+func (a *app) showMenuView() {
+	on := a.page == pageMenu
+	show := func(ids []int, v bool) {
+		for _, id := range ids {
+			x := uintptr(0)
+			if v {
+				x = SW_SHOW
+			}
+			pShowWindow.Call(a.c[id], x)
+		}
+	}
+	show([]int{idMenuHead}, on)
+	show(editorIDs(), on && a.set.MenuEditor)
+	show(simpleMenuIDs, on && !a.set.MenuEditor)
+	if on && !a.set.MenuEditor {
+		a.fillSimpleMenu()
+	}
+}
+
+// fillSimpleMenu shows which ready menu is chosen and what each offers.
+func (a *app) fillSimpleMenu() {
+	suffix := "-ms"
+	if a.proj.Target == TargetFreeDOS {
+		suffix = "-fd"
+	}
+	sel := -1
+	for i, id := range wizMenus {
+		t := TemplateByID(id + suffix)
+		var titles []string
+		for _, it := range t.Make().Items {
+			titles = append(titles, it.Title)
+		}
+		setText(a.c[idTplNote0+i], T(t.Desc)+"\n"+T("Menu items:")+" "+strings.Join(titles, " • "))
+		if id == a.menuFrom && !a.menuEdited {
+			sel = i
+		}
+	}
+	own := a.menuFrom == "" || a.menuEdited
+	var titles []string
+	for _, it := range a.proj.Items {
+		titles = append(titles, title(it))
+	}
+	setText(a.c[idTplOwnNote], T("Edited in the editor or read from a project file.")+"\n"+T("Menu items:")+" "+strings.Join(titles, " • "))
+	v := uintptr(0)
+	if own {
+		v = SW_SHOW
+		sel = len(wizMenus)
+	}
+	pShowWindow.Call(a.c[idTplOwn], v)
+	pShowWindow.Call(a.c[idTplOwnNote], v)
+	for i := 0; i <= len(wizMenus); i++ {
+		setCheck(a.c[idTpl0+i], i == sel)
+	}
+	a.layoutSimpleMenu()
+}
+
+func (a *app) layoutSimpleMenu() {
+	w, _ := clientSize(a.hwnd)
+	s := a.s
+	x := a.sideWidth() + s(14)
+	cw := w - x - s(14)
+	lh := s(18)
+	move(a.c[idMenuIntro], x, s(46), cw, 2*lh)
+	y := s(46) + 2*lh + s(14)
+	for i := 0; i <= len(wizMenus); i++ {
+		if i == len(wizMenus) && !(a.menuFrom == "" || a.menuEdited) {
+			break
+		}
+		move(a.c[idTpl0+i], x, y, cw, s(23))
+		y += s(23)
+		move(a.c[idTplNote0+i], x+s(22), y, cw-s(22), 2*lh)
+		y += 2*lh + s(12)
+	}
+	bw := fitW(s(160), s(24), a.c[idEditMenu])
+	move(a.c[idEditMenu], x, y+s(4), bw, s(30))
+}
+
+func (a *app) simpleMenuCommand(id int) {
+	switch {
+	case id == idEditMenu:
+		a.set.MenuEditor = true
+		saveSettings(a.data, a.set)
+		a.showPage(pageMenu)
+	case id == idSimpleView:
+		a.commit()
+		a.set.MenuEditor = false
+		saveSettings(a.data, a.set)
+		a.showPage(pageMenu)
+	case id == idTplOwn:
+		a.fillSimpleMenu()
+	default:
+		a.readyMenu(id - idTpl0)
+	}
+}
+
 // readyMenu replaces the menu with a ready one (c: index into wizMenus).
 func (a *app) readyMenu(c int) {
-	if c < 0 || c >= len(wizMenus) || !a.askSave() {
+	if c < 0 || c >= len(wizMenus) {
+		return
+	}
+	if wizMenus[c] == a.menuFrom && !a.menuEdited {
+		return
+	}
+	if a.menuEdited && msgBox(a.hwnd, T("Replace your edited menu with this ready one?"), appTitle(), MB_YESNO|MB_ICONQUESTION) != IDYES {
+		a.fillSimpleMenu()
 		return
 	}
 	suffix := "-ms"
@@ -332,11 +450,15 @@ func (a *app) readyMenu(c int) {
 	if t == TargetFreeDOS {
 		suffix = "-fd"
 	}
-	a.proj, a.path, a.dirty, a.sel = TemplateByID(wizMenus[c]+suffix).Make(), "", false, 1
+	// only the menu changes; the project (and its file) stays
+	a.proj, a.sel = TemplateByID(wizMenus[c]+suffix).Make(), 1
+	a.setMenuFrom(wizMenus[c])
 	a.loadProject()
+	a.setDirty()
 	if a.boot != nil {
 		a.boot.applyOwn()
 		a.boot.fillMenus(0)
 	}
+	a.fillSimpleMenu()
 	a.updateSide()
 }

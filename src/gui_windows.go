@@ -55,9 +55,21 @@ const (
 	idLblCfgName
 	idLblAutoName
 	idBlocks
-	idSide     // the steps
-	idMenuHead // heading of the boot menu page
-	idReady    // ready menus
+	idSide       // the steps
+	idMenuHead   // heading of the boot menu page
+	idMenuIntro  // simple view of the menu page
+	idTpl0       // radio buttons of the ready menus (len(wizMenus))
+	idTpl1       //
+	idTpl2       //
+	idTpl3       //
+	idTplOwn     // the user's own menu
+	idTplNote0   // their notes
+	idTplNote1   //
+	idTplNote2   //
+	idTplNote3   //
+	idTplOwnNote //
+	idEditMenu   // to the full editor
+	idSimpleView // back to the simple view
 )
 
 // menu IDs
@@ -106,10 +118,12 @@ type app struct {
 
 	langMenu []*Language
 
-	page      int     // the page shown (pageDisk ...)
-	head      uintptr // font of page headings
-	bold      uintptr
-	sideIcons uintptr
+	page       int     // the page shown (pageDisk ...)
+	menuFrom   string  // the ready menu the menu came from (wizMenus), "" if not one
+	menuEdited bool    // the menu was edited by hand since
+	head       uintptr // font of page headings
+	bold       uintptr
+	sideIcons  uintptr
 
 	drv      *drvWin
 	edit     *editWin
@@ -170,6 +184,7 @@ func runGUI() {
 	a.sideIcons = makeIconList(a.s(24))
 	theApp = a
 	a.proj = DefaultProject(TargetMSDOS)
+	a.menuFrom = "plain"
 
 	registerClass("EasyDOSDeployMain", syscall.NewCallback(mainProc))
 	registerClass("EasyDOSDeployPreview", syscall.NewCallback(previewProc))
@@ -431,7 +446,17 @@ func (a *app) build() {
 	a.ctl(idSaveDir, "BUTTON", WS_TABSTOP, 0)
 	a.ctl(idWriteImg, "BUTTON", WS_TABSTOP, 0)
 	sendMsg(a.ctl(idMenuHead, "STATIC", 0, 0), WM_SETFONT, a.head, 1)
-	a.ctl(idReady, "COMBOBOX", combo, 0)
+	a.ctl(idMenuIntro, "STATIC", 0, 0)
+	for i := 0; i < 5; i++ {
+		style := uint32(WS_TABSTOP | BS_RADIOBUTTON)
+		if i == 0 {
+			style |= WS_GROUP
+		}
+		a.ctl(idTpl0+i, "BUTTON", style, 0)
+		a.ctl(idTplNote0+i, "STATIC", 0, 0)
+	}
+	a.ctl(idEditMenu, "BUTTON", WS_TABSTOP, 0)
+	a.ctl(idSimpleView, "BUTTON", WS_TABSTOP, 0)
 	a.ctl(idSide, "LISTBOX", WS_TABSTOP|LBS_NOTIFY|LBS_OWNERDRAWFIXED|LBS_HASSTRINGS|LBS_NOINTEGRALHEIGHT, 0)
 	a.fillSide()
 	a.layout()
@@ -461,13 +486,12 @@ func (a *app) applyTexts() {
 	set(idSaveDir, T("Save to folder..."))
 	set(idWriteImg, T("Write to disk image..."))
 	set(idMenuHead, T("Boot menu"))
-	fillCombo(a.c[idReady], []string{
-		T("Start from a ready menu..."),
-		T("Plain DOS"),
-		T("Everyday: DOS / + mouse and CD-ROM / everything"),
-		T("Games: everything / EMS / no EMS / clean"),
-		T("Network with Easy Commander / plain DOS"),
-	}, 0)
+	set(idMenuIntro, T("The menu DOS shows at start-up, to choose what is loaded. Choose a ready one; you can change everything in the editor."))
+	for i, t := range []string{T("Plain DOS"), T("Everyday: DOS / + mouse and CD-ROM / everything"), T("Games: everything / EMS / no EMS / clean"), T("Network with Easy Commander / plain DOS"), T("Your own menu")} {
+		set(idTpl0+i, t)
+	}
+	set(idEditMenu, T("Edit the menu..."))
+	set(idSimpleView, T("Simple view"))
 	cue(a.c[idTimeout], T("forever"))
 	cue(a.c[idColor], T("e.g. 15,1"))
 	tgt := 0
@@ -516,9 +540,10 @@ func (a *app) layout() {
 	m := s(10)
 	rowH := s(23)
 	lblH := s(18)
-	rw := s(330)
-	move(a.c[idMenuHead], ox+s(14), s(14), w-ox-rw-s(40), s(28))
-	move(a.c[idReady], w-s(14)-rw, s(16), rw, s(300))
+	sv := fitW(s(120), s(24), a.c[idSimpleView])
+	move(a.c[idMenuHead], ox+s(14), s(14), w-ox-sv-s(40), s(28))
+	move(a.c[idSimpleView], w-s(14)-sv, s(16), sv, s(28))
+	a.layoutSimpleMenu()
 	x := ox + m
 	y := m + s(46)
 	place := func(lbl, lw, cw int, id int, comboExtra int) {
@@ -742,7 +767,7 @@ func (a *app) commit() {
 	}
 	it.Config, it.Autoexec = cfg, auto
 	if changed {
-		a.setDirty()
+		a.menuEdit()
 	}
 }
 
@@ -769,7 +794,7 @@ func (a *app) readSettings() {
 	p.MenuColor = strings.TrimSpace(getText(a.c[idColor]))
 	p.ConfigName = strings.TrimSpace(getText(a.c[idCfgName]))
 	p.AutoexecName = strings.TrimSpace(getText(a.c[idAutoName]))
-	a.setDirty()
+	a.menuEdit()
 }
 
 // targetChanged rebuilds the items made of building blocks for the new DOS
@@ -804,6 +829,12 @@ func (a *app) autoChanged() {
 		return
 	}
 	a.updateStatus()
+}
+
+// menuEdit marks a change the user made to the menu by hand.
+func (a *app) menuEdit() {
+	a.menuEdited = true
+	a.setDirty()
 }
 
 func (a *app) setDirty() {
@@ -879,7 +910,7 @@ func (a *app) addItem(copyCur bool) {
 	if len(p.Items) > 1 && p.Default >= pos {
 		p.Default++
 	}
-	a.setDirty()
+	a.menuEdit()
 	a.selectRow(pos + 1)
 	pSetFocus.Call(a.c[idTitle])
 	sendMsg(a.c[idTitle], 0x00B1, 0, ^uintptr(0)) // EM_SETSEL all
@@ -904,7 +935,7 @@ func (a *app) deleteItem() {
 	if a.sel < 1 && len(p.Items) > 0 {
 		a.sel = 1
 	}
-	a.setDirty()
+	a.menuEdit()
 	a.selectRow(a.sel)
 }
 
@@ -923,7 +954,7 @@ func (a *app) moveItem(d int) {
 	case j:
 		p.Default = i
 	}
-	a.setDirty()
+	a.menuEdit()
 	a.selectRow(j + 1)
 }
 
@@ -988,11 +1019,13 @@ func (a *app) openProjectFile(path string) {
 		return
 	}
 	a.proj, a.path, a.dirty, a.sel = p, path, false, 1
+	a.menuFrom, a.menuEdited = "", false
 	a.loadProject()
 }
 
 func (a *app) setProject(p *Project, notes []string, what string) {
 	a.proj, a.path, a.dirty, a.sel = p, "", true, 1
+	a.menuFrom, a.menuEdited = "", false
 	a.loadProject()
 	text := T("Read from %s: %d menu items, %s.", what, len(p.Items), p.Target.String())
 	if len(notes) > 0 {
@@ -1175,6 +1208,7 @@ func (a *app) onCommand(id int, code uint32) {
 	case id >= mTemplate && id < mTemplate+len(Templates):
 		if a.askSave() {
 			a.proj, a.path, a.dirty, a.sel = Templates[id-mTemplate].Make(), "", false, 1
+			a.setMenuFrom(Templates[id-mTemplate].ID)
 			a.loadProject()
 		}
 		return
@@ -1325,10 +1359,9 @@ func mainProc(hwnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {
 		}
 	case WM_COMMAND:
 		if a != nil && a.hwnd != 0 {
-			if int(loword(wParam)) == idReady {
-				if hiword(wParam) == CBN_SELCHANGE {
-					a.readyMenu(int(sendMsg(a.c[idReady], CB_GETCURSEL, 0, 0)) - 1)
-					sendMsg(a.c[idReady], CB_SETCURSEL, 0, 0)
+			if id := int(loword(wParam)); id >= idTpl0 && id <= idTplOwn || id == idEditMenu || id == idSimpleView {
+				if hiword(wParam) == BN_CLICKED {
+					a.simpleMenuCommand(id)
 				}
 				return 0
 			}

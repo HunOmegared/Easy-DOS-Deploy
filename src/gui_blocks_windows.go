@@ -377,7 +377,7 @@ func (w *blockWin) ok() {
 	}
 	p.AddDrivers(drv)
 	w.close()
-	a.setDirty()
+	a.menuEdit()
 	a.selectRow(a.sel)
 	if a.drv != nil {
 		a.drv.refresh()
