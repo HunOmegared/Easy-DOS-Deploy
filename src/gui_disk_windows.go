@@ -451,7 +451,12 @@ func (b *bootWin) updateDrivers() {
 // builtinProfiles come before the user's own disk profiles.
 func builtinProfiles() []GeomProfile {
 	g := UniversalGeom
-	return []GeomProfile{{Name: T("Universal starter card: any IDE BIOS, about 500 MB (BIOS: User 1024/16/63)"), C: g.C, H: g.H, S: g.S}}
+	out := []GeomProfile{{Name: T("Universal starter card: any IDE BIOS, about 500 MB (BIOS: User 1024/16/63)"), C: g.C, H: g.H, S: g.S}}
+	for _, c := range ClassicTypes {
+		i := c.Image()
+		out = append(out, GeomProfile{Name: T("Classic drive type %d (%d/%d/%d), %s: for a BIOS without a User type", c.Type, c.Table.C, c.Table.H, c.Table.S, humanSize(i.Sectors()*512)), C: i.C, H: i.H, S: i.S})
+	}
+	return out
 }
 
 func allProfiles() []GeomProfile { return append(builtinProfiles(), theApp.set.Profiles...) }
@@ -710,6 +715,11 @@ func (b *bootWin) update() {
 	t := p.Describe()
 	if o.Geom == UniversalGeom {
 		t += "\n" + T("Starter card: in the BIOS setup of each machine set this drive to type User, 1024 cylinders, 16 heads, 63 sectors, and LBA off (NORMAL or CHS). Not Auto.")
+	}
+	for _, c := range ClassicTypes {
+		if o.Geom == c.Image() {
+			t += "\n" + T("Classic drive type: in BIOS setup choose type %d and check that it shows %d/%d/%d. The image leaves the last two cylinders unused, as some BIOSes keep them.", c.Type, c.Table.C, c.Table.H, c.Table.S)
+		}
 	}
 	switch {
 	case bigger && o.OnlyC:

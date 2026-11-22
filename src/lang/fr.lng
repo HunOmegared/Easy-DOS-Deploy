@@ -1941,3 +1941,9 @@ TR: Créer une carte de démarrage qui démarre sur presque tout PC
 
 EN: No floppy needed: a CF card of about 500 MB with a geometry every IDE BIOS can take, and GEOM.COM to find the machine's own geometry. Also a helper for old IDE disks.
 TR: Sans disquette : une carte CF d'environ 500 Mo avec une géométrie que tout BIOS IDE accepte, et GEOM.COM pour trouver la géométrie propre de la machine. Sert aussi d'aide pour les vieux disques IDE.
+
+EN: Classic drive type %d (%d/%d/%d), %s: for a BIOS without a User type
+TR: Type de disque classique %d (%d/%d/%d), %s : pour un BIOS sans type User
+
+EN: Classic drive type: in BIOS setup choose type %d and check that it shows %d/%d/%d. The image leaves the last two cylinders unused, as some BIOSes keep them.
+TR: Type de disque classique : dans le setup du BIOS, choisissez le type %d et vérifiez qu'il affiche %d/%d/%d. L'image laisse libres les deux derniers cylindres, que certains BIOS se réservent.

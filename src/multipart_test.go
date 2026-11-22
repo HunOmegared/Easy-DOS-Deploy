@@ -153,3 +153,25 @@ func TestStarterCard(t *testing.T) {
 		t.Fatal(g)
 	}
 }
+
+func TestClassicTypes(t *testing.T) {
+	src := makeDonor(t, MediaHDD, Geometry{200, 16, 63}, DOSMS)
+	for _, c := range ClassicTypes {
+		g := c.Image()
+		p, err := PlanHDD(g)
+		if err != nil || len(p.Logical) != 0 {
+			t.Fatal(c, err)
+		}
+		img := filepath.Join(t.TempDir(), "classic.img")
+		if _, err := CreateBootImage(BootOptions{Path: img, Kind: MediaHDD, Geom: g, Source: src, AddGeom: true}); err != nil {
+			t.Fatal(c, err)
+		}
+		di, err := ReadDiskInfo(img)
+		if err != nil || di.Geom != g || di.DOS != DOSMS {
+			t.Fatalf("%v: %+v %v", c, di, err)
+		}
+	}
+	if g := ClassicTypes[0].Image(); g != (Geometry{613, 4, 17}) {
+		t.Fatal(g)
+	}
+}

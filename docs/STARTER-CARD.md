@@ -91,12 +91,38 @@ the starter card, heads and sectors are 16 and 63, as set.
 * **"No ROM BASIC", "Missing operating system", or it hangs:** some CF cards
   do not accept a geometry set by the BIOS. Try another card (older,
   "industrial" or simple cards of known brands are usually fine).
-* **The BIOS has no User type:** very early BIOSes (such as the original IBM
-  AT) only have a fixed list of drive types. Then there is no geometry that
-  works everywhere: choose a type from the machine's list whose heads and
-  sectors the card accepts, and build the image with that geometry, or use an
-  XT-IDE BIOS (XTIDE Universal BIOS) if you can.
-* **The BIOS does not accept 63 sectors:** a few very old ones stop at a
-  smaller number. Build the image with the heads and sectors it does accept
-  (for example 16 heads and 17 sectors gives about 140 MB) and enter the same
-  values.
+* **The BIOS has no User type, or does not accept 63 sectors:** use a
+  classic drive type instead, see below.
+
+## A BIOS without a User type: classic drive types
+
+Very early BIOSes (such as the original IBM AT and many 286 clones) only have
+a fixed list of drive types. Nearly every clone kept the first 14 types of
+the IBM AT BIOS unchanged, so two of them are built-in disk profiles too:
+
+| Profile | BIOS type | BIOS shows | Size |
+|---|---|---|---|
+| Classic drive type 2 | **2** (the Seagate ST-225) | 615 / 4 / 17 | 20 MB |
+| Classic drive type 9 | **9** | 900 / 15 / 17 | about 112 MB |
+
+Type 2 is the safest: it is in practically every AT BIOS. Type 9 gives more
+room, enough for a helper card. CF cards accept these geometries like any
+other one set by the BIOS.
+
+1. Make the card as above, but on the *Machine and disk* page choose the
+   **Classic drive type** profile instead of the universal one (and keep
+   *Put GEOM.COM onto the disk* ticked on the *Build* page).
+2. In BIOS setup choose that **type number** for the hard disk, and **check
+   that the BIOS shows the values in the table.** If it shows other values,
+   that BIOS has its own table: use the type with those values that is
+   closest, and build the image with exactly what it shows (two cylinders
+   fewer, as the profiles do).
+3. Boot and run `GEOM`: it shows 4 heads and 17 sectors (type 2) or 15 heads
+   and 17 sectors (type 9).
+
+The images use two cylinders fewer than the table (613 and 898), because
+some BIOSes keep the last cylinder for themselves.
+
+If nothing else works, an XT-IDE BIOS (XTIDE Universal BIOS) on an IDE
+controller or a network card's boot ROM gives even the oldest machines
+auto-detection.

@@ -98,6 +98,23 @@ func UserCylinders(setup Geometry, mode int) (uint32, Geometry, bool) {
 // BIOSes give DOS a cylinder or two less than they are set to.
 var UniversalGeom = Geometry{1000, 16, 63}
 
+// ClassicType is a drive type of the IBM AT BIOS table, which nearly every
+// clone BIOS kept for types 1-14: for a BIOS without a User type.
+type ClassicType struct {
+	Type  int
+	Table Geometry // as the BIOS table has it
+}
+
+// ClassicTypes are the ones offered as built-in disk profiles.
+var ClassicTypes = []ClassicType{
+	{2, Geometry{615, 4, 17}},  // ST-225, 20 MB
+	{9, Geometry{900, 15, 17}}, // 112 MB
+}
+
+// Image is the geometry the image is made with: two cylinders fewer, as
+// some BIOSes keep the last cylinder for themselves.
+func (c ClassicType) Image() Geometry { return Geometry{c.Table.C - 2, c.Table.H, c.Table.S} }
+
 // biosCylLimit: some BIOSes of the early 1990s do not handle more than 4096
 // cylinders in setup (the 2 GB barrier).
 const biosCylLimit = 4096
