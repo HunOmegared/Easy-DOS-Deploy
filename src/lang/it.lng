@@ -1780,9 +1780,6 @@ TR: Avanzate: una dimensione diversa dell'immagine
 EN: Removable disks only: CF and SD cards in a reader, IDE disks on a USB adapter, and USB drives. Insert the card or connect the adapter, then click Refresh. The Windows system disk is never listed.
 TR: Solo dischi rimovibili: schede CF e SD in un lettore, dischi IDE su un adattatore USB e unità USB. Inserisci la scheda o collega l'adattatore, poi fai clic su Aggiorna. Il disco di sistema di Windows non compare mai.
 
-EN: No suitable disk found. Insert a card into the reader or connect the USB-IDE adapter, then click Refresh.
-TR: Nessun disco adatto. Inserisci una scheda nel lettore o collega l'adattatore USB-IDE, poi fai clic su Aggiorna.
-
 EN: Write image to disk
 TR: Scrivi l'immagine sul disco
 
@@ -1791,3 +1788,6 @@ TR: Metti la scheda o il disco nella macchina di destinazione, fallo rilevare da
 
 EN: removable
 TR: rimovibile
+
+EN: No suitable disk found.
+TR: Nessun disco adatto.

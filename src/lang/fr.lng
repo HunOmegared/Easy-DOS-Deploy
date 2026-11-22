@@ -1780,9 +1780,6 @@ TR: Avancé : une autre taille d'image
 EN: Removable disks only: CF and SD cards in a reader, IDE disks on a USB adapter, and USB drives. Insert the card or connect the adapter, then click Refresh. The Windows system disk is never listed.
 TR: Disques amovibles uniquement : cartes CF et SD dans un lecteur, disques IDE sur un adaptateur USB, et lecteurs USB. Insérez la carte ou branchez l'adaptateur, puis cliquez sur Actualiser. Le disque système de Windows n'est jamais affiché.
 
-EN: No suitable disk found. Insert a card into the reader or connect the USB-IDE adapter, then click Refresh.
-TR: Aucun disque adapté. Insérez une carte dans le lecteur ou branchez l'adaptateur USB-IDE, puis cliquez sur Actualiser.
-
 EN: Write image to disk
 TR: Écrire l'image sur le disque
 
@@ -1791,3 +1788,6 @@ TR: Mettez la carte ou le disque dans la machine cible, laissez le setup du BIOS
 
 EN: removable
 TR: amovible
+
+EN: No suitable disk found.
+TR: Aucun disque adapté.

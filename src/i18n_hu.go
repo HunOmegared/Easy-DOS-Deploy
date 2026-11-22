@@ -595,8 +595,8 @@ var huTexts = map[string]string{
 	"Choose a disk profile, or enter the geometry DOS gets from the target machine's BIOS (MSD or GEOM shows it), not the one in BIOS setup. Not sure? Help with the disk profile tells how to find it.": "Válassz lemezprofilt, vagy add meg a geometriát, amelyet a célgép BIOS-a ad a DOS-nak (az MSD vagy a GEOM mutatja meg), nem azt, ami a BIOS setupban látszik. Nem vagy biztos benne? A „Segítség a lemezprofil létrehozásához” elmondja, hogyan derítheted ki.",
 	"Advanced: a different image size": "Speciális: eltérő image-méret",
 	"Removable disks only: CF and SD cards in a reader, IDE disks on a USB adapter, and USB drives. Insert the card or connect the adapter, then click Refresh. The Windows system disk is never listed.": "Csak cserélhető lemezek: CF és SD kártyák olvasóban, IDE lemezek USB-átalakítón, és USB-meghajtók. Tedd be a kártyát, vagy csatlakoztasd az átalakítót, aztán kattints a Frissítésre. A Windows rendszerlemeze sosem jelenik meg.",
-	"No suitable disk found. Insert a card into the reader or connect the USB-IDE adapter, then click Refresh.":                                                                                           "Nincs megfelelő lemez. Tegyél kártyát az olvasóba, vagy csatlakoztasd az USB-IDE átalakítót, aztán kattints a Frissítésre.",
 	"Write image to disk": "Kép kiírása lemezre",
 	"Put the card or disk into the target machine, let BIOS setup detect it (Auto), and copy the values it shows. The program works out what DOS will get. To be sure, check it with GEOM on the target machine (see Help with the disk profile).": "Tedd a kártyát vagy lemezt a célgépbe, a BIOS setupban ismertesd fel (Auto), és írd be az értékeket, amelyeket mutat. A program kiszámolja, mit kap belőlük a DOS. Hogy biztos legyél benne, ellenőrizd a GEOM-mal a célgépen (lásd: Segítség a lemezprofil létrehozásához).",
-	"removable": "cserélhető",
+	"removable":               "cserélhető",
+	"No suitable disk found.": "Nincs megfelelő lemez.",
 }

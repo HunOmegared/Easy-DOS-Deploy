@@ -1106,7 +1106,7 @@ func (p *pickWin) refresh() {
 		}
 	}
 	if len(p.disks) == 0 {
-		sendMsg(lb, LB_ADDSTRING, 0, uintptr(unsafe.Pointer(u16(T("No suitable disk found. Insert a card into the reader or connect the USB-IDE adapter, then click Refresh.")))))
+		sendMsg(lb, LB_ADDSTRING, 0, uintptr(unsafe.Pointer(u16(T("No suitable disk found.")))))
 	} else {
 		sendMsg(lb, LB_SETCURSEL, 0, 0)
 	}

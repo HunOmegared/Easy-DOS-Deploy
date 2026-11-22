@@ -1780,9 +1780,6 @@ TR: Erweitert: eine andere Image-Größe
 EN: Removable disks only: CF and SD cards in a reader, IDE disks on a USB adapter, and USB drives. Insert the card or connect the adapter, then click Refresh. The Windows system disk is never listed.
 TR: Nur Wechseldatenträger: CF- und SD-Karten in einem Leser, IDE-Platten an einem USB-Adapter und USB-Laufwerke. Karte einstecken oder Adapter anschließen, dann auf Aktualisieren klicken. Die Windows-Systemplatte wird nie aufgeführt.
 
-EN: No suitable disk found. Insert a card into the reader or connect the USB-IDE adapter, then click Refresh.
-TR: Keine passende Platte gefunden. Stecken Sie eine Karte in den Leser oder schließen Sie den USB-IDE-Adapter an und klicken Sie dann auf Aktualisieren.
-
 EN: Write image to disk
 TR: Image auf die Platte schreiben
 
@@ -1791,3 +1788,6 @@ TR: Karte oder Platte in den Zielrechner stecken, im BIOS-Setup erkennen lassen 
 
 EN: removable
 TR: Wechseldatenträger
+
+EN: No suitable disk found.
+TR: Keine passende Platte gefunden.
