@@ -71,6 +71,11 @@ type BootOptions struct {
 	// FreeDOS, instead of a source: the files of a small FreeDOS system
 	// (FreeDOSFiles); the boot code is the program's own.
 	FreeDOS map[string][]byte
+	// Extra files written after the system (path on the disk -> data), e.g.
+	// C:\DOS from the Setup disks (SetupDisks.DOSFiles).
+	Extra map[string][]byte
+	// NoDriveSpace leaves DRVSPACE.BIN / DBLSPACE.BIN of the source out.
+	NoDriveSpace bool
 }
 
 // DOS kinds found on a source disk.
@@ -653,6 +658,9 @@ func CreateBootImage(o BootOptions) (*Report, error) {
 	}
 	copied := map[string]bool{}
 	for i, name := range systemFiles(src.dos) {
+		if o.NoDriveSpace && (name == "DRVSPACE.BIN" || name == "DBLSPACE.BIN") {
+			continue
+		}
 		data, err := src.v.ReadFile(name)
 		if err != nil {
 			if i < 2 || (src.dos == DOSFree && i == 0) {
@@ -706,6 +714,19 @@ func CreateBootImage(o BootOptions) (*Report, error) {
 		if len(skipped) > 0 {
 			r.Warnings = append(r.Warnings, T("Not copied (unreadable): %s", strings.Join(skipped, ", ")))
 		}
+	}
+	if len(o.Extra) > 0 {
+		names := make([]string, 0, len(o.Extra))
+		for n := range o.Extra {
+			names = append(names, n)
+		}
+		sort.Strings(names)
+		for _, n := range names {
+			if err := v.WriteFile(n, o.Extra[n]); err != nil {
+				return nil, fmt.Errorf("%s: %v", n, err)
+			}
+		}
+		r.Done = append(r.Done, T("%d files of MS-DOS installed (C:\\DOS).", len(names)))
 	}
 	r.Done = append(r.Done, T("Free space: %s", humanSize(v.FreeBytes())))
 	if err := v.Sync(); err != nil {

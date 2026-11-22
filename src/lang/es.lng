@@ -1521,3 +1521,18 @@ TR: Algunas BIOS antiguas no admiten más de %d cilindros. Si después no se det
 
 EN: The disk is bigger than one MS-DOS partition (2 GB): the rest becomes drives D:, E: ... in an extended partition.
 TR: El disco es mayor que una partición de MS-DOS (2 GB): el resto se convierte en las unidades D:, E: … de una partición extendida.
+
+EN: %d files of MS-DOS installed (C:\\DOS).
+TR: %d archivos de MS-DOS instalados (C:\\DOS).
+
+EN: PACKING.LST was not found: the names of the expanded files are guessed from their endings.
+TR: No se encontró PACKING.LST: los nombres de los archivos descomprimidos se deducen de su extensión.
+
+EN: These files cannot be expanded: %s
+TR: Estos archivos no se pueden descomprimir: %s
+
+EN: Setup disk 1 is missing: it must be a disk image (it has the boot sector, IO.SYS and MSDOS.SYS).
+TR: Falta el disco de instalación 1: debe ser una imagen de disco (contiene el sector de arranque, IO.SYS y MSDOS.SYS).
+
+EN: Setup disk %d is missing: %s
+TR: Falta el disco de instalación %d: %s
