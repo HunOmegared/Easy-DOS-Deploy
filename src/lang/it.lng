@@ -226,9 +226,6 @@ TR: Il blocco [%s] ha ricevuto un nuovo ID: %s (al massimo 8 lettere/cifre).
 EN: Boot menu project (*.bmp.json)
 TR: Progetto di menu di avvio (*.bmp.json)
 
-EN: Boot menu:
-TR: Menu di avvio:
-
 EN: Bootable DOS floppy image to put GEOM.COM on
 TR: Immagine di dischetto DOS avviabile su cui mettere GEOM.COM
 
@@ -561,9 +558,6 @@ TR: In un'immagine disco
 
 EN: JemmEx / Jemm386 memory manager
 TR: Gestore di memoria JemmEx / Jemm386
-
-EN: Just open the editor
-TR: Apri solo l'editor
 
 EN: LARGE / ECHS
 TR: LARGE / ECHS
@@ -928,9 +922,6 @@ TR: L'immagine vuota è pronta: %s
 EN: The file had no menu; its content went into the common part. Add menu items.
 TR: Il file non aveva un menu; il suo contenuto è finito nella parte comune. Aggiungi delle voci di menu.
 
-EN: The full CONFIG.SYS / AUTOEXEC.BAT editor, starting with a plain DOS menu.
-TR: L'editor completo di CONFIG.SYS / AUTOEXEC.BAT, partendo da un menu DOS semplice.
-
 EN: The image (%s) is bigger than the card (%s).
 TR: L'immagine (%s) è più grande della scheda (%s).
 
@@ -1078,9 +1069,6 @@ TR: Dov'è il sistema di cui vuoi cambiare il menu?
 EN: Where should the files go? (For example the root of a disk image mounted with ImDisk/OSFMount.)
 TR: Dove devono andare i file? (Per esempio la radice di un'immagine disco montata con ImDisk/OSFMount.)
 
-EN: Which DOS, and what should the boot menu offer?
-TR: Quale DOS, e cosa deve offrire il menu di avvio?
-
 EN: Works with nearly every IDE/ATAPI CD drive, also on old ISA controllers. Part of Windows 98, not free: browse for it on your Windows 98 boot disk (or its image), or in WINDOWS\\COMMAND\\EBD.
 TR: Funziona con quasi tutte le unità CD IDE/ATAPI, anche su vecchi controller ISA. Fa parte di Windows 98, non è libero: selezionalo dal tuo disco di avvio di Windows 98 (o dalla sua immagine), o da WINDOWS\\COMMAND\\EBD.
 
@@ -1113,9 +1101,6 @@ TR: Solo XMS (HIMEM), DOS in memoria alta
 
 EN: Yes: continue without them\nNo: open the Drivers window (download or browse)\nCancel: go back
 TR: Sì: continua senza\nNo: apri la finestra Driver (scarica o seleziona)\nAnnulla: torna indietro
-
-EN: You can change everything later in the editor (New..., Building blocks...).
-TR: Potrai cambiare tutto più tardi nell'editor (Nuova..., Blocchi...).
 
 EN: [default]
 TR: [predefinita]
@@ -1797,3 +1782,42 @@ TR: Per esempio: Integra 486, CF da 1 GB
 
 EN: The profile %s already exists with %d/%d/%d. Overwrite it?
 TR: Il profilo %s esiste già con %d/%d/%d. Sovrascriverlo?
+
+EN: Easy DOS Deploy builds a bootable DOS system for an old PC: on a CF card or an IDE disk, on a floppy, or as an image for an emulator. Choose what you would like to do; everything can be changed later in the main window.
+TR: Easy DOS Deploy crea un sistema DOS avviabile per un vecchio PC: su una scheda CF o un disco IDE, su un dischetto o come immagine per un emulatore. Scegli cosa vuoi fare; poi nella finestra principale si può cambiare tutto.
+
+EN: Just open the main window
+TR: Apri solo la finestra principale
+
+EN: All steps on one screen: disk, system, drivers, boot menu and build.
+TR: Tutti i passi in un posto: disco, sistema, driver, menu di avvio e creazione.
+
+EN: DOS and boot menu
+TR: DOS e menu di avvio
+
+EN: The boot menu is what DOS shows at start-up: you choose what is loaded, such as the memory manager, the mouse, the CD-ROM or the sound card. Choose a ready one; it can be edited later.
+TR: Il menu di avvio è ciò che DOS mostra all'avvio: lì scegli cosa caricare, come il gestore di memoria, il mouse, il CD-ROM o la scheda audio. Scegline uno pronto; si può modificare dopo.
+
+EN: The program reads its CONFIG.SYS and AUTOEXEC.BAT into the boot menu step. After editing, write the menu back from there (Write to disk image or Save to folder).
+TR: Il programma legge i suoi CONFIG.SYS e AUTOEXEC.BAT nel passo del menu di avvio. Dopo la modifica, riscrivi il menu da lì (Scrivi in un'immagine disco o Salva in una cartella).
+
+EN: What to do
+TR: Cosa fare
+
+EN: Main window: the rest
+TR: Finestra principale: il resto
+
+EN: The next steps depend on it
+TR: I passi seguenti dipendono da questo
+
+EN: Where the system is
+TR: Dove si trova il sistema
+
+EN: Where DOS comes from
+TR: Da dove viene DOS
+
+EN: The program can download FreeDOS, so an empty card is enough. If you already have a FreeDOS system, it can be used instead.
+TR: Il programma può scaricare FreeDOS, quindi basta una scheda vuota. Si può usare anche un sistema FreeDOS già esistente.
+
+EN: MS-DOS belongs to Microsoft, so it comes from your own disks or from a system that already works. The Setup disks are the easiest way for a new system.
+TR: MS-DOS appartiene a Microsoft, quindi viene dai tuoi dischi o da un sistema che già funziona. Per un nuovo sistema i dischi di installazione sono la via più semplice.
