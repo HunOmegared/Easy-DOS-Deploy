@@ -113,19 +113,21 @@ same cable, or on the secondary channel), then:
 
 If your modern PC has no floppy drive (and you have no USB floppy drive) but
 the old machine has one, the starter card can make a boot floppy there. Boot
-from the starter card and type:
+from the starter card, put a floppy into drive A: and type:
 
 ```
-FORMAT A: /S
-COPY C:\GEOM.COM A:
-COPY C:\DOS\FDISK.EXE A:
-COPY C:\DOS\SYS.COM A:
+MKFLOPPY
 ```
+
+It formats the floppy as a boot disk and copies `GEOM`, `FORMAT`, `FDISK` and
+`SYS` onto it. (The program puts `MKFLOPPY.BAT` next to `GEOM.COM`. By hand
+it is `FORMAT A: /S`, then copying those files from `C:\DOS`.)
 
 Use a disk the drive can handle (360K, 720K, 1.2M or 1.44M); FORMAT formats
-it for the drive. This needs a starter card with a full DOS: MS-DOS from the
-Setup disks, or FreeDOS from a full FreeDOS source. The FreeDOS the program
-downloads by itself is only the kernel and the command line, without FORMAT.
+it for the drive and asks a few questions (press Enter, then N at the end).
+This needs a starter card with a full DOS: MS-DOS from the Setup disks, or
+FreeDOS from a full FreeDOS source. The FreeDOS the program downloads by
+itself is only the kernel and the command line, without FORMAT.
 
 With this floppy the card or disk to measure can be **alone, as master**,
 exactly where it will be used: no master/slave jumpers, and `GEOM` shows

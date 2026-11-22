@@ -1924,6 +1924,9 @@ TR: Weiter:\n1. 86Box: das Image als Festplatte mit %d Zylindern, %d Köpfen, %d
 EN: GEOM.COM in the root: it shows the geometry the BIOS gives.
 TR: GEOM.COM im Hauptverzeichnis: es zeigt die Geometrie, die das BIOS gibt.
 
+EN: MKFLOPPY.BAT in the root: it makes a boot floppy with GEOM in drive A:.
+TR: MKFLOPPY.BAT im Hauptverzeichnis: es erstellt eine Startdiskette mit GEOM in Laufwerk A:.
+
 EN: Put GEOM.COM onto the disk (it shows the geometry the BIOS gives)
 TR: GEOM.COM auf die Platte legen (es zeigt die Geometrie, die das BIOS gibt)
 

@@ -25,7 +25,7 @@ type emu86 struct {
 }
 
 func (e *emu86) lin(s, o uint16) int { return (int(s)<<4 + int(o)) & 0xFFFFF }
-func (e *emu86) rb(s, o uint16) byte  { return e.mem[e.lin(s, o)] }
+func (e *emu86) rb(s, o uint16) byte { return e.mem[e.lin(s, o)] }
 func (e *emu86) rw(s, o uint16) uint16 {
 	return uint16(e.rb(s, o)) | uint16(e.rb(s, o+1))<<8
 }

@@ -689,6 +689,10 @@ func CreateBootImage(o BootOptions) (*Report, error) {
 			return err
 		}
 		r.Done = append(r.Done, T("GEOM.COM in the root: it shows the geometry the BIOS gives."))
+		if err := v.WriteFile("MKFLOPPY.BAT", mkFloppyBAT()); err != nil {
+			return err
+		}
+		r.Done = append(r.Done, T("MKFLOPPY.BAT in the root: it makes a boot floppy with GEOM in drive A:."))
 		return nil
 	}
 	if src == nil {
@@ -789,4 +793,46 @@ func CreateBootImage(o BootOptions) (*Report, error) {
 	}
 	ok = true
 	return r, nil
+}
+
+// mkFloppyBAT is MKFLOPPY.BAT, put next to GEOM.COM: on the target machine
+// it makes a boot floppy in drive A: with GEOM, FORMAT, FDISK and SYS, with
+// the FORMAT of MS-DOS (C:\DOS) or of a full FreeDOS (C:\FREEDOS\BIN,
+// C:\FDOS\BIN).
+func mkFloppyBAT() []byte {
+	lines := []string{
+		"@ECHO OFF",
+		"REM Makes a boot floppy in drive A: with GEOM, FORMAT, FDISK and SYS.",
+		"SET D=",
+		"IF EXIST C:\\DOS\\FORMAT.COM SET D=C:\\DOS",
+		"IF EXIST C:\\FREEDOS\\BIN\\FORMAT.EXE SET D=C:\\FREEDOS\\BIN",
+		"IF EXIST C:\\FDOS\\BIN\\FORMAT.EXE SET D=C:\\FDOS\\BIN",
+		"IF \"%D%\"==\"\" GOTO NOFMT",
+		"ECHO.",
+		"ECHO This makes a boot floppy in drive A: with GEOM, FORMAT, FDISK and SYS.",
+		"ECHO Everything on the floppy will be erased.",
+		"ECHO.",
+		"SET OLDPATH=%PATH%",
+		"SET PATH=%D%;%PATH%",
+		"%D%\\FORMAT A: /S",
+		"SET PATH=%OLDPATH%",
+		"SET OLDPATH=",
+		"IF NOT EXIST A:\\COMMAND.COM GOTO FAIL",
+		"COPY C:\\GEOM.COM A:\\ >NUL",
+		"FOR %%F IN (FORMAT.COM FORMAT.EXE FDISK.EXE FDISK.COM SYS.COM SYS.EXE) DO IF EXIST %D%\\%%F COPY %D%\\%%F A:\\ >NUL",
+		"ECHO.",
+		"ECHO The boot floppy is ready. Boot from it and type GEOM.",
+		"GOTO END",
+		":FAIL",
+		"ECHO.",
+		"ECHO The floppy was not made (FORMAT stopped or failed).",
+		"GOTO END",
+		":NOFMT",
+		"ECHO FORMAT was not found in C:\\DOS, C:\\FREEDOS\\BIN or C:\\FDOS\\BIN.",
+		"ECHO The FreeDOS the program downloads by itself has no FORMAT: make the card",
+		"ECHO with MS-DOS from the Setup disks, or with a full FreeDOS.",
+		":END",
+		"SET D=",
+	}
+	return []byte(strings.Join(lines, "\r\n") + "\r\n")
 }
