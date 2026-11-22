@@ -664,9 +664,6 @@ TR: Rete con Easy Commander / DOS semplice (MS-DOS 6.x)
 EN: Network: packet driver + mTCP + Easy Commander
 TR: Rete: driver di pacchetto + mTCP + Easy Commander
 
-EN: New bootable disk image
-TR: Nuova immagine disco avviabile
-
 EN: New driver
 TR: Nuovo driver
 
@@ -1656,3 +1653,60 @@ TR: Dare un nome al driver.
 
 EN: Your own driver (%s), added from %s.
 TR: Driver proprio (%s), aggiunto da %s.
+
+EN: Machine and disk
+TR: Macchina e disco
+
+EN: The disk the system goes onto, with the geometry the target machine's BIOS gives to DOS. A disk bigger than 2 GB is split into the drives C:, D: ... so none of it is lost.
+TR: Il disco che riceve il sistema, con la geometria che il BIOS della macchina di destinazione dà a DOS. Un disco oltre i 2 GB viene diviso nelle unità C:, D: … così non se ne perde nulla.
+
+EN: System
+TR: Sistema
+
+EN: Where DOS comes from: your MS-DOS Setup disks, a card or image that already boots, or FreeDOS downloaded by the program.
+TR: Da dove viene DOS: dai tuoi dischi di installazione di MS-DOS, da una scheda o immagine che già si avvia, o da FreeDOS scaricato dal programma.
+
+EN: Build
+TR: Crea
+
+EN: Makes the disk image with the system, the drivers and the boot menu. Try it in an emulator, then write it to the card.
+TR: Crea l'immagine disco con il sistema, i driver e il menu di avvio. Provala in un emulatore, poi scrivila sulla scheda.
+
+EN: Boot menu
+TR: Menu di avvio
+
+EN: Geometry missing
+TR: Manca la geometria
+
+EN: Check the geometry
+TR: Controlla la geometria
+
+EN: Empty: you install DOS
+TR: Vuoto: installi tu DOS
+
+EN: FreeDOS, downloaded
+TR: FreeDOS, scaricato
+
+EN: %s, Setup disks
+TR: %s, dischi di installazione
+
+EN: Setup disks not given
+TR: Dischi di installazione non indicati
+
+EN: No system chosen
+TR: Nessun sistema scelto
+
+EN: %d chosen, %d to browse for
+TR: %d scelti, %d da cercare
+
+EN: %d chosen, %d to download
+TR: %d scelti, %d da scaricare
+
+EN: %d chosen, all here
+TR: %d scelti, tutti presenti
+
+EN: %d menu items
+TR: %d voci di menu
+
+EN: Image file, then the card
+TR: File immagine, poi la scheda

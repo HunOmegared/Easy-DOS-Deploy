@@ -43,7 +43,7 @@ func (a *app) openOwnDriver() {
 	loadCommonControls()
 	w := &ownWin{c: map[int]uintptr{}}
 	a.own = w
-	owner := a.drv.hwnd
+	owner := a.hwnd
 	w.hwnd = createWindow(WS_EX_DLGMODALFRAME, "EasyDOSDeployOwn", T("Add own driver"), 0x00C00000|0x00080000, cwDefault, cwDefault, a.s(600), a.s(560), owner, 0)
 	mk := func(id int, class, text string, style, ex uint32) uintptr {
 		h := createWindow(ex, class, text, WS_CHILD|WS_VISIBLE|style, 0, 0, 10, 10, w.hwnd, uintptr(id))
@@ -241,14 +241,10 @@ func (w *ownWin) add() {
 
 func (w *ownWin) close() {
 	a := theApp
-	if a.drv != nil {
-		enable(a.drv.hwnd, true)
-	}
+	enable(a.hwnd, true)
 	pDestroyWindow.Call(w.hwnd)
 	a.own = nil
-	if a.drv != nil {
-		pSetForegroundWindow.Call(a.drv.hwnd)
-	}
+	pSetForegroundWindow.Call(a.hwnd)
 }
 
 func ownProc(hwnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {

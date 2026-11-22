@@ -664,9 +664,6 @@ TR: Netzwerk mit Easy Commander / einfaches DOS (MS-DOS 6.x)
 EN: Network: packet driver + mTCP + Easy Commander
 TR: Netzwerk: Paketttreiber + mTCP + Easy Commander
 
-EN: New bootable disk image
-TR: Neues bootfähiges Disk-Image
-
 EN: New driver
 TR: Neuer Treiber
 
@@ -1656,3 +1653,60 @@ TR: Geben Sie dem Treiber einen Namen.
 
 EN: Your own driver (%s), added from %s.
 TR: Eigener Treiber (%s), hinzugefügt aus %s.
+
+EN: Machine and disk
+TR: Rechner und Platte
+
+EN: The disk the system goes onto, with the geometry the target machine's BIOS gives to DOS. A disk bigger than 2 GB is split into the drives C:, D: ... so none of it is lost.
+TR: Die Platte, auf die das System kommt, mit der Geometrie, die das BIOS des Zielrechners an DOS gibt. Eine Platte über 2 GB wird in die Laufwerke C:, D: … aufgeteilt, so geht nichts verloren.
+
+EN: System
+TR: System
+
+EN: Where DOS comes from: your MS-DOS Setup disks, a card or image that already boots, or FreeDOS downloaded by the program.
+TR: Woher DOS kommt: von Ihren MS-DOS-Setup-Disketten, von einer Karte oder einem Image, das schon bootet, oder von FreeDOS, das das Programm herunterlädt.
+
+EN: Build
+TR: Erstellen
+
+EN: Makes the disk image with the system, the drivers and the boot menu. Try it in an emulator, then write it to the card.
+TR: Erstellt das Platten-Image mit dem System, den Treibern und dem Bootmenü. Probieren Sie es in einem Emulator aus und schreiben Sie es dann auf die Karte.
+
+EN: Boot menu
+TR: Bootmenü
+
+EN: Geometry missing
+TR: Geometrie fehlt
+
+EN: Check the geometry
+TR: Geometrie prüfen
+
+EN: Empty: you install DOS
+TR: Leer: Sie installieren DOS
+
+EN: FreeDOS, downloaded
+TR: FreeDOS, heruntergeladen
+
+EN: %s, Setup disks
+TR: %s, Setup-Disketten
+
+EN: Setup disks not given
+TR: Keine Setup-Disketten angegeben
+
+EN: No system chosen
+TR: Kein System gewählt
+
+EN: %d chosen, %d to browse for
+TR: %d gewählt, %d auszuwählen
+
+EN: %d chosen, %d to download
+TR: %d gewählt, %d herunterzuladen
+
+EN: %d chosen, all here
+TR: %d gewählt, alle vorhanden
+
+EN: %d menu items
+TR: %d Menüpunkte
+
+EN: Image file, then the card
+TR: Image-Datei, dann die Karte

@@ -55,6 +55,8 @@ const (
 	idLblCfgName
 	idLblAutoName
 	idBlocks
+	idSide     // the steps
+	idMenuHead // heading of the boot menu page
 )
 
 // menu IDs
@@ -102,6 +104,11 @@ type app struct {
 	set     Settings
 
 	langMenu []*Language
+
+	page      int     // the page shown (pageDisk ...)
+	head      uintptr // font of page headings
+	bold      uintptr
+	sideIcons uintptr
 
 	drv      *drvWin
 	edit     *editWin
@@ -155,6 +162,10 @@ func runGUI() {
 	a.store = NewStore(filepath.Join(a.data, "drivers"))
 	a.font = makeFont("Segoe UI", 9, a.dpi)
 	a.mono = makeFont("Consolas", 10, a.dpi)
+	a.head = makeFontWeight("Segoe UI", 13, a.dpi, 600)
+	a.bold = makeFontWeight("Segoe UI", 9, a.dpi, 600)
+	loadCommonControls()
+	a.sideIcons = makeIconList(a.s(24))
 	theApp = a
 	a.proj = DefaultProject(TargetMSDOS)
 
@@ -173,11 +184,13 @@ func runGUI() {
 	registerClass("EasyDOSDeployOwn", syscall.NewCallback(ownProc))
 
 	a.hwnd = createWindow(0, "EasyDOSDeployMain", appTitle(), WS_OVERLAPPEDWINDOW,
-		cwDefault, cwDefault, a.s(980), a.s(680), 0, 0)
+		cwDefault, cwDefault, a.s(1200), a.s(760), 0, 0)
 	a.buildMenu()
 	a.build()
+	a.createPages()
 	a.applyTexts()
 	a.loadProject()
+	a.showPage(pageDisk)
 	pShowWindow.Call(a.hwnd, SW_SHOW)
 	pUpdateWindow.Call(a.hwnd)
 
@@ -414,6 +427,9 @@ func (a *app) build() {
 	a.ctl(idPreview, "BUTTON", WS_TABSTOP, 0)
 	a.ctl(idSaveDir, "BUTTON", WS_TABSTOP, 0)
 	a.ctl(idWriteImg, "BUTTON", WS_TABSTOP, 0)
+	sendMsg(a.ctl(idMenuHead, "STATIC", 0, 0), WM_SETFONT, a.head, 1)
+	a.ctl(idSide, "LISTBOX", WS_TABSTOP|LBS_NOTIFY|LBS_OWNERDRAWFIXED|LBS_HASSTRINGS|LBS_NOINTEGRALHEIGHT, 0)
+	a.fillSide()
 	a.layout()
 }
 
@@ -440,6 +456,7 @@ func (a *app) applyTexts() {
 	set(idPreview, T("Preview"))
 	set(idSaveDir, T("Save to folder..."))
 	set(idWriteImg, T("Write to disk image..."))
+	set(idMenuHead, T("Boot menu"))
 	cue(a.c[idTimeout], T("forever"))
 	cue(a.c[idColor], T("e.g. 15,1"))
 	tgt := 0
@@ -470,27 +487,27 @@ func (a *app) setLanguage(code string) {
 	if a.edit != nil {
 		a.edit.close()
 	}
-	if a.drv != nil {
-		pDestroyWindow.Call(a.drv.hwnd)
-		a.drv = nil
-	}
-	if a.boot != nil {
-		pDestroyWindow.Call(a.boot.hwnd)
-		a.boot = nil
-	}
+	a.destroyPages()
 	a.buildMenu()
+	a.createPages()
 	a.applyTexts()
 	a.loadProject()
+	a.fillSide()
+	a.showPage(a.page)
 }
 
 func (a *app) layout() {
 	w, h := clientSize(a.hwnd)
 	s := a.s
+	ox := a.sideWidth() // the steps are on the left
+	move(a.c[idSide], 0, 0, ox, h)
+	a.layoutPages()
 	m := s(10)
 	rowH := s(23)
 	lblH := s(18)
-	x := m
-	y := m
+	move(a.c[idMenuHead], ox+s(14), s(14), w-ox-s(28), s(28))
+	x := ox + m
+	y := m + s(46)
 	place := func(lbl, lw, cw int, id int, comboExtra int) {
 		lw = fitW(lw, s(6), a.c[lbl])
 		move(a.c[lbl], x, y+s(4), lw, lblH)
@@ -501,7 +518,7 @@ func (a *app) layout() {
 	place(idLblTarget, s(70), s(110), idTarget, s(200))
 	place(idLblTimeout, s(98), s(60), idTimeout, 0)
 	place(idLblDefault, s(90), s(240), idDefault, s(200))
-	x, y = m, y+rowH+s(8)
+	x, y = ox+m, y+rowH+s(8)
 	place(idLblCodepage, s(70), s(200), idCodepage, s(200))
 	place(idLblColor, s(84), s(64), idColor, 0)
 	place(idLblCfgName, s(80), s(104), idCfgName, 0)
@@ -517,12 +534,12 @@ func (a *app) layout() {
 	listW := 3*bw + 2*s(4)
 	btnH := s(26)
 	listH := h - top - bottomH - 2*btnH - s(4) - s(3)*m
-	move(a.c[idList], m, top, listW, listH)
+	move(a.c[idList], ox+m, top, listW, listH)
 	for i, id := range listBtns {
-		move(a.c[id], m+(i%3)*(bw+s(4)), top+listH+s(6)+(i/3)*(btnH+s(4)), bw, btnH)
+		move(a.c[id], ox+m+(i%3)*(bw+s(4)), top+listH+s(6)+(i/3)*(btnH+s(4)), bw, btnH)
 	}
 
-	ex := m + listW + m
+	ex := ox + m + listW + m
 	ew := w - ex - m
 	yy := top
 	lw1 := fitW(s(72), s(6), a.c[idLblID])
@@ -551,7 +568,7 @@ func (a *app) layout() {
 	move(a.c[idWriteImg], w-m-bw2, by, bw2, bottomH)
 	move(a.c[idSaveDir], w-m-2*bw2-s(8), by, bw2, bottomH)
 	move(a.c[idPreview], w-m-3*bw2-s(16), by, bw2, bottomH)
-	move(a.c[idStatus], m, by+s(6), w-3*bw2-4*m, bottomH)
+	move(a.c[idStatus], ox+m, by+s(6), w-ox-3*bw2-4*m, bottomH)
 }
 
 // ---- project <-> controls ----
@@ -797,6 +814,7 @@ func (a *app) updateTitle() {
 }
 
 func (a *app) updateStatus() {
+	defer a.updateSide()
 	ps := a.proj.Validate()
 	if t := strings.TrimSpace(getText(a.c[idTimeout])); t != "" {
 		if n, err := strconv.Atoi(t); err != nil || n < 0 {
@@ -1277,11 +1295,31 @@ func mainProc(hwnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {
 	case WM_GETMINMAXINFO:
 		mm := *(**minMaxInfo)(unsafe.Pointer(&lParam)) // lParam is a pointer from Windows
 		if a != nil {
-			mm.minTrack = point{int32(a.s(900)), int32(a.s(560))}
+			mm.minTrack = point{int32(a.s(1080)), int32(a.s(640))}
 		}
 		return 0
+	case WM_MEASUREITEM:
+		if a != nil {
+			if mi := *(**measureItem)(unsafe.Pointer(&lParam)); mi.ctlID == idSide {
+				a.measureSide(mi)
+				return 1
+			}
+		}
+	case WM_DRAWITEM:
+		if a != nil {
+			if di := *(**drawItem)(unsafe.Pointer(&lParam)); di.ctlID == idSide {
+				a.drawSide(di)
+				return 1
+			}
+		}
 	case WM_COMMAND:
 		if a != nil && a.hwnd != 0 {
+			if int(loword(wParam)) == idSide {
+				if hiword(wParam) == LBN_SELCHANGE {
+					a.showPage(int(sendMsg(a.c[idSide], LB_GETCURSEL, 0, 0)))
+				}
+				return 0
+			}
 			a.onCommand(int(loword(wParam)), hiword(wParam))
 		}
 		return 0
@@ -1413,6 +1451,7 @@ const (
 	dvEdit
 	dvDelete
 	dvReset
+	dvTitle
 )
 
 const wmDownloadDone = WM_APP + 1
@@ -1426,16 +1465,14 @@ type drvWin struct {
 	result  []DownloadResult
 }
 
-func (a *app) openDrivers() {
-	if a.drv != nil {
-		pShowWindow.Call(a.drv.hwnd, SW_SHOW)
-		pSetForegroundWindow.Call(a.drv.hwnd)
-		a.drv.refresh()
-		return
-	}
+// openDrivers shows the Drivers page.
+func (a *app) openDrivers() { a.showPage(pageDrivers) }
+
+// createDriversPage makes the Drivers page.
+func (a *app) createDriversPage() {
 	d := &drvWin{c: map[int]uintptr{}}
 	a.drv = d
-	d.hwnd = createWindow(0, "EasyDOSDeployDrivers", T("Drivers"), WS_OVERLAPPEDWINDOW, cwDefault, cwDefault, a.s(900), a.s(560), 0, 0) // no owner, see Preview
+	d.hwnd = a.newPanel("EasyDOSDeployDrivers")
 	mk := func(id int, class, text string, style, ex uint32) {
 		h := createWindow(ex, class, text, WS_CHILD|WS_VISIBLE|style, 0, 0, 10, 10, d.hwnd, uintptr(id))
 		sendMsg(h, WM_SETFONT, a.font, 1)
@@ -1461,22 +1498,25 @@ func (a *app) openDrivers() {
 	mk(dvFolder, "BUTTON", T("Open folder"), WS_TABSTOP, 0)
 	mk(dvClose, "BUTTON", T("Close"), WS_TABSTOP, 0)
 	mk(dvStatus, "STATIC", "", 0, 0)
+	mk(dvTitle, "STATIC", T("Drivers"), 0, 0)
+	sendMsg(d.c[dvTitle], WM_SETFONT, a.head, 1)
+	pShowWindow.Call(d.c[dvClose], 0) // a page, not a window
 	d.layout()
 	d.refresh()
-	pShowWindow.Call(d.hwnd, SW_SHOW)
 }
 
 func (d *drvWin) layout() {
 	a := theApp
 	w, h := clientSize(d.hwnd)
 	s := a.s
-	m := s(10)
+	m := s(14)
 	headH := s(36)
 	bh := s(28)
-	listW := (w - 3*m) * 52 / 100
-	top := m + headH
+	listW := (w - 3*m) * 58 / 100
+	move(d.c[dvTitle], m, m, w-2*m, s(28))
+	top := m + s(32) + headH + s(6)
 	lh := h - top - 2*bh - 3*m - s(4)
-	move(d.c[dvHead], m, m, w-2*m, headH)
+	move(d.c[dvHead], m, m+s(32), w-2*m, headH)
 	move(d.c[dvList], m, top, listW, lh)
 	gear, status := s(36), s(140)
 	sendMsg(d.c[dvList], LVM_SETCOLUMNWIDTH, 2, uintptr(gear))
@@ -1496,9 +1536,7 @@ func (d *drvWin) layout() {
 	row(y1, []int{dvNew, dvEdit, dvDelete, dvReset}, []int{140, 90, 90, 170})
 	y2 := h - m - bh
 	x := row(y2, []int{dvDownload, dvBrowse, dvWeb, dvFolder}, []int{150, 100, 90, 120})
-	cw := fitW(s(110), s(24), d.c[dvClose])
-	move(d.c[dvStatus], x+s(6), y2+s(6), w-x-cw-s(20)-2*m, bh)
-	move(d.c[dvClose], w-m-cw, y2, cw, bh)
+	move(d.c[dvStatus], x+s(6), y2+s(6), w-x-m-s(6), bh)
 }
 
 func (d *drvWin) selected(i int) bool { return lvChecked(d.c[dvList], i) }
@@ -1861,16 +1899,7 @@ func driversProc(hwnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {
 			d.remove()
 		case dvReset:
 			d.reset()
-		case dvClose:
-			pShowWindow.Call(hwnd, 0)
-		case IDCANCEL:
-			if hiword(wParam) == 0 {
-				pShowWindow.Call(hwnd, 0)
-			}
 		}
-		return 0
-	case WM_CLOSE:
-		pShowWindow.Call(hwnd, 0)
 		return 0
 	}
 	r, _, _ := pDefWindowProcW.Call(hwnd, uintptr(msg), wParam, lParam)
@@ -1918,7 +1947,7 @@ func (a *app) openEditor(index int) {
 	if index >= 0 {
 		titleText = T("Edit driver")
 	}
-	e.hwnd = createWindow(WS_EX_DLGMODALFRAME, "EasyDOSDeployDrvEdit", titleText, WS_OVERLAPPEDWINDOW, cwDefault, cwDefault, a.s(640), a.s(600), a.drv.hwnd, 0)
+	e.hwnd = createWindow(WS_EX_DLGMODALFRAME, "EasyDOSDeployDrvEdit", titleText, WS_OVERLAPPEDWINDOW, cwDefault, cwDefault, a.s(640), a.s(600), a.hwnd, 0)
 	mk := func(id int, class, text string, style, ex uint32) {
 		h := createWindow(ex, class, text, WS_CHILD|WS_VISIBLE|style, 0, 0, 10, 10, e.hwnd, uintptr(id))
 		sendMsg(h, WM_SETFONT, a.font, 1)
@@ -1953,7 +1982,7 @@ func (a *app) openEditor(index int) {
 	mk(edOK, "BUTTON", T("OK"), WS_TABSTOP|BS_DEFPUSHBUTTON, 0)
 	mk(edCancel, "BUTTON", T("Cancel"), WS_TABSTOP, 0)
 	e.layout()
-	enable(a.drv.hwnd, false)
+	enable(a.hwnd, false)
 	pShowWindow.Call(e.hwnd, SW_SHOW)
 	pSetFocus.Call(e.c[edName])
 	if index < 0 {
@@ -2001,8 +2030,8 @@ func (e *editWin) layout() {
 func (e *editWin) close() {
 	a := theApp
 	if a.drv != nil {
-		enable(a.drv.hwnd, true)
-		pSetForegroundWindow.Call(a.drv.hwnd)
+		enable(a.hwnd, true)
+		pSetForegroundWindow.Call(a.hwnd)
 	}
 	pDestroyWindow.Call(e.hwnd)
 	a.edit = nil

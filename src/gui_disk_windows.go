@@ -56,7 +56,30 @@ const (
 	bwLblLabel
 	bwLblOut
 	bwHelp
+	bwHeadDisk
+	bwIntroDisk
+	bwHeadSys
+	bwIntroSys
+	bwHeadBuild
+	bwIntroBuild
 )
+
+// The image window's controls live on three pages of the main window.
+const (
+	bpDisk = iota
+	bpSystem
+	bpBuild
+)
+
+func bootPanelOf(id int) int {
+	switch id {
+	case bwHeadSys, bwIntroSys, bwBlank, bwFreeDOS, bwSetupDOS, bwSetupBtn, bwLblSource, bwSource, bwSrcBrowse, bwCopyAll, bwUseOwn, bwOwnInfo, bwOwnLines:
+		return bpSystem
+	case bwHeadBuild, bwIntroBuild, bwLblMenu, bwMenuKind, bwMenuEdit, bwDrvInfo, bwDrvBtn, bwLblLabel, bwLabel, bwLblOut, bwOut, bwOutBrowse, bwCreate, bwClose:
+		return bpBuild
+	}
+	return bpDisk
+}
 
 type bootWin struct {
 	hwnd    uintptr
@@ -71,6 +94,7 @@ type bootWin struct {
 	machineSrc  string
 	fromSource  []string        // catalog driver files taken from the source
 	triedSource map[string]bool // catalog IDs already looked for on it
+	panels      [3]uintptr      // the pages (bpDisk ...) in the main window
 	// MS-DOS from its Setup disks (bwSetupDOS)
 	setup      *SetupDisks
 	setupPaths []string
@@ -78,21 +102,32 @@ type bootWin struct {
 	calcAfter  bool // open the geometry window when the Setup disks dialog closes
 }
 
+// openBootWin shows the Machine and disk page.
 func (a *app) openBootWin() {
-	if a.boot != nil {
-		pShowWindow.Call(a.boot.hwnd, SW_SHOW)
-		pSetForegroundWindow.Call(a.boot.hwnd)
-		return
-	}
+	a.showPage(pageDisk)
+}
+
+// createBootPages makes the Machine and disk, System and Build pages.
+func (a *app) createBootPages() {
 	b := &bootWin{c: map[int]uintptr{}}
 	a.boot = b
-	b.hwnd = createWindow(0, "EasyDOSDeployBoot", T("New bootable disk image"), WS_OVERLAPPEDWINDOW&^0x00050000, cwDefault, cwDefault, a.s(700), a.s(890), 0, 0) // no owner, so it does not stay above the main window
+	b.hwnd = a.hwnd // the owner of its dialogs and message boxes
+	for i := range b.panels {
+		b.panels[i] = a.newPanel("EasyDOSDeployBoot")
+	}
 	mk := func(id int, class, text string, style, ex uint32) uintptr {
-		h := createWindow(ex, class, text, WS_CHILD|WS_VISIBLE|style, 0, 0, 10, 10, b.hwnd, uintptr(id))
+		h := createWindow(ex, class, text, WS_CHILD|WS_VISIBLE|style, 0, 0, 10, 10, b.panels[bootPanelOf(id)], uintptr(id))
 		sendMsg(h, WM_SETFONT, a.font, 1)
 		b.c[id] = h
 		return h
 	}
+	head := func(id, intro int, title, text string) {
+		sendMsg(mk(id, "STATIC", title, 0, 0), WM_SETFONT, a.head, 1)
+		mk(intro, "STATIC", text, 0, 0)
+	}
+	head(bwHeadDisk, bwIntroDisk, T("Machine and disk"), T("The disk the system goes onto, with the geometry the target machine's BIOS gives to DOS. A disk bigger than 2 GB is split into the drives C:, D: ... so none of it is lost."))
+	head(bwHeadSys, bwIntroSys, T("System"), T("Where DOS comes from: your MS-DOS Setup disks, a card or image that already boots, or FreeDOS downloaded by the program."))
+	head(bwHeadBuild, bwIntroBuild, T("Build"), T("Makes the disk image with the system, the drivers and the boot menu. Try it in an emulator, then write it to the card."))
 	edit := uint32(WS_TABSTOP | ES_AUTOHSCROLL)
 	mk(bwLblKind, "STATIC", T("Type:"), 0, 0)
 	mk(bwKind, "COMBOBOX", "", WS_TABSTOP|CBS_DROPDOWNLIST|WS_VSCROLL, 0)
@@ -135,12 +170,12 @@ func (a *app) openBootWin() {
 	mk(bwOutBrowse, "BUTTON", T("Browse..."), WS_TABSTOP, 0)
 	mk(bwCreate, "BUTTON", T("Create"), WS_TABSTOP|BS_DEFPUSHBUTTON, 0)
 	mk(bwClose, "BUTTON", T("Close"), WS_TABSTOP, 0)
+	pShowWindow.Call(b.c[bwClose], 0) // a page, not a window
 	fillCombo(b.c[bwKind], MediaNames(), 0)
 	b.fillProfiles("")
 	b.fillMenus(menuEditor)
 	b.layout()
 	b.update()
-	pShowWindow.Call(b.hwnd, SW_SHOW)
 }
 
 // openBootWinWith opens the image window with a type and, optionally, a
@@ -396,26 +431,33 @@ func (b *bootWin) fillProfiles(sel string) {
 
 func (b *bootWin) layout() {
 	a := theApp
-	w, h := clientSize(b.hwnd)
 	s := a.s
-	m := s(10)
+	m := s(14)
 	rh := s(23)
 	lh := s(18)
-	cw := w - 2*m
 	lp, bp := s(6), s(24) // padding of labels and buttons
-	col := fitW(s(110), lp, b.c[bwLblKind], b.c[bwLblProfile], b.c[bwLblMenu], b.c[bwLblLabel])
-	sb := fitW(s(100), bp, b.c[bwSrcBrowse], b.c[bwMenuEdit], b.c[bwDrvBtn], b.c[bwOutBrowse])
-	y := m
-	lbl := func(id, x, ww int) { move(b.c[id], x, y+s(4), ww, lh) }
-	lbl(bwLblKind, m, col)
+	// heading and introduction of a page; returns the first free y
+	top := func(head, intro, w int) int {
+		move(b.c[head], m, m, w-2*m, s(28))
+		move(b.c[intro], m, m+s(32), w-2*m, 3*lh)
+		return m + s(32) + 3*lh + s(10)
+	}
+	lbl := func(id, x, y, ww int) { move(b.c[id], x, y+s(4), ww, lh) }
+
+	// Machine and disk
+	w, _ := clientSize(b.panels[bpDisk])
+	cw := w - 2*m
+	col := fitW(s(110), lp, b.c[bwLblKind], b.c[bwLblProfile])
+	y := top(bwHeadDisk, bwIntroDisk, w)
+	lbl(bwLblKind, m, y, col)
 	move(b.c[bwKind], m+col, y, s(220), rh+s(160))
 	y += rh + s(10)
-	lbl(bwLblProfile, m, col)
+	lbl(bwLblProfile, m, y, col)
 	pb := fitW(s(110), bp, b.c[bwSaveProf], b.c[bwDelProf])
 	move(b.c[bwProfile], m+col, y, cw-col-2*pb-s(12), rh+s(160))
 	move(b.c[bwSaveProf], w-m-2*pb-s(6), y, pb, rh)
 	move(b.c[bwDelProf], w-m-pb, y, pb, rh)
-	y += rh + s(8)
+	y += rh + s(10)
 	x := m
 	for _, p := range []struct{ l, e, lw int }{{bwLblC, bwC, 70}, {bwLblH, bwH, 50}, {bwLblS, bwS, 100}} {
 		lw := fitW(s(p.lw), lp, b.c[p.l])
@@ -424,64 +466,70 @@ func (b *bootWin) layout() {
 		move(b.c[p.e], x, y, s(60), rh)
 		x += s(60) + s(14)
 	}
-	// the two geometry buttons go on the same row if they fit, else below
 	g1 := fitW(0, bp, b.c[bwFromImg])
 	g2 := fitW(0, bp, b.c[bwFromBios])
 	if half := (w - m - x - s(6)) / 2; g1 <= half && g2 <= half {
 		move(b.c[bwFromImg], x, y, half, rh)
 		move(b.c[bwFromBios], x+half+s(6), y, w-m-x-half-s(6), rh)
 	} else {
-		y += rh + s(4)
+		y += rh + s(6)
 		move(b.c[bwFromImg], m, y, g1, rh)
 		move(b.c[bwFromBios], m+g1+s(6), y, g2, rh)
 	}
-	y += rh + s(6)
+	y += rh + s(8)
 	move(b.c[bwHelp], m, y, cw, 2*lh)
-	y += 2*lh + s(4)
+	y += 2*lh + s(6)
 	move(b.c[bwLblTotal], m, y+s(4), cw-s(130), lh)
 	move(b.c[bwTotal], w-m-s(120), y, s(120), rh)
+	y += rh + s(10)
+	move(b.c[bwPlan], m, y, cw, 3*lh)
+
+	// System
+	w, _ = clientSize(b.panels[bpSystem])
+	cw = w - 2*m
+	sb := fitW(s(100), bp, b.c[bwSrcBrowse], b.c[bwSetupBtn], b.c[bwOwnLines])
+	y = top(bwHeadSys, bwIntroSys, w)
+	move(b.c[bwSetupDOS], m, y, cw-sb-s(10), rh)
+	move(b.c[bwSetupBtn], w-m-sb, y, sb, rh)
 	y += rh + s(6)
-	move(b.c[bwPlan], m, y, cw, 2*lh)
-	y += 2*lh + s(4)
-	move(b.c[bwBlank], m, y, cw, rh)
-	y += rh + s(2)
 	move(b.c[bwFreeDOS], m, y, cw, rh)
-	y += rh + s(2)
-	db := fitW(s(100), bp, b.c[bwSetupBtn])
-	move(b.c[bwSetupDOS], m, y, cw-db-s(10), rh)
-	move(b.c[bwSetupBtn], w-m-db, y, db, rh)
 	y += rh + s(6)
+	move(b.c[bwBlank], m, y, cw, rh)
+	y += rh + s(14)
 	move(b.c[bwLblSource], m, y, cw, lh)
-	y += lh + s(2)
+	y += lh + s(4)
 	move(b.c[bwSource], m, y, cw-sb-s(10), rh)
 	move(b.c[bwSrcBrowse], w-m-sb, y, sb, rh)
 	y += rh + s(6)
 	move(b.c[bwCopyAll], m, y, cw, rh)
 	y += rh + s(2)
-	ob := fitW(s(100), s(24), b.c[bwOwnLines])
-	move(b.c[bwUseOwn], m, y, cw-ob-s(10), rh)
-	move(b.c[bwOwnLines], w-m-ob, y, ob, rh)
+	move(b.c[bwUseOwn], m, y, cw-sb-s(10), rh)
+	move(b.c[bwOwnLines], w-m-sb, y, sb, rh)
 	y += rh + s(2)
-	move(b.c[bwOwnInfo], m+s(20), y, cw-s(20)-ob-s(10), 4*lh)
-	y += 4*lh + s(4)
-	y += s(6)
-	move(b.c[bwLblMenu], m, y+s(4), col, lh)
+	move(b.c[bwOwnInfo], m+s(20), y, cw-s(20)-sb-s(10), 4*lh)
+
+	// Build
+	w, h := clientSize(b.panels[bpBuild])
+	cw = w - 2*m
+	col = fitW(s(110), lp, b.c[bwLblMenu], b.c[bwLblLabel])
+	sb = fitW(s(100), bp, b.c[bwMenuEdit], b.c[bwDrvBtn], b.c[bwOutBrowse])
+	y = top(bwHeadBuild, bwIntroBuild, w)
+	lbl(bwLblMenu, m, y, col)
 	move(b.c[bwMenuKind], m+col, y, cw-col-sb-s(10), rh+s(160))
 	move(b.c[bwMenuEdit], w-m-sb, y, sb, rh)
 	y += rh + s(6)
 	move(b.c[bwDrvInfo], m+col, y+s(4), cw-col-sb-s(10), 4*lh)
 	move(b.c[bwDrvBtn], w-m-sb, y, sb, rh)
-	y += 4*lh + s(10)
-	move(b.c[bwLblLabel], m, y+s(4), col, lh)
+	y += 4*lh + s(12)
+	lbl(bwLblLabel, m, y, col)
 	move(b.c[bwLabel], m+col, y, s(140), rh)
-	y += rh + s(10)
+	y += rh + s(12)
 	move(b.c[bwLblOut], m, y, cw, lh)
-	y += lh + s(2)
+	y += lh + s(4)
 	move(b.c[bwOut], m, y, cw-sb-s(10), rh)
 	move(b.c[bwOutBrowse], w-m-sb, y, sb, rh)
-	bw := fitW(s(110), bp, b.c[bwCreate], b.c[bwClose])
-	move(b.c[bwCreate], w-m-2*bw-s(8), h-m-s(28), bw, s(28))
-	move(b.c[bwClose], w-m-bw, h-m-s(28), bw, s(28))
+	bw := fitW(s(160), bp, b.c[bwCreate])
+	move(b.c[bwCreate], w-m-bw, h-m-s(32), bw, s(32))
 }
 
 func atoiU(s string) uint32 {
@@ -871,16 +919,8 @@ func bootProc(hwnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {
 			}
 		case bwCreate:
 			b.create()
-		case bwClose:
-			pShowWindow.Call(hwnd, 0)
-		case IDCANCEL:
-			if code == 0 {
-				pShowWindow.Call(hwnd, 0)
-			}
 		}
-		return 0
-	case WM_CLOSE:
-		pShowWindow.Call(hwnd, 0)
+		theApp.updateSide()
 		return 0
 	}
 	r, _, _ := pDefWindowProcW.Call(hwnd, uintptr(msg), wParam, lParam)

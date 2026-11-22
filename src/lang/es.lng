@@ -664,9 +664,6 @@ TR: Red con Easy Commander / DOS simple (MS-DOS 6.x)
 EN: Network: packet driver + mTCP + Easy Commander
 TR: Red: controlador de paquetes + mTCP + Easy Commander
 
-EN: New bootable disk image
-TR: Nueva imagen de disco de arranque
-
 EN: New driver
 TR: Nuevo controlador
 
@@ -1656,3 +1653,60 @@ TR: Dé un nombre al controlador.
 
 EN: Your own driver (%s), added from %s.
 TR: Su controlador (%s), añadido desde %s.
+
+EN: Machine and disk
+TR: Máquina y disco
+
+EN: The disk the system goes onto, with the geometry the target machine's BIOS gives to DOS. A disk bigger than 2 GB is split into the drives C:, D: ... so none of it is lost.
+TR: El disco que recibe el sistema, con la geometría que la BIOS de la máquina de destino da a DOS. Un disco de más de 2 GB se divide en las unidades C:, D: … para no perder nada.
+
+EN: System
+TR: Sistema
+
+EN: Where DOS comes from: your MS-DOS Setup disks, a card or image that already boots, or FreeDOS downloaded by the program.
+TR: De dónde viene DOS: de sus discos de instalación de MS-DOS, de una tarjeta o imagen que ya arranca, o de FreeDOS descargado por el programa.
+
+EN: Build
+TR: Crear
+
+EN: Makes the disk image with the system, the drivers and the boot menu. Try it in an emulator, then write it to the card.
+TR: Crea la imagen de disco con el sistema, los controladores y el menú de arranque. Pruébela en un emulador y luego escríbala en la tarjeta.
+
+EN: Boot menu
+TR: Menú de arranque
+
+EN: Geometry missing
+TR: Falta la geometría
+
+EN: Check the geometry
+TR: Revise la geometría
+
+EN: Empty: you install DOS
+TR: Vacío: usted instala DOS
+
+EN: FreeDOS, downloaded
+TR: FreeDOS, descargado
+
+EN: %s, Setup disks
+TR: %s, discos de instalación
+
+EN: Setup disks not given
+TR: No se indicaron los discos de instalación
+
+EN: No system chosen
+TR: Ningún sistema elegido
+
+EN: %d chosen, %d to browse for
+TR: %d elegidos, %d para buscar
+
+EN: %d chosen, %d to download
+TR: %d elegidos, %d para descargar
+
+EN: %d chosen, all here
+TR: %d elegidos, todos presentes
+
+EN: %d menu items
+TR: %d entradas de menú
+
+EN: Image file, then the card
+TR: Archivo de imagen, luego la tarjeta

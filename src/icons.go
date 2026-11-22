@@ -10,6 +10,10 @@ const (
 	iconDownload        // can be downloaded: amber arrow
 	iconBrowse          // must be browsed for: orange folder
 	iconGear            // edit
+	iconWarn            // something is missing: amber circle with !
+	iconMenu            // boot menu: lines
+	iconBuild           // build: play triangle
+	iconDisk            // machine and disk
 	iconCount
 )
 
@@ -66,6 +70,53 @@ func drawIcon(k, n int) []byte {
 				outer = 0.46
 			}
 			return r < outer && r > 0.14
+		}
+	case iconWarn:
+		col = rgb{0xD8, 0x8A, 0x00}
+		inside = func(x, y float64) bool {
+			r := math.Hypot(x-0.5, y-0.5)
+			if r > 0.46 {
+				return false
+			}
+			mark := (x > 0.44 && x < 0.56 && y > 0.20 && y < 0.60) || math.Hypot(x-0.5, y-0.74) < 0.065
+			return !mark
+		}
+	case iconMenu:
+		col = rgb{0x18, 0x5F, 0xA5}
+		inside = func(x, y float64) bool {
+			for _, ly := range []float64{0.24, 0.5, 0.76} {
+				if y > ly-0.07 && y < ly+0.07 {
+					if x > 0.08 && x < 0.22 {
+						return true
+					}
+					if x > 0.32 && x < 0.92 {
+						return true
+					}
+				}
+			}
+			return false
+		}
+	case iconBuild:
+		col = rgb{0x2E, 0x9E, 0x3E}
+		inside = func(x, y float64) bool {
+			if x < 0.18 || x > 0.88 {
+				return false
+			}
+			h := (0.88 - x) / 0.70 * 0.40
+			return math.Abs(y-0.5) < h
+		}
+	case iconDisk:
+		col = rgb{0x5A, 0x5A, 0x5A}
+		inside = func(x, y float64) bool {
+			// a CF card: a rectangle with a cut corner and a label
+			if x < 0.14 || x > 0.86 || y < 0.10 || y > 0.90 {
+				return false
+			}
+			if x+y < 0.40 {
+				return false
+			}
+			label := x > 0.26 && x < 0.74 && y > 0.56 && y < 0.78
+			return !label
 		}
 	default:
 		return px
