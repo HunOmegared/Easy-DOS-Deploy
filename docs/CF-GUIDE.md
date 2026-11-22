@@ -162,4 +162,5 @@ geometry.
 ## IDE hard disks on a USB-IDE adapter
 
 The same steps work, as long as the adapter can read the drive. Very old
-drives that only know CHS addressing often do not work on USB adapters.
+drives that only know CHS addressing often do not work on USB adapters; for
+those, see [Old IDE disks](OLD-IDE-DISKS.md).

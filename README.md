@@ -102,6 +102,7 @@ that folder is writable (portable use), otherwise in
 | Document | Content |
 |---|---|
 | [CF card guide](docs/CF-GUIDE.md) | the steps of a project: geometry, big disks, where DOS comes from, your files, trying in 86Box, writing the card |
+| [Old IDE disks](docs/OLD-IDE-DISKS.md) | disks a USB-IDE adapter cannot handle: a CF card as a helper, installing on the target machine, a PC with an IDE port |
 | [Drivers](docs/DRIVERS.md) | the built-in driver list, where each driver comes from, adding your own |
 | [Translating](docs/TRANSLATING.md) | adding a new language |
 | [Building](docs/BUILDING.md) | building and testing from source |
