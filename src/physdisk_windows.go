@@ -287,11 +287,9 @@ func WriteDisk(d PhysDisk, image string, quick, verify bool, prog Progress) (*Wr
 		return nil, err
 	}
 	size := secs * 512
-	var vol *Volume
+	var vol *diskMap
 	if quick {
-		if v, err := openVolume(f); err == nil {
-			vol = v // shares f; not closed separately
-		}
+		vol = openDiskMap(f) // shares f; nil if the layout is unknown
 	}
 	// open the disk first: this is where missing administrator rights show
 	h, err := openRaw(d.Path(), true)

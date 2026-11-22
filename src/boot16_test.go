@@ -247,9 +247,9 @@ func TestDOSGeometry(t *testing.T) {
 	if g := DOSGeometry(card, ModeAssist); g != (Geometry{1013, 32, 63}) {
 		t.Fatalf("1 GB, LBA-assist: %v", g)
 	}
-	// 256 heads: a User type with fewer cylinders, at most 2 GB
+	// 256 heads: a User type with fewer cylinders, the most that DOS can use
 	c, g, ok := UserCylinders(lexar, ModeLBA)
-	if !ok || c != 4175 || g != (Geometry{519, 128, 63}) {
+	if !ok || c != 8191 || g != (Geometry{1021, 128, 63}) {
 		t.Fatal(c, g, ok)
 	}
 	if _, err := PlanHDD(g); err != nil {
@@ -260,16 +260,6 @@ func TestDOSGeometry(t *testing.T) {
 	}
 	if c, _, _ := UserCylinders(Geometry{4096, 16, 63}, ModeLBA); c != 4096 {
 		t.Fatal(c) // already fine
-	}
-	// more than one FAT16 partition can take: cut to 2 GB
-	if g := FitFAT16(Geometry{970, 255, 63}); g.C != 260 {
-		t.Fatal(g)
-	}
-	if _, err := PlanHDD(FitFAT16(Geometry{970, 255, 63})); err != nil {
-		t.Fatal(err)
-	}
-	if g := FitFAT16(Geometry{510, 128, 63}); g.C != 510 {
-		t.Fatal(g)
 	}
 }
 

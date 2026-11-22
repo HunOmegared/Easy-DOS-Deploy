@@ -80,26 +80,18 @@ func DOSGeometry(setup Geometry, mode int) Geometry {
 
 // UserCylinders is for a BIOS that would give DOS 256 heads, which MS-DOS 6.x
 // and Windows 9x cannot use: the most cylinders to type in BIOS setup (drive
-// type User, heads and sectors unchanged) so that DOS gets at most 255 heads
-// and the disk fits one FAT16 partition. Example: the 8 GB card above, 4175
-// instead of 15506 cylinders: DOS 519/128/63, 2 GB.
+// type User, heads and sectors unchanged) so that DOS gets at most 255 heads.
+// Example: the 8 GB card above with LBA (heads doubled), 8191 instead of
+// 15506 cylinders: DOS 1021/128/63, 4.2 GB (C: and D:).
 func UserCylinders(setup Geometry, mode int) (uint32, Geometry, bool) {
 	for c := setup.C; c > 0; c-- {
-		g := DOSGeometry(Geometry{c, setup.H, setup.S}, mode)
-		if g.H <= 255 && g.Sectors()-int64(g.S) <= maxFAT16 {
+		if g := DOSGeometry(Geometry{c, setup.H, setup.S}, mode); g.H <= 255 {
 			return c, g, true
 		}
 	}
 	return 0, Geometry{}, false
 }
 
-// FitFAT16 cuts a geometry to the cylinders one FAT16 partition can use.
-func FitFAT16(g Geometry) Geometry {
-	if g.H == 0 || g.S == 0 {
-		return g
-	}
-	if max := uint32((maxFAT16 + int64(g.S)) / int64(g.H*g.S)); g.C > max {
-		g.C = max
-	}
-	return g
-}
+// biosCylLimit: some BIOSes of the early 1990s do not handle more than 4096
+// cylinders in setup (the 2 GB barrier).
+const biosCylLimit = 4096

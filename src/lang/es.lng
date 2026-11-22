@@ -1003,9 +1003,6 @@ TR: El menú se hizo para MS-DOS, pero la imagen tiene un sistema FreeDOS.
 EN: The name is empty.
 TR: El nombre está vacío.
 
-EN: The partition would be %s; FAT16 (MS-DOS 6.x) allows at most 2 GB. Use fewer cylinders.
-TR: La partición sería de %s; FAT16 (MS-DOS 6.x) permite como máximo 2 GB. Use menos cilindros.
-
 EN: The program makes this file itself; there is nothing to browse for.
 TR: El programa crea este archivo por sí mismo; no hay nada que seleccionar.
 
@@ -1363,9 +1360,6 @@ TR: LBA, cabezas duplicadas (p. ej. Phoenix 1995)
 EN: LBA-assisted, up to 255 heads (most BIOSes from 1996)
 TR: LBA asistido, hasta 255 cabezas (la mayoría de las BIOS desde 1996)
 
-EN: One MS-DOS partition can be 2 GB at most: the image uses %d cylinders of them.
-TR: Una partición de MS-DOS puede tener como máximo 2 GB: la imagen usa %d cilindros.
-
 EN: A backup of such a card (an image file)
 TR: Una copia de una tarjeta así (un archivo de imagen)
 
@@ -1512,3 +1506,18 @@ TR: Tomado del origen del sistema: %s
 
 EN: this COMMAND.COM is not FreeCOM (the FreeDOS command shell)
 TR: este COMMAND.COM no es FreeCOM (el intérprete de comandos de FreeDOS)
+
+EN: CD-ROM drive letter %c: instead of %c:, because the disk has the drives C: to %c:.
+TR: Letra de la unidad de CD-ROM: %c: en lugar de %c:, porque el disco tiene las unidades C: a %c:.
+
+EN: %c: %s (%d KB clusters)
+TR: %c: %s (clústeres de %d KB)
+
+EN: Drives: %s
+TR: Unidades: %s
+
+EN: Some old BIOSes cannot handle more than %d cylinders. If the drive is not found after this, use %d (DOS then gets %d / %d / %d).
+TR: Algunas BIOS antiguas no admiten más de %d cilindros. Si después no se detecta la unidad, use %d (DOS obtiene entonces %d / %d / %d).
+
+EN: The disk is bigger than one MS-DOS partition (2 GB): the rest becomes drives D:, E: ... in an extended partition.
+TR: El disco es mayor que una partición de MS-DOS (2 GB): el resto se convierte en las unidades D:, E: … de una partición extendida.

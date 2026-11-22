@@ -132,6 +132,7 @@ type DiskInfo struct {
 	FatType     int
 	DOS         DOSKind
 	Desc        string
+	Drives      int // DOS hard disk drives (C:, D: ...)
 }
 
 // imageSectors returns the usable size of an image file in sectors
@@ -174,85 +175,167 @@ func ReadDiskInfo(path string) (*DiskInfo, error) {
 	di.Partitioned = true
 	mbr := make([]byte, 512)
 	v.f.ReadAt(mbr, 0)
+	// The partitions end at the end of a cylinder: the cylinders come from
+	// the end of the last one (by LBA, which also works past cylinder 1023).
+	var end uint32
 	for i := 0; i < 4; i++ {
 		e := mbr[446+16*i:]
+		if e[4] == 0 || le32(e[12:]) == 0 {
+			continue
+		}
 		if int64(le32(e[8:]))*512 == v.base {
 			di.PartStart, di.PartSize = le32(e[8:]), le32(e[12:])
-			endCyl := uint32(e[7]) | uint32(e[6]&0xC0)<<2
-			endHead := uint32(e[5])
-			if endHead+1 > di.Geom.H {
-				di.Geom.H = endHead + 1
-			}
-			// The partition ends at the end of a cylinder; computing from the
-			// LBA end also works past cylinder 1023.
-			if di.Geom.H > 0 && di.Geom.S > 0 {
-				c := (int64(di.PartStart) + int64(di.PartSize)) / int64(di.Geom.H*di.Geom.S)
-				if c > 0 {
-					di.Geom.C = uint32(c)
-				} else {
-					di.Geom.C = endCyl + 1
-				}
-			}
+		}
+		if h := uint32(e[5]) + 1; h > di.Geom.H {
+			di.Geom.H = h
+		}
+		if x := le32(e[8:]) + le32(e[12:]); x > end {
+			end = x
 		}
 	}
+	if di.Geom.H > 0 && di.Geom.S > 0 {
+		di.Geom.C = uint32((int64(end) + int64(di.Geom.H*di.Geom.S) - 1) / int64(di.Geom.H*di.Geom.S))
+	}
+	di.Drives = HardDrives(path)
 	return di, nil
 }
 
-// PlanHDD works out the partition for a geometry, as DOS FDISK would make
-// it: from cylinder 0 head 1 to the end of the last cylinder.
-type HDDPlan struct {
-	Start, Size uint32
+// PartPlan is one DOS drive of a hard disk plan.
+type PartPlan struct {
+	Start, Size uint32 // LBA and sectors of the volume
 	FatType     int
 	SPC         uint8
 	PartType    byte
+	EBR         uint32 // logical drive: LBA of its extended boot record
 }
 
-func PlanHDD(g Geometry) (*HDDPlan, error) {
+// HDDPlan is the partitioning of a hard disk, as DOS FDISK makes it: the
+// primary partition (C:) from cylinder 0 head 1, and if the disk is bigger
+// than one FAT16 partition can be, an extended partition with logical
+// drives (D:, E: ...) up to the end of the last cylinder. Every drive ends
+// at the end of a cylinder.
+type HDDPlan struct {
+	PartPlan            // C:
+	Logical  []PartPlan // D:, E: ...
+	ExtStart uint32     // extended partition (0: none)
+	ExtSize  uint32
+}
+
+// Drives is C: and the logical drives.
+func (p *HDDPlan) Drives() []PartPlan { return append([]PartPlan{p.PartPlan}, p.Logical...) }
+
+func checkGeometry(g Geometry) error {
 	if g.H == 256 {
-		return nil, fmt.Errorf("%s", T("256 heads: MS-DOS 6.x and Windows 9x cannot use a disk that the BIOS gives like this. In BIOS setup, set the drive to type User with fewer cylinders (\"From BIOS setup...\" tells how many), then check it again with GEOM.COM."))
+		return fmt.Errorf("%s", T("256 heads: MS-DOS 6.x and Windows 9x cannot use a disk that the BIOS gives like this. In BIOS setup, set the drive to type User with fewer cylinders (\"From BIOS setup...\" tells how many), then check it again with GEOM.COM."))
 	}
 	if g.H < 1 || g.H > 255 || g.S < 1 || g.S > 63 || g.C < 1 {
-		return nil, fmt.Errorf("%s", T("Heads must be 1-255, sectors 1-63, cylinders at least 1."))
+		return fmt.Errorf("%s", T("Heads must be 1-255, sectors 1-63, cylinders at least 1."))
 	}
 	if g.C > 1024 {
-		return nil, fmt.Errorf("%s", T("DOS can only use 1024 cylinders. Use the geometry the BIOS gives in LBA/LARGE mode (more heads, fewer cylinders)."))
+		return fmt.Errorf("%s", T("DOS can only use 1024 cylinders. Use the geometry the BIOS gives in LBA/LARGE mode (more heads, fewer cylinders)."))
 	}
-	p := &HDDPlan{Start: g.S}
-	total := g.Sectors()
-	if total <= int64(g.S)+64 {
+	return nil
+}
+
+// fatFor chooses the FAT type, cluster size and partition type for a
+// volume, like FDISK and FORMAT.
+func fatFor(size uint32) (fat int, spc uint8, typ byte) {
+	switch {
+	case size < 32680: // FAT12 below 16 MB
+		return 12, 8, 0x01
+	case size <= 262144:
+		spc = 4
+	case size <= 524288:
+		spc = 8
+	case size <= 1048576:
+		spc = 16
+	case size <= 2097152:
+		spc = 32
+	default:
+		spc = 64
+	}
+	if size < 65536 {
+		return 16, spc, 0x04
+	}
+	return 16, spc, 0x06
+}
+
+func PlanHDD(g Geometry) (*HDDPlan, error) { return PlanDisk(g, nil) }
+
+// PlanDisk plans a disk with the given drive sizes in sectors (C: first;
+// each rounded up to whole cylinders, 0 or a missing size: as big as
+// possible). The space left after the listed drives is given to more
+// logical drives of at most 2 GB, so none of the disk is lost.
+func PlanDisk(g Geometry, sizes []uint32) (*HDDPlan, error) {
+	if err := checkGeometry(g); err != nil {
+		return nil, err
+	}
+	cyl := g.H * g.S
+	if g.Sectors() <= int64(g.S)+64 {
 		return nil, fmt.Errorf("%s", T("The disk is too small."))
 	}
-	size := total - int64(g.S)
-	if size > maxFAT16 {
-		return nil, fmt.Errorf(T("The partition would be %s; FAT16 (MS-DOS 6.x) allows at most 2 GB. Use fewer cylinders."), humanSize(size*512))
+	maxCyl := uint32((maxFAT16 + int64(g.S)) / int64(cyl)) // cylinders of one FAT16 volume
+	if maxCyl < 1 {
+		maxCyl = 1
 	}
-	p.Size = uint32(size)
-	switch {
-	case size < 32680: // FAT12 below 16 MB, like FDISK
-		p.FatType, p.PartType, p.SPC = 12, 0x01, 8
-	case size <= 262144:
-		p.FatType, p.SPC = 16, 4
-	case size <= 524288:
-		p.FatType, p.SPC = 16, 8
-	case size <= 1048576:
-		p.FatType, p.SPC = 16, 16
-	case size <= 2097152:
-		p.FatType, p.SPC = 16, 32
-	default:
-		p.FatType, p.SPC = 16, 64
-	}
-	if p.FatType == 16 {
-		if size < 65536 {
-			p.PartType = 0x04
-		} else {
-			p.PartType = 0x06
+	cylsFor := func(i int, left uint32) uint32 {
+		k := maxCyl
+		if i < len(sizes) && sizes[i] > 0 {
+			k = (sizes[i] + g.S + cyl - 1) / cyl
+			if k > maxCyl {
+				k = maxCyl
+			}
 		}
+		if k > left {
+			k = left
+		}
+		return k
+	}
+	p := &HDDPlan{}
+	k := cylsFor(0, g.C)
+	p.Start, p.Size = g.S, k*cyl-g.S
+	p.FatType, p.SPC, p.PartType = fatFor(p.Size)
+	at := k
+	for i := 1; at < g.C; i++ {
+		k := cylsFor(i, g.C-at)
+		if k*cyl-g.S < 2048 { // less than 1 MB is not worth a drive
+			break
+		}
+		d := PartPlan{EBR: at * cyl, Start: at*cyl + g.S, Size: k*cyl - g.S}
+		d.FatType, d.SPC, d.PartType = fatFor(d.Size)
+		p.Logical = append(p.Logical, d)
+		at += k
+	}
+	if n := len(p.Logical); n > 0 {
+		last := p.Logical[n-1]
+		p.ExtStart = p.Logical[0].EBR
+		p.ExtSize = last.Start + last.Size - p.ExtStart
 	}
 	return p, nil
 }
 
 func (p *HDDPlan) Describe() string {
-	return T("Partition: %s, FAT%d, %d KB clusters", humanSize(int64(p.Size)*512), p.FatType, int(p.SPC)/2)
+	if len(p.Logical) == 0 {
+		return T("Partition: %s, FAT%d, %d KB clusters", humanSize(int64(p.Size)*512), p.FatType, int(p.SPC)/2)
+	}
+	var parts []string
+	for i, d := range p.Drives() {
+		parts = append(parts, T("%c: %s (%d KB clusters)", 'C'+i, humanSize(int64(d.Size)*512), int(d.SPC)/2))
+	}
+	return T("Drives: %s", strings.Join(parts, ", "))
+}
+
+// partEntry fills a 16 byte partition table entry.
+func partEntry(e []byte, active bool, typ byte, start, size, rel uint32, g Geometry) {
+	if active {
+		e[0] = 0x80
+	}
+	st, en := chs(start, g), chs(start+size-1, g)
+	copy(e[1:4], st[:])
+	e[4] = typ
+	copy(e[5:8], en[:])
+	binary.LittleEndian.PutUint32(e[8:], start-rel)
+	binary.LittleEndian.PutUint32(e[12:], size)
 }
 
 // chs encodes an LBA as the 3 CHS bytes of a partition entry.
@@ -480,18 +563,28 @@ func CreateBootImage(o BootOptions) (*Report, error) {
 				r.Done = append(r.Done, T("MBR: the program's own boot code (the source has no MBR)."))
 			}
 		}
-		e := mbr[446:]
-		e[0] = 0x80
-		st := chs(plan.Start, o.Geom)
-		en := chs(plan.Start+plan.Size-1, o.Geom)
-		copy(e[1:4], st[:])
-		e[4] = plan.PartType
-		copy(e[5:8], en[:])
-		binary.LittleEndian.PutUint32(e[8:], plan.Start)
-		binary.LittleEndian.PutUint32(e[12:], plan.Size)
+		for i := 446; i < 510; i++ {
+			mbr[i] = 0
+		}
+		partEntry(mbr[446:], true, plan.PartType, plan.Start, plan.Size, 0, o.Geom)
+		if plan.ExtStart > 0 {
+			partEntry(mbr[462:], false, 0x05, plan.ExtStart, plan.ExtSize, 0, o.Geom)
+		}
 		mbr[510], mbr[511] = 0x55, 0xAA
 		if _, err := f.WriteAt(mbr, 0); err != nil {
 			return nil, err
+		}
+		for i, d := range plan.Logical {
+			ebr := make([]byte, 512)
+			partEntry(ebr[446:], false, d.PartType, d.Start, d.Size, d.EBR, o.Geom)
+			if i+1 < len(plan.Logical) {
+				n := plan.Logical[i+1]
+				partEntry(ebr[462:], false, 0x05, n.EBR, n.Start+n.Size-n.EBR, plan.ExtStart, o.Geom)
+			}
+			ebr[510], ebr[511] = 0x55, 0xAA
+			if _, err := f.WriteAt(ebr, int64(d.EBR)*512); err != nil {
+				return nil, err
+			}
 		}
 		r.Done = append(r.Done, T("Geometry %d/%d/%d, %s.", o.Geom.C, o.Geom.H, o.Geom.S, plan.Describe()))
 	} else {
@@ -507,6 +600,16 @@ func CreateBootImage(o BootOptions) (*Report, error) {
 	}
 	if err := formatFAT(f, base, bp, bootFrom); err != nil {
 		return nil, err
+	}
+	if plan != nil {
+		for _, d := range plan.Logical {
+			lp := bp
+			// FORMAT counts the hidden sectors of a logical drive from its EBR
+			lp.totSecs, lp.spc, lp.fatType, lp.hidden, lp.label = d.Size, d.SPC, d.FatType, d.Start-d.EBR, ""
+			if err := formatFAT(f, int64(d.Start)*512, lp, bootFrom); err != nil {
+				return nil, err
+			}
+		}
 	}
 	f.Close()
 

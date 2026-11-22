@@ -1321,8 +1321,8 @@ func (w *calcWin) mode() int {
 	return clampIdx(int(sendMsg(w.c[gcMode], CB_GETCURSEL, 0, 0)), len(TranslationModes()))
 }
 
-// result is what goes into the image window: the geometry DOS gets, cut to
-// one FAT16 partition, with the image size; or the geometry it will get
+// result is what goes into the image window: the geometry DOS gets, with
+// the image size; or the geometry it will get
 // after the drive is set to type User with fewer cylinders (256 heads).
 func (w *calcWin) result() (g Geometry, total int64, text string, ok bool) {
 	setup, g, ok := w.values()
@@ -1336,12 +1336,15 @@ func (w *calcWin) result() (g Geometry, total int64, text string, ok bool) {
 			return g, 0, text + "\n" + T("256 heads: MS-DOS cannot use this disk."), false
 		}
 		text += "\n" + T("256 heads: MS-DOS cannot use this. In BIOS setup, set the drive to type User with %d cylinders (heads and sectors unchanged); DOS then gets %d / %d / %d. \"Use these values\" takes this.", c, ug.C, ug.H, ug.S)
+		if c > biosCylLimit {
+			sg := DOSGeometry(Geometry{biosCylLimit, setup.H, setup.S}, w.mode())
+			text += "\n" + T("Some old BIOSes cannot handle more than %d cylinders. If the drive is not found after this, use %d (DOS then gets %d / %d / %d).", biosCylLimit, biosCylLimit, sg.C, sg.H, sg.S)
+		}
 		return ug, ug.Sectors(), text, true
 	}
 	total = setup.Sectors()
-	if fg := FitFAT16(g); fg.C < g.C {
-		text += "\n" + T("One MS-DOS partition can be 2 GB at most: the image uses %d cylinders of them.", fg.C)
-		g, total = fg, fg.Sectors()
+	if p, err := PlanHDD(g); err == nil && len(p.Logical) > 0 {
+		text += "\n" + T("The disk is bigger than one MS-DOS partition (2 GB): the rest becomes drives D:, E: ... in an extended partition.")
 	}
 	return g, total, text, true
 }

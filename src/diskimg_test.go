@@ -49,10 +49,14 @@ func TestPlanIntegraCard(t *testing.T) {
 	if p.Start != 63 || p.Size != 1013*32*63-63 || p.FatType != 16 || p.SPC != 32 || p.PartType != 0x06 {
 		t.Fatalf("%+v", p)
 	}
-	for _, g := range []Geometry{{2030, 16, 63}, {1024, 255, 63}, {10, 0, 63}, {10, 16, 64}} {
+	for _, g := range []Geometry{{2030, 16, 63}, {10, 0, 63}, {10, 16, 64}} {
 		if _, err := PlanHDD(g); err == nil {
 			t.Fatalf("%v accepted", g)
 		}
+	}
+	// bigger than one FAT16 partition: C: and logical drives
+	if p, err := PlanHDD(Geometry{1024, 255, 63}); err != nil || len(p.Logical) != 3 {
+		t.Fatal(p, err)
 	}
 	if p, _ := PlanHDD(Geometry{20, 16, 63}); p.FatType != 12 || p.PartType != 1 {
 		t.Fatalf("small: %+v", p)

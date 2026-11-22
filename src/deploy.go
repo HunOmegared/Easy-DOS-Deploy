@@ -110,12 +110,18 @@ func MissingDrivers(p *Project, store *Store) []string {
 	return out
 }
 
-func deploy(t fsTarget, p *Project, store *Store, withDrivers bool) (*Report, error) {
+// drives is the number of hard disk drives (C:, D: ...) of the target, 0 if
+// not known.
+func deploy(t fsTarget, p *Project, store *Store, withDrivers bool, drives int) (*Report, error) {
 	out, err := Generate(p)
 	if err != nil {
 		return nil, err
 	}
 	r := &Report{}
+	if a, from, to := fixCDLetter(out.Autoexec, drives); from != to {
+		out.Autoexec = a
+		r.Done = append(r.Done, T("CD-ROM drive letter %c: instead of %c:, because the disk has the drives C: to %c:.", to, from, 'C'+drives-1))
+	}
 	for _, x := range p.Validate() {
 		if !x.Fatal {
 			r.Warnings = append(r.Warnings, x.Msg)
@@ -174,7 +180,7 @@ func deploy(t fsTarget, p *Project, store *Store, withDrivers bool) (*Report, er
 
 // WriteToFolder writes the files (and optionally the drivers) into a folder.
 func WriteToFolder(dir string, p *Project, store *Store, withDrivers bool) (*Report, error) {
-	return deploy(folderTarget{dir}, p, store, withDrivers)
+	return deploy(folderTarget{dir}, p, store, withDrivers, 0)
 }
 
 // WriteToImage writes into the FAT volume of a disk image file.
@@ -184,7 +190,7 @@ func WriteToImage(path string, p *Project, store *Store, withDrivers bool) (*Rep
 		return nil, err
 	}
 	defer v.Close()
-	r, err := deploy(v, p, store, withDrivers)
+	r, err := deploy(v, p, store, withDrivers, HardDrives(path))
 	if r != nil {
 		r.Done = append([]string{T("Volume: %s", v.Desc)}, r.Done...)
 		if !imageBootable(v) {
@@ -330,4 +336,36 @@ func ReadFromImage(path string) (*Project, []string, error) {
 	}
 	defer v.Close()
 	return readSource(v)
+}
+
+var mscdexLetter = regexp.MustCompile(`(?i)MSCDEX.*/L:([A-Z])`)
+
+// fixCDLetter moves the MSCDEX drive letter (/L:) after the hard disk
+// drives when it would fall on one of them (D: on a disk with C: and D:).
+func fixCDLetter(lines []string, drives int) ([]string, byte, byte) {
+	if drives < 2 {
+		return lines, 0, 0
+	}
+	first := byte('C' + drives)
+	var from byte
+	var out []string
+	for i, l := range lines {
+		m := mscdexLetter.FindStringSubmatchIndex(l)
+		if m == nil {
+			continue
+		}
+		c := l[m[2]] &^ 0x20
+		if c < 'C' || c >= first {
+			continue
+		}
+		if out == nil {
+			out = append([]string(nil), lines...)
+		}
+		from = c
+		out[i] = l[:m[2]] + string(first) + l[m[3]:]
+	}
+	if out == nil {
+		return lines, 0, 0
+	}
+	return out, from, first
 }
