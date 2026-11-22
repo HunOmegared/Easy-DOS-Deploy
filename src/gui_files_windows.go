@@ -3,6 +3,8 @@
 package main
 
 import (
+	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 	"unsafe"
@@ -106,14 +108,84 @@ func (w *filesWin) refresh() {
 	a.updateSide()
 }
 
-func (w *filesWin) add(src string) {
+// driveList lists the DOS drives the disk will have (Machine and disk).
+func (a *app) driveList() []string {
+	out := []string{"C:"}
+	if a.boot == nil {
+		return out
+	}
+	o := a.boot.options()
+	if o.Kind != MediaHDD {
+		return out
+	}
+	p, err := PlanHDD(o.Geom)
+	if err != nil {
+		return out
+	}
+	if o.OnlyC {
+		p.OnlyC()
+	}
+	out = out[:0]
+	for i, d := range p.Drives() {
+		out = append(out, fmt.Sprintf("%c:  (%s)", 'C'+i, humanSize(int64(d.Size)*512)))
+	}
+	return out
+}
+
+// add puts the chosen folders or files on the list, asking where they go.
+func (w *filesWin) add(srcs []string) {
 	a := theApp
-	for _, it := range a.proj.Files {
-		if strings.EqualFold(it.Source, src) {
-			return
+	var fresh []string
+	for _, src := range srcs {
+		dup := false
+		for _, it := range a.proj.Files {
+			if strings.EqualFold(it.Source, src) {
+				dup = true
+			}
+		}
+		if !dup {
+			fresh = append(fresh, src)
 		}
 	}
-	a.proj.Files = append(a.proj.Files, CopyItem{Source: src, Dest: DefaultDest(src)})
+	if len(fresh) == 0 {
+		return
+	}
+	var prompt, folder, hint string
+	one := len(fresh) == 1
+	dir := false
+	if st, err := os.Stat(fresh[0]); err == nil && st.IsDir() {
+		dir = true
+	}
+	switch {
+	case one && dir:
+		prompt = T("Where should the folder %s go on the DOS disk?", filepath.Base(fresh[0]))
+		folder = strings.TrimPrefix(DefaultDest(fresh[0]), `C:\`)
+		hint = T("Its contents go into this folder.")
+	case one:
+		prompt = T("Where should %s go on the DOS disk?", filepath.Base(fresh[0]))
+		hint = T("Empty: the root of the drive.")
+	default:
+		prompt = T("Where should these %d items go on the DOS disk?", len(fresh))
+		hint = T("Each folder gets its own folder in it, the files go into it. Empty: the root of the drive.")
+	}
+	drive, f, ok := destBox(a.hwnd, prompt, a.driveList(), 0, folder, hint)
+	if !ok {
+		return
+	}
+	root := fmt.Sprintf(`%c:\`, 'C'+drive)
+	for _, src := range fresh {
+		dest := root + f
+		if !one {
+			if st, err := os.Stat(src); err == nil && st.IsDir() {
+				n := strings.TrimPrefix(DefaultDest(src), `C:\`)
+				dest = strings.TrimSuffix(root+f, `\`) + `\` + n
+				if f == "" {
+					dest = root + n
+				}
+			}
+		}
+		a.proj.Files = append(a.proj.Files, CopyItem{Source: src, Dest: dest})
+	}
 	a.setDirty()
 	w.refresh()
 	lvSelect(w.c[flList], len(a.proj.Files)-1)
@@ -126,21 +198,12 @@ func (w *filesWin) setDest() {
 		return
 	}
 	it := &a.proj.Files[i]
-	for {
-		d, ok := inputBox(a.hwnd, T("Destination"), T("DOS folder for %s:", filepath.Base(it.Source)), T("For example: C:\\GAMES\\DOOM or D:\\UTIL"), it.Dest)
-		if !ok {
-			return
-		}
-		if _, _, err := splitDest(d); err != nil {
-			msgBox(a.hwnd, err.Error(), appTitle(), MB_ICONWARNING)
-			continue
-		}
-		it.Dest = strings.ToUpper(strings.TrimRight(d, `\`))
-		if len(it.Dest) == 2 {
-			it.Dest += `\`
-		}
-		break
+	drive, parts, _ := splitDest(it.Dest)
+	d, f, ok := destBox(a.hwnd, T("DOS folder for %s:", filepath.Base(it.Source)), a.driveList(), drive, strings.Join(parts, `\`), T("For example: GAMES\\DOOM. Empty: the root of the drive."))
+	if !ok {
+		return
 	}
+	it.Dest = fmt.Sprintf(`%c:\%s`, 'C'+d, strings.ToUpper(f))
 	a.setDirty()
 	w.refresh()
 }
@@ -178,12 +241,12 @@ func filesProc(hwnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {
 		}
 		switch int(loword(wParam)) {
 		case flAddDir:
-			if p := folderDialog(a.hwnd, T("Folder for the DOS disk")); p != "" {
-				w.add(p)
+			if ps := pickItems(a.hwnd, T("Folders for the DOS disk"), true); len(ps) > 0 {
+				w.add(ps)
 			}
 		case flAddFile:
-			if p := fileDialog(a.hwnd, false, T("File for the DOS disk"), "", "", T("All files"), "*.*"); p != "" {
-				w.add(p)
+			if ps := pickItems(a.hwnd, T("Files for the DOS disk"), false); len(ps) > 0 {
+				w.add(ps)
 			}
 		case flDest:
 			w.setDest()

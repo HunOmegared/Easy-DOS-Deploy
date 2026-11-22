@@ -1852,20 +1852,8 @@ TR: Nada todavía. Este paso es opcional.
 EN: Together: %s. They are copied after the system, the drivers and the menu.
 TR: En total: %s. Se copian después del sistema, los controladores y el menú.
 
-EN: Destination
-TR: Destino
-
 EN: DOS folder for %s:
 TR: Carpeta DOS para %s:
-
-EN: For example: C:\\GAMES\\DOOM or D:\\UTIL
-TR: Por ejemplo: C:\\GAMES\\DOOM o D:\\UTIL
-
-EN: Folder for the DOS disk
-TR: Carpeta para el disco DOS
-
-EN: File for the DOS disk
-TR: Archivo para el disco DOS
 
 EN: Optional: games, utilities
 TR: Opcional: juegos, utilidades
@@ -1890,3 +1878,39 @@ TR: Sus archivos: %d archivos, %s.
 
 EN: Long names shortened for DOS (%d): %s
 TR: Nombres largos acortados para DOS (%d): %s
+
+EN: Where should the folder %s go on the DOS disk?
+TR: ¿Dónde va la carpeta %s en el disco DOS?
+
+EN: Its contents go into this folder.
+TR: Su contenido va a esta carpeta.
+
+EN: Where should %s go on the DOS disk?
+TR: ¿Dónde va %s en el disco DOS?
+
+EN: Empty: the root of the drive.
+TR: Vacío: la raíz de la unidad.
+
+EN: Where should these %d items go on the DOS disk?
+TR: ¿Dónde van estos %d elementos en el disco DOS?
+
+EN: Each folder gets its own folder in it, the files go into it. Empty: the root of the drive.
+TR: Cada carpeta recibe su propia carpeta dentro, los archivos van en ella. Vacío: la raíz de la unidad.
+
+EN: For example: GAMES\\DOOM. Empty: the root of the drive.
+TR: Por ejemplo: GAMES\\DOOM. Vacío: la raíz de la unidad.
+
+EN: Folders for the DOS disk
+TR: Carpetas para el disco DOS
+
+EN: Files for the DOS disk
+TR: Archivos para el disco DOS
+
+EN: Destination on the DOS disk
+TR: Destino en el disco DOS
+
+EN: Drive:
+TR: Unidad:
+
+EN: Folder:
+TR: Carpeta:
