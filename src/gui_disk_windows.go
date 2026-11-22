@@ -62,6 +62,24 @@ const (
 	bwIntroSys
 	bwHeadBuild
 	bwIntroBuild
+	bwSysSource // radio: a disk or image that already boots
+	bwNoteSetup
+	bwNoteFree
+	bwNoteSource
+	bwNoteBlank
+	bwSetupInfo
+	bwWriteMenu // build: write the menu of step 4
+	bwMenuSum
+	bwGeomHelp
+	bwOnlyC
+)
+
+// System choices (radio buttons of the System page).
+const (
+	sysSetup = iota
+	sysFree
+	sysSource
+	sysBlank
 )
 
 // The image window's controls live on three pages of the main window.
@@ -73,9 +91,11 @@ const (
 
 func bootPanelOf(id int) int {
 	switch id {
-	case bwHeadSys, bwIntroSys, bwBlank, bwFreeDOS, bwSetupDOS, bwSetupBtn, bwLblSource, bwSource, bwSrcBrowse, bwCopyAll, bwUseOwn, bwOwnInfo, bwOwnLines:
+	case bwHeadSys, bwIntroSys, bwBlank, bwFreeDOS, bwSetupDOS, bwSetupBtn, bwLblSource, bwSource, bwSrcBrowse, bwCopyAll, bwUseOwn, bwOwnInfo, bwOwnLines,
+		bwSysSource, bwNoteSetup, bwNoteFree, bwNoteSource, bwNoteBlank, bwSetupInfo:
 		return bpSystem
-	case bwHeadBuild, bwIntroBuild, bwLblMenu, bwMenuKind, bwMenuEdit, bwDrvInfo, bwDrvBtn, bwLblLabel, bwLabel, bwLblOut, bwOut, bwOutBrowse, bwCreate, bwClose:
+	case bwHeadBuild, bwIntroBuild, bwLblMenu, bwMenuKind, bwMenuEdit, bwDrvInfo, bwDrvBtn, bwLblLabel, bwLabel, bwLblOut, bwOut, bwOutBrowse, bwCreate, bwClose,
+		bwWriteMenu, bwMenuSum:
 		return bpBuild
 	}
 	return bpDisk
@@ -95,6 +115,7 @@ type bootWin struct {
 	fromSource  []string        // catalog driver files taken from the source
 	triedSource map[string]bool // catalog IDs already looked for on it
 	panels      [3]uintptr      // the pages (bpDisk ...) in the main window
+	sysChoice   int             // sysSetup ...
 	// MS-DOS from its Setup disks (bwSetupDOS)
 	setup      *SetupDisks
 	setupPaths []string
@@ -131,7 +152,7 @@ func (a *app) createBootPages() {
 	edit := uint32(WS_TABSTOP | ES_AUTOHSCROLL)
 	mk(bwLblKind, "STATIC", T("Type:"), 0, 0)
 	mk(bwKind, "COMBOBOX", "", WS_TABSTOP|CBS_DROPDOWNLIST|WS_VSCROLL, 0)
-	mk(bwLblProfile, "STATIC", T("Card profile:"), 0, 0)
+	mk(bwLblProfile, "STATIC", T("Disk profile:"), 0, 0)
 	mk(bwProfile, "COMBOBOX", "", WS_TABSTOP|CBS_DROPDOWN|WS_VSCROLL|ES_AUTOHSCROLL, 0)
 	mk(bwSaveProf, "BUTTON", T("Save profile"), WS_TABSTOP, 0)
 	mk(bwDelProf, "BUTTON", T("Delete profile"), WS_TABSTOP, 0)
@@ -141,12 +162,22 @@ func (a *app) createBootPages() {
 	mk(bwH, "EDIT", "", edit, WS_EX_CLIENTEDGE)
 	mk(bwLblS, "STATIC", T("Sectors/track:"), 0, 0)
 	mk(bwS, "EDIT", "", edit, WS_EX_CLIENTEDGE)
-	mk(bwFromImg, "BUTTON", T("From a card backup..."), WS_TABSTOP, 0)
+	mk(bwFromImg, "BUTTON", T("From a disk backup..."), WS_TABSTOP, 0)
 	mk(bwFromBios, "BUTTON", T("From BIOS setup..."), WS_TABSTOP, 0)
-	mk(bwBlank, "BUTTON", T("Empty image: I install DOS on it myself (e.g. DOS Setup in 86Box)"), WS_TABSTOP|BS_AUTOCHECKBOX, 0)
-	mk(bwFreeDOS, "BUTTON", T("FreeDOS without a system source: the program downloads it (kernel and FreeCOM)"), WS_TABSTOP|BS_AUTOCHECKBOX, 0)
-	mk(bwSetupDOS, "BUTTON", T("MS-DOS from its Setup disks: the program installs it (C:\\DOS)"), WS_TABSTOP|BS_AUTOCHECKBOX, 0)
+	mk(bwGeomHelp, "BUTTON", T("Help with the disk profile..."), WS_TABSTOP, 0)
+	mk(bwOnlyC, "BUTTON", T("Only drive C: (2 GB at most), so that the CD-ROM stays D:"), WS_TABSTOP|BS_AUTOCHECKBOX, 0)
+	// the System page: one choice, its settings under it
+	radio := uint32(WS_TABSTOP | BS_RADIOBUTTON)
+	mk(bwSetupDOS, "BUTTON", T("MS-DOS from its Setup disks"), radio|WS_GROUP, 0)
+	mk(bwNoteSetup, "STATIC", T("The program installs MS-DOS from the images of your Setup disks into C:\\DOS, as Setup would. Recommended for a new system."), 0, 0)
 	mk(bwSetupBtn, "BUTTON", T("Disks..."), WS_TABSTOP, 0)
+	mk(bwSetupInfo, "STATIC", "", 0, 0)
+	mk(bwFreeDOS, "BUTTON", T("FreeDOS, downloaded by the program"), radio, 0)
+	mk(bwNoteFree, "STATIC", T("Free and MS-DOS compatible; most DOS programs and games run on it. The program can download it, so an empty card is enough."), 0, 0)
+	mk(bwSysSource, "BUTTON", T("A disk or image that already boots DOS"), radio, 0)
+	mk(bwNoteSource, "STATIC", T("A card backup, a hard disk image or a boot floppy image: its boot code and system files are taken, and its drivers can be used."), 0, 0)
+	mk(bwBlank, "BUTTON", T("Empty image: I install DOS on it myself"), radio, 0)
+	mk(bwNoteBlank, "STATIC", T("For DOS Setup in an emulator: the image has the right geometry but no system."), 0, 0)
 	mk(bwLblTotal, "STATIC", T("Image size in sectors (empty: cylinders × heads × sectors):"), 0, 0)
 	mk(bwTotal, "EDIT", "", edit, WS_EX_CLIENTEDGE)
 	mk(bwHelp, "STATIC", T("Enter the geometry DOS gets from the target machine's BIOS (MSD.EXE, Disk Drives), not the one in BIOS setup."), 0, 0)
@@ -158,8 +189,8 @@ func (a *app) createBootPages() {
 	mk(bwUseOwn, "BUTTON", T("Use the drivers of the system source"), WS_TABSTOP|BS_AUTOCHECKBOX, 0)
 	mk(bwOwnInfo, "STATIC", "", 0, 0)
 	mk(bwOwnLines, "BUTTON", T("Lines..."), WS_TABSTOP, 0)
-	mk(bwLblMenu, "STATIC", T("Boot menu:"), 0, 0)
-	mk(bwMenuKind, "COMBOBOX", "", WS_TABSTOP|CBS_DROPDOWNLIST|WS_VSCROLL, 0)
+	mk(bwWriteMenu, "BUTTON", T("Write the boot menu of step 4 and its drivers"), WS_TABSTOP|BS_AUTOCHECKBOX, 0)
+	mk(bwMenuSum, "STATIC", "", 0, 0)
 	mk(bwMenuEdit, "BUTTON", T("Edit..."), WS_TABSTOP, 0)
 	mk(bwDrvInfo, "STATIC", "", 0, 0)
 	mk(bwDrvBtn, "BUTTON", T("Drivers..."), WS_TABSTOP, 0)
@@ -171,6 +202,13 @@ func (a *app) createBootPages() {
 	mk(bwCreate, "BUTTON", T("Create"), WS_TABSTOP|BS_DEFPUSHBUTTON, 0)
 	mk(bwClose, "BUTTON", T("Close"), WS_TABSTOP, 0)
 	pShowWindow.Call(b.c[bwClose], 0) // a page, not a window
+	setCheck(b.c[bwWriteMenu], true)
+	b.setSys(sysSource)
+	if len(a.set.SetupDisks) > 0 {
+		b.sysChoice = sysSetup // last time from the Setup disks: offered again
+		setCheck(b.c[bwSetupDOS], true)
+		setCheck(b.c[bwSysSource], false)
+	}
 	fillCombo(b.c[bwKind], MediaNames(), 0)
 	b.fillProfiles("")
 	b.fillMenus(menuEditor)
@@ -199,32 +237,40 @@ const (
 	menuKeep   = 5
 )
 
-func (b *bootWin) fillMenus(sel int) {
+// fillMenus shows what the Build page writes: the menu of step 4.
+func (b *bootWin) fillMenus(int) {
 	a := theApp
 	var titles []string
 	for _, it := range a.proj.Items {
 		titles = append(titles, title(it))
 	}
-	items := []string{
-		T("Plain DOS"),
-		T("Everyday: DOS / + mouse and CD-ROM / everything"),
-		T("Games: everything / EMS / no EMS / clean"),
-		T("Network with Easy Commander / plain DOS"),
-		T("The menu in the editor: %s", strings.Join(titles, "; ")),
-		T("Keep the menu of the system source (write no menu)"),
+	fd := checked(b.c[bwFreeDOS])
+	if fd {
+		setCheck(b.c[bwWriteMenu], true) // no menu of a source to keep
 	}
-	if checked(b.c[bwFreeDOS]) {
-		items = items[:menuKeep] // there is no source menu to keep
-		if sel == menuKeep {
-			sel = 0
-		}
+	enable(b.c[bwWriteMenu], !fd && !checked(b.c[bwBlank]))
+	if checked(b.c[bwWriteMenu]) {
+		setText(b.c[bwMenuSum], T("Boot menu (step 4): %s", strings.Join(titles, "; ")))
+	} else {
+		setText(b.c[bwMenuSum], T("The CONFIG.SYS and AUTOEXEC.BAT of the system source stay as they are."))
 	}
-	fillCombo(b.c[bwMenuKind], items, sel)
 	b.updateDrivers()
 }
 
 func (b *bootWin) menuChoice() int {
-	return clampIdx(int(sendMsg(b.c[bwMenuKind], CB_GETCURSEL, 0, 0)), menuKeep+1)
+	if checked(b.c[bwWriteMenu]) || checked(b.c[bwFreeDOS]) {
+		return menuEditor
+	}
+	return menuKeep
+}
+
+// setSys chooses the system (the radio buttons of the System page).
+func (b *bootWin) setSys(k int) {
+	b.sysChoice = k
+	for i, id := range []int{bwSetupDOS, bwFreeDOS, bwSysSource, bwBlank} {
+		setCheck(b.c[id], i == k)
+	}
+	b.layout()
 }
 
 // sourceTarget is the DOS of the system source, or the editor's.
@@ -252,25 +298,6 @@ func (b *bootWin) sourceTarget() Target {
 		}
 	}
 	return a.proj.Target
-}
-
-// menuChosen loads a ready menu into the editor.
-func (b *bootWin) menuChosen() {
-	a := theApp
-	c := b.menuChoice()
-	if c < menuEditor {
-		if !a.askSaveFrom(b.hwnd) {
-			b.fillMenus(menuEditor)
-			return
-		}
-		suffix := "-ms"
-		if b.sourceTarget() == TargetFreeDOS {
-			suffix = "-fd"
-		}
-		a.proj, a.path, a.dirty, a.sel = TemplateByID(wizMenus[c]+suffix).Make(), "", false, 1
-		a.loadProject()
-	}
-	b.applyOwn()
 }
 
 // findMachine reads the drivers of the system source, once per source.
@@ -353,14 +380,19 @@ func (b *bootWin) setupMode() bool { return checked(b.c[bwSetupDOS]) }
 // setupChanged shows the Setup disks in the source line and follows the
 // DOS of the choice.
 func (b *bootWin) setupChanged() {
-	if b.setupMode() && b.setup != nil {
+	if b.setup != nil {
 		ver := b.setup.Version
 		if ver == "" {
 			ver = "MS-DOS"
 		}
-		setText(b.c[bwLblSource], T("System: %s from its Setup disks (%d), installed into C:\\DOS.", ver, len(b.setupPaths)))
+		files, missing := b.setup.DOSFiles(b.setupOpt)
+		t := T("%s from %d Setup disks: %d files go into C:\\DOS.", ver, len(b.setupPaths), len(files))
+		if len(missing) > 0 {
+			t += "\n" + strings.Join(missing, "\n")
+		}
+		setText(b.c[bwSetupInfo], t)
 	} else {
-		setText(b.c[bwLblSource], T("System source: a bootable disk image or card backup (empty: not bootable):"))
+		setText(b.c[bwSetupInfo], T("No disks yet: choose the images of your Setup disks."))
 	}
 	b.update()
 	b.followSource()
@@ -476,49 +508,80 @@ func (b *bootWin) layout() {
 		move(b.c[bwFromImg], m, y, g1, rh)
 		move(b.c[bwFromBios], m+g1+s(6), y, g2, rh)
 	}
+	y += rh + s(6)
+	gh := fitW(s(160), bp, b.c[bwGeomHelp])
+	move(b.c[bwGeomHelp], w-m-gh, y, gh, rh)
 	y += rh + s(8)
 	move(b.c[bwHelp], m, y, cw, 2*lh)
 	y += 2*lh + s(6)
 	move(b.c[bwLblTotal], m, y+s(4), cw-s(130), lh)
 	move(b.c[bwTotal], w-m-s(120), y, s(120), rh)
 	y += rh + s(10)
-	move(b.c[bwPlan], m, y, cw, 3*lh)
+	move(b.c[bwPlan], m, y, cw, 4*lh)
+	y += 4*lh + s(6)
+	move(b.c[bwOnlyC], m, y, cw, rh)
 
-	// System
+	// System: the four choices; the settings of the chosen one under it
 	w, _ = clientSize(b.panels[bpSystem])
 	cw = w - 2*m
 	sb := fitW(s(100), bp, b.c[bwSrcBrowse], b.c[bwSetupBtn], b.c[bwOwnLines])
+	in := m + s(22) // indent of notes and settings
+	iw := w - m - in
 	y = top(bwHeadSys, bwIntroSys, w)
-	move(b.c[bwSetupDOS], m, y, cw-sb-s(10), rh)
-	move(b.c[bwSetupBtn], w-m-sb, y, sb, rh)
-	y += rh + s(6)
-	move(b.c[bwFreeDOS], m, y, cw, rh)
-	y += rh + s(6)
-	move(b.c[bwBlank], m, y, cw, rh)
-	y += rh + s(14)
-	move(b.c[bwLblSource], m, y, cw, lh)
-	y += lh + s(4)
-	move(b.c[bwSource], m, y, cw-sb-s(10), rh)
-	move(b.c[bwSrcBrowse], w-m-sb, y, sb, rh)
-	y += rh + s(6)
-	move(b.c[bwCopyAll], m, y, cw, rh)
-	y += rh + s(2)
-	move(b.c[bwUseOwn], m, y, cw-sb-s(10), rh)
-	move(b.c[bwOwnLines], w-m-sb, y, sb, rh)
-	y += rh + s(2)
-	move(b.c[bwOwnInfo], m+s(20), y, cw-s(20)-sb-s(10), 4*lh)
+	details := map[int][]int{
+		sysSetup:  {bwSetupBtn, bwSetupInfo},
+		sysSource: {bwLblSource, bwSource, bwSrcBrowse, bwCopyAll, bwUseOwn, bwOwnLines, bwOwnInfo},
+	}
+	for k, r := range [][2]int{{bwSetupDOS, bwNoteSetup}, {bwFreeDOS, bwNoteFree}, {bwSysSource, bwNoteSource}, {bwBlank, bwNoteBlank}} {
+		move(b.c[r[0]], m, y, cw, rh)
+		y += rh
+		move(b.c[r[1]], in, y, iw, 2*lh)
+		y += 2*lh + s(4)
+		for _, id := range details[k] {
+			v := uintptr(0)
+			if k == b.sysChoice {
+				v = SW_SHOW
+			}
+			pShowWindow.Call(b.c[id], v)
+		}
+		if k != b.sysChoice {
+			y += s(10)
+			continue
+		}
+		switch k {
+		case sysSetup:
+			move(b.c[bwSetupBtn], in, y, sb, rh)
+			move(b.c[bwSetupInfo], in+sb+s(12), y+s(4), iw-sb-s(12), 3*lh)
+			y += 3*lh + s(8)
+		case sysSource:
+			move(b.c[bwLblSource], in, y, iw, lh)
+			y += lh + s(4)
+			move(b.c[bwSource], in, y, iw-sb-s(10), rh)
+			move(b.c[bwSrcBrowse], w-m-sb, y, sb, rh)
+			y += rh + s(6)
+			move(b.c[bwCopyAll], in, y, iw, rh)
+			y += rh + s(2)
+			move(b.c[bwUseOwn], in, y, iw-sb-s(10), rh)
+			move(b.c[bwOwnLines], w-m-sb, y, sb, rh)
+			y += rh + s(2)
+			move(b.c[bwOwnInfo], in+s(20), y, iw-s(20)-sb-s(10), 4*lh)
+			y += 4*lh + s(6)
+		}
+		y += s(10)
+	}
 
 	// Build
 	w, h := clientSize(b.panels[bpBuild])
 	cw = w - 2*m
-	col = fitW(s(110), lp, b.c[bwLblMenu], b.c[bwLblLabel])
+	col = fitW(s(110), lp, b.c[bwLblLabel])
 	sb = fitW(s(100), bp, b.c[bwMenuEdit], b.c[bwDrvBtn], b.c[bwOutBrowse])
 	y = top(bwHeadBuild, bwIntroBuild, w)
-	lbl(bwLblMenu, m, y, col)
-	move(b.c[bwMenuKind], m+col, y, cw-col-sb-s(10), rh+s(160))
+	move(b.c[bwWriteMenu], m, y, cw-sb-s(10), rh)
 	move(b.c[bwMenuEdit], w-m-sb, y, sb, rh)
-	y += rh + s(6)
-	move(b.c[bwDrvInfo], m+col, y+s(4), cw-col-sb-s(10), 4*lh)
+	y += rh + s(2)
+	move(b.c[bwMenuSum], m+s(22), y, cw-s(22)-sb-s(10), 2*lh)
+	y += 2*lh + s(6)
+	move(b.c[bwDrvInfo], m+s(22), y+s(4), cw-s(22)-sb-s(10), 4*lh)
 	move(b.c[bwDrvBtn], w-m-sb, y, sb, rh)
 	y += 4*lh + s(12)
 	lbl(bwLblLabel, m, y, col)
@@ -548,11 +611,15 @@ func (b *bootWin) options() BootOptions {
 		CopyAll: sendMsg(b.c[bwCopyAll], BM_GETCHECK, 0, 0) == 1,
 		Label:   strings.TrimSpace(getText(b.c[bwLabel])),
 		Path:    strings.Trim(strings.TrimSpace(getText(b.c[bwOut])), `"`),
+		OnlyC:   checked(b.c[bwOnlyC]),
 	}
 	if t, err := strconv.ParseInt(strings.TrimSpace(getText(b.c[bwTotal])), 10, 64); err == nil {
 		o.Total = t
 	}
 	o.Blank = o.Kind == MediaHDD && checked(b.c[bwBlank])
+	if !checked(b.c[bwSysSource]) {
+		o.Source, o.CopyAll = "", false
+	}
 	if checked(b.c[bwFreeDOS]) && !o.Blank {
 		o.Source, o.CopyAll = "", false
 	}
@@ -578,13 +645,16 @@ func (b *bootWin) update() {
 		enable(b.c[id], hdd)
 	}
 	fd := checked(b.c[bwFreeDOS]) || b.setupMode()
-	for _, id := range []int{bwMenuKind, bwMenuEdit, bwDrvBtn, bwLabel, bwFreeDOS, bwSetupDOS, bwSetupBtn} {
+	for _, id := range []int{bwWriteMenu, bwMenuEdit, bwDrvBtn, bwLabel} {
 		enable(b.c[id], !o.Blank)
 	}
 	for _, id := range []int{bwSource, bwSrcBrowse, bwCopyAll} {
 		enable(b.c[id], !o.Blank && !fd)
 	}
-	enable(b.c[bwBlank], hdd && !fd)
+	enable(b.c[bwBlank], hdd)
+	if !hdd && checked(b.c[bwBlank]) {
+		b.setSys(sysSource) // an empty floppy image is not offered
+	}
 	if !hdd {
 		setText(b.c[bwPlan], T("Standard floppy format (FAT12), as DOS FORMAT makes it."))
 		return
@@ -598,7 +668,18 @@ func (b *bootWin) update() {
 		setText(b.c[bwPlan], T("Error: %s", err.Error()))
 		return
 	}
+	bigger := len(p.Logical) > 0
+	enable(b.c[bwOnlyC], bigger)
+	if o.OnlyC {
+		p.OnlyC()
+	}
 	t := p.Describe()
+	switch {
+	case bigger && o.OnlyC:
+		t += "\n" + T("The disk is bigger than 2 GB: the space after C: stays unused.")
+	case bigger:
+		t += "\n" + T("Note: some CD-ROM games only work when the CD-ROM is drive D:. With D: on the disk, the CD-ROM becomes %c:. If you play such games, tick \"Only drive C:\".", 'C'+len(p.Drives()))
+	}
 	if o.Total > 0 && o.Total < o.Geom.Sectors() {
 		t += "  " + T("The size is smaller than cylinders × heads × sectors; that is used instead.")
 	}
@@ -693,6 +774,7 @@ func (b *bootWin) applyDiskInfo(p string) {
 	sendMsg(b.c[bwKind], CB_SETCURSEL, uintptr(MediaHDD), 0)
 	b.setGeom(di.Geom, di.Total)
 	if di.DOS != DOSNone {
+		b.setSys(sysSource)
 		setText(b.c[bwSource], p)
 		b.followSource()
 	}
@@ -703,11 +785,24 @@ func (b *bootWin) applyDiskInfo(p string) {
 func (b *bootWin) create() {
 	a := theApp
 	o := b.options()
+	asked := false
 	if o.Path == "" {
-		msgBox(b.hwnd, T("Choose where to save the new image."), appTitle(), MB_ICONINFORMATION)
-		return
+		// as in any Windows program: Save as
+		name := "dos.img"
+		if a.path != "" {
+			name = strings.TrimSuffix(filepath.Base(a.path), filepath.Ext(a.path)) + ".img"
+		}
+		p := fileDialog(b.hwnd, true, T("New image file"), "img", name, T("Disk images (*.img, *.ima, *.vhd, *.hdd, *.dsk)"), "*.img;*.ima", T("All files"), "*.*")
+		if p == "" {
+			return
+		}
+		o.Path, asked = p, true // the dialog asked about overwriting
 	}
-	if _, err := os.Stat(o.Path); err == nil {
+	if filepath.Ext(o.Path) == "" {
+		o.Path += ".img"
+	}
+	setText(b.c[bwOut], o.Path)
+	if _, err := os.Stat(o.Path); err == nil && !asked {
 		if msgBox(b.hwnd, T("%s already exists. Overwrite it?", o.Path), appTitle(), MB_YESNO|MB_ICONQUESTION) != IDYES {
 			return
 		}
@@ -829,14 +924,6 @@ func bootProc(hwnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {
 		mm := *(**minMaxInfo)(unsafe.Pointer(&lParam))
 		mm.minTrack = point{int32(a.s(640)), int32(a.s(560))}
 		return 0
-	case 0x0006: // WM_ACTIVATE
-		if b != nil && len(b.c) > 0 && loword(wParam) != 0 {
-			sel := b.menuChoice()
-			if sel < menuEditor && a.dirty {
-				sel = menuEditor // edited in the editor since
-			}
-			b.fillMenus(sel)
-		}
 	case WM_COMMAND:
 		if b == nil {
 			return 0
@@ -851,19 +938,23 @@ func bootProc(hwnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {
 			if code == CBN_SELCHANGE {
 				b.loadProfile()
 			}
+		case bwOnlyC:
+			if code == BN_CLICKED {
+				b.update()
+			}
 		case bwC, bwH, bwS, bwTotal:
 			if code == EN_CHANGE {
 				b.update()
 			}
-		case bwMenuKind:
-			if code == CBN_SELCHANGE {
-				b.menuChosen()
+		case bwWriteMenu:
+			if code == BN_CLICKED {
+				b.fillMenus(0)
+				b.applyOwn()
 			}
 		case bwMenuEdit:
-			if b.menuChoice() == menuKeep {
-				b.fillMenus(menuEditor)
-			}
-			pSetForegroundWindow.Call(a.hwnd)
+			a.showPage(pageMenu)
+		case bwGeomHelp:
+			a.openGeomHelp()
 		case bwDrvBtn:
 			a.openDrivers()
 		case bwSaveProf:
@@ -874,33 +965,16 @@ func bootProc(hwnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {
 			b.fromImage()
 		case bwFromBios:
 			a.openCalc()
-		case bwBlank:
+		case bwSetupDOS, bwFreeDOS, bwSysSource, bwBlank:
 			if code == BN_CLICKED {
-				b.update()
-				b.applyOwn()
-			}
-		case bwFreeDOS:
-			if code == BN_CLICKED {
-				if checked(b.c[bwFreeDOS]) {
-					setCheck(b.c[bwSetupDOS], false)
-				}
-				b.update()
-				b.followSource()
-			}
-		case bwSetupDOS:
-			if code == BN_CLICKED {
-				if checked(b.c[bwSetupDOS]) {
-					setCheck(b.c[bwFreeDOS], false)
-					if b.setup == nil {
-						a.openSetupDisks()
-						return 0
-					}
-				}
+				k := map[int]int{bwSetupDOS: sysSetup, bwFreeDOS: sysFree, bwSysSource: sysSource, bwBlank: sysBlank}[int(loword(wParam))]
+				b.setSys(k)
 				b.setupChanged()
+				if k == sysSetup && b.setup == nil {
+					a.openSetupDisks()
+				}
 			}
 		case bwSetupBtn:
-			setCheck(b.c[bwSetupDOS], true)
-			setCheck(b.c[bwFreeDOS], false)
 			a.openSetupDisks()
 		case bwUseOwn:
 			if code == BN_CLICKED {

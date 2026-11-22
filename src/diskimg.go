@@ -76,6 +76,9 @@ type BootOptions struct {
 	Extra map[string][]byte
 	// NoDriveSpace leaves DRVSPACE.BIN / DBLSPACE.BIN of the source out.
 	NoDriveSpace bool
+	// OnlyC makes only C: on a disk bigger than 2 GB (the rest stays unused),
+	// so that the CD-ROM keeps the letter D: that some games expect.
+	OnlyC bool
 	// Progress, if set, is called with the files written so far.
 	Progress func(done, total int)
 }
@@ -227,6 +230,9 @@ type HDDPlan struct {
 	ExtStart uint32     // extended partition (0: none)
 	ExtSize  uint32
 }
+
+// OnlyC drops the logical drives: the space after C: stays unused.
+func (p *HDDPlan) OnlyC() { p.Logical, p.ExtStart, p.ExtSize = nil, 0, 0 }
 
 // Drives is C: and the logical drives.
 func (p *HDDPlan) Drives() []PartPlan { return append([]PartPlan{p.PartPlan}, p.Logical...) }
@@ -500,6 +506,9 @@ func CreateBootImage(o BootOptions) (*Report, error) {
 		var err error
 		if plan, err = PlanHDD(o.Geom); err != nil {
 			return nil, err
+		}
+		if o.OnlyC {
+			plan.OnlyC()
 		}
 		total = o.Total
 		if total < o.Geom.Sectors() {

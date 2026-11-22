@@ -57,6 +57,7 @@ const (
 	idBlocks
 	idSide     // the steps
 	idMenuHead // heading of the boot menu page
+	idReady    // ready menus
 )
 
 // menu IDs
@@ -121,6 +122,7 @@ type app struct {
 	calc     *calcWin
 	setupDlg *setupWin
 	own      *ownWin
+	geomHelp *geomHelpWin
 	preview  uintptr
 	prevC    map[int]uintptr
 }
@@ -182,6 +184,7 @@ func runGUI() {
 	registerClass("EasyDOSDeployCalc", syscall.NewCallback(calcProc))
 	registerClass("EasyDOSDeploySetup", syscall.NewCallback(setupProc))
 	registerClass("EasyDOSDeployOwn", syscall.NewCallback(ownProc))
+	registerClass("EasyDOSDeployGeomHelp", syscall.NewCallback(geomHelpProc))
 
 	a.hwnd = createWindow(0, "EasyDOSDeployMain", appTitle(), WS_OVERLAPPEDWINDOW,
 		cwDefault, cwDefault, a.s(1200), a.s(760), 0, 0)
@@ -428,6 +431,7 @@ func (a *app) build() {
 	a.ctl(idSaveDir, "BUTTON", WS_TABSTOP, 0)
 	a.ctl(idWriteImg, "BUTTON", WS_TABSTOP, 0)
 	sendMsg(a.ctl(idMenuHead, "STATIC", 0, 0), WM_SETFONT, a.head, 1)
+	a.ctl(idReady, "COMBOBOX", combo, 0)
 	a.ctl(idSide, "LISTBOX", WS_TABSTOP|LBS_NOTIFY|LBS_OWNERDRAWFIXED|LBS_HASSTRINGS|LBS_NOINTEGRALHEIGHT, 0)
 	a.fillSide()
 	a.layout()
@@ -457,6 +461,13 @@ func (a *app) applyTexts() {
 	set(idSaveDir, T("Save to folder..."))
 	set(idWriteImg, T("Write to disk image..."))
 	set(idMenuHead, T("Boot menu"))
+	fillCombo(a.c[idReady], []string{
+		T("Start from a ready menu..."),
+		T("Plain DOS"),
+		T("Everyday: DOS / + mouse and CD-ROM / everything"),
+		T("Games: everything / EMS / no EMS / clean"),
+		T("Network with Easy Commander / plain DOS"),
+	}, 0)
 	cue(a.c[idTimeout], T("forever"))
 	cue(a.c[idColor], T("e.g. 15,1"))
 	tgt := 0
@@ -505,7 +516,9 @@ func (a *app) layout() {
 	m := s(10)
 	rowH := s(23)
 	lblH := s(18)
-	move(a.c[idMenuHead], ox+s(14), s(14), w-ox-s(28), s(28))
+	rw := s(330)
+	move(a.c[idMenuHead], ox+s(14), s(14), w-ox-rw-s(40), s(28))
+	move(a.c[idReady], w-s(14)-rw, s(16), rw, s(300))
 	x := ox + m
 	y := m + s(46)
 	place := func(lbl, lw, cw int, id int, comboExtra int) {
@@ -831,9 +844,7 @@ func (a *app) updateStatus() {
 	if !HasFatal(ps) && len(ps) > 0 {
 		msg = T("Note: %s", ps[0].Msg)
 	}
-	if miss := MissingDrivers(a.proj, a.store); len(miss) > 0 && !HasFatal(ps) {
-		msg += "  " + T("Missing drivers: %d (Drivers menu).", len(miss))
-	}
+	// only the menu's own problems: the steps on the left show the rest
 	setText(a.c[idStatus], msg)
 }
 
@@ -1314,6 +1325,13 @@ func mainProc(hwnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {
 		}
 	case WM_COMMAND:
 		if a != nil && a.hwnd != 0 {
+			if int(loword(wParam)) == idReady {
+				if hiword(wParam) == CBN_SELCHANGE {
+					a.readyMenu(int(sendMsg(a.c[idReady], CB_GETCURSEL, 0, 0)) - 1)
+					sendMsg(a.c[idReady], CB_SETCURSEL, 0, 0)
+				}
+				return 0
+			}
 			if int(loword(wParam)) == idSide {
 				if hiword(wParam) == LBN_SELCHANGE {
 					a.showPage(int(sendMsg(a.c[idSide], LB_GETCURSEL, 0, 0)))

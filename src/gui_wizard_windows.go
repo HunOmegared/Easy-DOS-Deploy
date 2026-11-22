@@ -299,7 +299,7 @@ func (w *wizardWin) next() {
 	}
 	if fd && a.boot != nil {
 		// FreeDOS needs no source: the program downloads it
-		setCheck(a.boot.c[bwFreeDOS], true)
+		a.boot.setSys(sysFree)
 		a.boot.update()
 		a.boot.followSource()
 	}
@@ -339,7 +339,7 @@ func wizardProc(hwnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {
 		case wzFreeDOS:
 			w.close()
 			a.openBootWinWith(MediaHDD, nil)
-			setCheck(a.boot.c[bwFreeDOS], true)
+			a.boot.setSys(sysFree)
 			a.boot.update()
 			a.boot.followSource()
 			a.openCalc()
@@ -348,19 +348,20 @@ func wizardProc(hwnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {
 			w.close()
 			a.openBootWinWith(MediaHDD, nil)
 			if fd {
-				setCheck(a.boot.c[bwBlank], true)
+				a.boot.setSys(sysBlank)
 				a.boot.update()
 				a.openCalc()
 				break
 			}
 			// MS-DOS: the program installs it from the disks, then the geometry
-			setCheck(a.boot.c[bwSetupDOS], true)
+			a.boot.setSys(sysSetup)
 			a.boot.calcAfter = true
 			a.openSetupDisks()
 		case wzBootFloppy:
 			w.close()
 			a.openBootWinWith(MediaHDD, nil)
 			if p := fileDialog(a.boot.hwnd, false, T("DOS boot floppy image"), "", "", imgFilter()...); p != "" {
+				a.boot.setSys(sysSource)
 				setText(a.boot.c[bwSource], p)
 				setCheck(a.boot.c[bwCopyAll], true)
 				a.boot.followSource()

@@ -259,9 +259,6 @@ TR: Annuler
 EN: Card backup or hard disk image
 TR: Sauvegarde de carte ou image de disque dur
 
-EN: Card profile:
-TR: Profil de carte :
-
 EN: Card:
 TR: Carte :
 
@@ -276,9 +273,6 @@ TR: Vérification (relecture)
 
 EN: Choose the folder with CONFIG.SYS and AUTOEXEC.BAT (for example the root of a mounted disk image):
 TR: Choisissez le dossier contenant CONFIG.SYS et AUTOEXEC.BAT (par exemple la racine d'une image disque montée) :
-
-EN: Choose where to save the new image.
-TR: Choisissez où enregistrer la nouvelle image.
 
 EN: Circular INCLUDE: %s
 TR: INCLUDE circulaire : %s
@@ -433,9 +427,6 @@ TR: Vide (MS-DOS 6.x)
 EN: Empty image: %d sectors (%s), geometry %d/%d/%d.
 TR: Image vide : %d secteurs (%s), géométrie %d/%d/%d.
 
-EN: Empty image: I install DOS on it myself (e.g. DOS Setup in 86Box)
-TR: Image vide : j'y installe DOS moi-même (par ex. DOS Setup dans 86Box)
-
 EN: Enter the geometry DOS gets from the target machine's BIOS (MSD.EXE, Disk Drives), not the one in BIOS setup.
 TR: Saisissez la géométrie que DOS obtient du BIOS de la machine cible (MSD.EXE, Disk Drives), pas celle du setup du BIOS.
 
@@ -514,9 +505,6 @@ TR: Gratuiciel de JazeFox : configure les cartes son ISA PnP (ESS, Creative, Yam
 EN: From BIOS setup...
 TR: Depuis le setup du BIOS...
 
-EN: From a card backup...
-TR: Depuis une sauvegarde de carte...
-
 EN: GEOM.COM is now on %s.\n\nWrite the image to a floppy (WinImage, Greaseweazle), boot the target machine from it with the card or disk in place, and type GEOM.
 TR: GEOM.COM est maintenant sur %s.\n\nÉcrivez l'image sur une disquette (WinImage, Greaseweazle), démarrez la machine cible dessus avec la carte ou le disque en place, et tapez GEOM.
 
@@ -583,9 +571,6 @@ TR: Gestionnaire de mémoire JemmEx / Jemm386
 EN: Just open the editor
 TR: Ouvrir simplement l'éditeur
 
-EN: Keep the menu of the system source (write no menu)
-TR: Garder le menu de la source système (n'écrire aucun menu)
-
 EN: LARGE / ECHS
 TR: LARGE / ECHS
 
@@ -627,9 +612,6 @@ TR: L'entrée de menu %s n'a pas d'aiguillage dans AUTOEXEC.BAT.
 
 EN: Menu items:
 TR: Entrées du menu :
-
-EN: Missing drivers: %d (Drivers menu).
-TR: Pilotes manquants : %d (menu Pilotes).
 
 EN: Mode:
 TR: Mode :
@@ -978,9 +960,6 @@ TR: Les lignes de %s ont été modifiées à la main. Les remplacer par les lign
 
 EN: The lines this makes (for %s):
 TR: Les lignes produites (pour %s) :
-
-EN: The menu in the editor: %s
-TR: Le menu dans l'éditeur : %s
 
 EN: The menu was made for FreeDOS, but the image has an MS-DOS system.
 TR: Le menu a été fait pour FreeDOS, mais l'image a un système MS-DOS.
@@ -1369,9 +1348,6 @@ TR: Noyau FreeDOS (KERNEL.SYS)
 EN: FreeDOS needs these files, which are not here yet:
 TR: FreeDOS a besoin de ces fichiers, qui ne sont pas encore là :
 
-EN: FreeDOS without a system source: the program downloads it (kernel and FreeCOM)
-TR: FreeDOS sans source système : le programme le télécharge (noyau et FreeCOM)
-
 EN: FreeDOS: the kernel (KERNEL.SYS) or the command shell (COMMAND.COM) is missing.
 TR: FreeDOS : le noyau (KERNEL.SYS) ou l'interpréteur de commandes (COMMAND.COM) manque.
 
@@ -1519,14 +1495,8 @@ TR: La disquette d'installation 1 manque : elle doit être une image disque (ell
 EN: Setup disk %d is missing: %s
 TR: La disquette d'installation %d manque : %s
 
-EN: MS-DOS from its Setup disks: the program installs it (C:\\DOS)
-TR: MS-DOS depuis ses disquettes d'installation : le programme l'installe (C:\\DOS)
-
 EN: Disks...
 TR: Disquettes...
-
-EN: System: %s from its Setup disks (%d), installed into C:\\DOS.
-TR: Système : %s depuis ses disquettes d'installation (%d), installé dans C:\\DOS.
 
 EN: None
 TR: Aucun
@@ -1710,3 +1680,90 @@ TR: %d entrées de menu
 
 EN: Image file, then the card
 TR: Fichier image, puis la carte
+
+EN: Disk profile:
+TR: Profil de disque :
+
+EN: From a disk backup...
+TR: Depuis une sauvegarde de disque...
+
+EN: Help with the disk profile...
+TR: Aide pour le profil de disque...
+
+EN: MS-DOS from its Setup disks
+TR: MS-DOS depuis ses disquettes d'installation
+
+EN: The program installs MS-DOS from the images of your Setup disks into C:\\DOS, as Setup would. Recommended for a new system.
+TR: Le programme installe MS-DOS depuis les images de vos disquettes d'installation dans C:\\DOS, comme le ferait Setup. Recommandé pour un nouveau système.
+
+EN: FreeDOS, downloaded by the program
+TR: FreeDOS, téléchargé par le programme
+
+EN: A disk or image that already boots DOS
+TR: Un disque ou une image qui démarre déjà DOS
+
+EN: A card backup, a hard disk image or a boot floppy image: its boot code and system files are taken, and its drivers can be used.
+TR: Une sauvegarde de carte, une image de disque dur ou une image de disquette de démarrage : son code d'amorçage et ses fichiers système sont repris, et ses pilotes peuvent servir.
+
+EN: Empty image: I install DOS on it myself
+TR: Image vide : j'installe DOS moi-même
+
+EN: For DOS Setup in an emulator: the image has the right geometry but no system.
+TR: Pour DOS Setup dans un émulateur : l'image a la bonne géométrie mais pas de système.
+
+EN: Write the boot menu of step 4 and its drivers
+TR: Écrire le menu de démarrage de l'étape 4 et ses pilotes
+
+EN: Boot menu (step 4): %s
+TR: Menu de démarrage (étape 4) : %s
+
+EN: The CONFIG.SYS and AUTOEXEC.BAT of the system source stay as they are.
+TR: Les fichiers CONFIG.SYS et AUTOEXEC.BAT de la source restent tels quels.
+
+EN: %s from %d Setup disks: %d files go into C:\\DOS.
+TR: %s depuis %d disquettes d'installation : %d fichiers vont dans C:\\DOS.
+
+EN: No disks yet: choose the images of your Setup disks.
+TR: Pas encore de disquettes : choisissez les images de vos disquettes d'installation.
+
+EN: Help with the disk profile
+TR: Aide pour le profil de disque
+
+EN: The disk profile is the geometry (cylinders, heads, sectors) that the BIOS of the target machine gives to DOS. It must match exactly, or the disk will not boot there. There are three ways to find it.
+TR: Le profil de disque est la géométrie (cylindres, têtes, secteurs) que le BIOS de la machine cible donne à DOS. Elle doit correspondre exactement, sinon le disque ne démarre pas sur cette machine. Il y a trois façons de la trouver.
+
+EN: 1. BIOS setup: put the card or disk into the target machine, let BIOS setup detect it (Auto) and type the values it shows. The program works out what DOS gets from them.
+TR: 1. Setup du BIOS : mettez la carte ou le disque dans la machine cible, laissez le setup du BIOS le détecter (Auto) et tapez les valeurs affichées. Le programme calcule ce que DOS en obtient.
+
+EN: 2. GEOM: the most exact way. Boot the target machine from a floppy with GEOM.COM, with the card or disk in place: it shows the geometry DOS gets.
+TR: 2. GEOM : la méthode la plus exacte. Démarrez la machine cible depuis une disquette avec GEOM.COM, la carte ou le disque en place : il affiche la géométrie que DOS obtient.
+
+EN: FreeDOS floppy with GEOM...
+TR: Disquette FreeDOS avec GEOM...
+
+EN: GEOM onto my boot floppy...
+TR: GEOM sur ma disquette de démarrage...
+
+EN: Save GEOM.COM...
+TR: Enregistrer GEOM.COM...
+
+EN: 3. A working disk: if a card or disk already boots DOS on that machine, back it up first (Disk image menu) and read the geometry from the backup.
+TR: 3. Un disque qui fonctionne : si une carte ou un disque démarre déjà DOS sur cette machine, sauvegardez-le d'abord (menu Image disque) et lisez la géométrie dans la sauvegarde.
+
+EN: Then save it as a disk profile: next time you only choose it from the list.
+TR: Enregistrez-la ensuite comme profil de disque : la prochaine fois, il suffit de la choisir dans la liste.
+
+EN: 1 menu item
+TR: 1 entrée de menu
+
+EN: Start from a ready menu...
+TR: Partir d'un menu tout prêt...
+
+EN: Only drive C: (2 GB at most), so that the CD-ROM stays D:
+TR: Seulement le lecteur C: (2 Go au plus), pour que le CD-ROM reste D:
+
+EN: The disk is bigger than 2 GB: the space after C: stays unused.
+TR: Le disque fait plus de 2 Go : l'espace après C: reste inutilisé.
+
+EN: Note: some CD-ROM games only work when the CD-ROM is drive D:. With D: on the disk, the CD-ROM becomes %c:. If you play such games, tick "Only drive C:".
+TR: Remarque : certains jeux sur CD ne fonctionnent que si le CD-ROM est le lecteur D:. Avec un D: sur le disque, le CD-ROM devient %c:. Si vous jouez à ces jeux, cochez « Seulement le lecteur C: ».

@@ -118,3 +118,14 @@ func TestFixCDLetter(t *testing.T) {
 		t.Fatal("changed with one drive")
 	}
 }
+
+func TestOnlyC(t *testing.T) {
+	src := makeDonor(t, MediaHDD, Geometry{200, 16, 63}, DOSMS)
+	img := filepath.Join(t.TempDir(), "onlyc.img")
+	if _, err := CreateBootImage(BootOptions{Path: img, Kind: MediaHDD, Geom: Geometry{1000, 255, 63}, Source: src, OnlyC: true}); err != nil {
+		t.Fatal(err)
+	}
+	if n := HardDrives(img); n != 1 {
+		t.Fatal(n)
+	}
+}

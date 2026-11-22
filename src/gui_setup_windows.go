@@ -225,9 +225,6 @@ func (w *setupWin) close(ok bool) {
 	pDestroyWindow.Call(w.hwnd)
 	a.setupDlg = nil
 	if b != nil {
-		if b.setup == nil {
-			setCheck(b.c[bwSetupDOS], false)
-		}
 		b.setupChanged()
 		pSetForegroundWindow.Call(b.hwnd)
 		if b.calcAfter {

@@ -39,6 +39,7 @@ const (
 	COLOR_WINDOW        = 5
 	COLOR_GRAYTEXT      = 17
 	LB_SETITEMHEIGHT    = 0x01A0
+	BS_RADIOBUTTON      = 0x0004
 )
 
 var (
@@ -123,7 +124,7 @@ func (a *app) pagePanel(p int) uintptr {
 // menuPageIDs are the editor's controls, shown only on the menu page.
 var menuPageIDs = []int{idLblTarget, idTarget, idLblTimeout, idTimeout, idLblDefault, idDefault, idLblCodepage, idCodepage,
 	idLblColor, idColor, idLblCfgName, idCfgName, idLblAutoName, idAutoName, idList, idAdd, idBlocks, idCopy, idDel, idUp, idDown,
-	idLblID, idID, idLblTitle, idTitle, idLblConfig, idConfig, idLblAutoexec, idAutoexec, idHint, idPreview, idSaveDir, idWriteImg, idMenuHead}
+	idLblID, idID, idLblTitle, idTitle, idLblConfig, idConfig, idLblAutoexec, idAutoexec, idHint, idPreview, idSaveDir, idWriteImg, idMenuHead, idReady, idStatus}
 
 // showPage switches to a page.
 func (a *app) showPage(p int) {
@@ -203,6 +204,9 @@ func (a *app) stepState(p int) (int, string) {
 		if err != nil {
 			return iconWarn, T("Check the geometry")
 		}
+		if o.OnlyC {
+			pl.OnlyC()
+		}
 		var drives []string
 		for i := range pl.Drives() {
 			drives = append(drives, fmt.Sprintf("%c:", 'C'+i))
@@ -245,6 +249,9 @@ func (a *app) stepState(p int) (int, string) {
 			if x.Fatal {
 				return iconWarn, x.Msg
 			}
+		}
+		if len(a.proj.Items) == 1 {
+			return iconMenu, T("1 menu item")
 		}
 		return iconMenu, T("%d menu items", len(a.proj.Items))
 	case pageBuild:
@@ -310,4 +317,26 @@ func (a *app) fillSide() {
 		sendMsg(h, LB_ADDSTRING, 0, uintptr(unsafe.Pointer(u16(t))))
 	}
 	sendMsg(h, LB_SETCURSEL, uintptr(a.page), 0)
+}
+
+// readyMenu replaces the menu with a ready one (c: index into wizMenus).
+func (a *app) readyMenu(c int) {
+	if c < 0 || c >= len(wizMenus) || !a.askSave() {
+		return
+	}
+	suffix := "-ms"
+	t := a.proj.Target
+	if a.boot != nil {
+		t = a.boot.sourceTarget()
+	}
+	if t == TargetFreeDOS {
+		suffix = "-fd"
+	}
+	a.proj, a.path, a.dirty, a.sel = TemplateByID(wizMenus[c]+suffix).Make(), "", false, 1
+	a.loadProject()
+	if a.boot != nil {
+		a.boot.applyOwn()
+		a.boot.fillMenus(0)
+	}
+	a.updateSide()
 }
