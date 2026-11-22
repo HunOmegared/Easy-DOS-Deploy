@@ -119,7 +119,7 @@ that folder is writable (portable use), otherwise in
 | `src/` | the Windows program (Go) and its tests |
 | `src/lang/` | the built-in German, French, Spanish and Italian translations |
 | `src/tools/winres/` | makes the icon, version information and manifest of the exe |
-| `asm/` | the 16-bit code: the MBR boot code and `GEOM.COM` with a tiny assembler, and the FreeDOS boot sector |
+| `asm/` | the 16-bit code: the MBR boot code (with a tiny assembler), `GEOM.COM` and the FreeDOS boot sector (with NASM) |
 | `docs/` | the guides above and the screenshots |
 | `.github/workflows/` | the GitHub Actions build |
 

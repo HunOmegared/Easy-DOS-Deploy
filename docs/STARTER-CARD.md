@@ -69,8 +69,45 @@ At the DOS prompt type:
 GEOM
 ```
 
-It shows the geometry the BIOS gives to DOS, for example 1022 / 16 / 63. With
-the starter card, heads and sectors are 16 and 63, as set.
+GEOM shows two things:
+
+* **What the BIOS gives DOS**, for every hard disk the BIOS knows, for example
+  `Disk 1: Cylinders: 1022   Heads: 16   Sectors/track: 63`. With the starter
+  card, heads and sectors are 16 and 63, as set.
+* **What the IDE devices say about themselves.** GEOM asks every device on the
+  two IDE channels (primary and secondary, master and slave) directly, even
+  the ones the BIOS does not know. For each disk or card it shows the model,
+  its own geometry and size, and the values to choose as BIOS type *User* if
+  the BIOS has no auto-detection. CD-ROM drives are named as such.
+
+```
+What the IDE devices say about themselves:
+  Primary master:   SanDisk SDCFB-512
+    Own geometry: 993/16/63, 488 MB
+    Without auto-detection, BIOS type User: 993/16/63
+  Primary slave:    SanDisk SDCFB-1024
+    Own geometry: 1985/16/63, 977 MB
+    Without auto-detection, BIOS type User: 1024/16/63
+    (a BIOS without LBA uses at most 1024 cylinders, about 504 MB)
+```
+
+Devices on an XT-IDE or SCSI card are not asked; for those only the BIOS part
+counts.
+
+### Measuring another card or disk
+
+To find the values for the card or disk you want to build for, put the
+starter card in as **master** and the other card or disk as **slave** (on the
+same cable, or on the secondary channel), then:
+
+1. **The BIOS has auto-detection:** set the second disk to Auto (LBA on, if the
+   BIOS has it) and boot from the starter card. `GEOM` shows it as *Disk 2*:
+   build the image with those three numbers.
+2. **The BIOS has no auto-detection:** boot from the starter card (the second
+   disk can be *None* in BIOS setup). `GEOM` shows the second disk under *What
+   the IDE devices say*. Enter its *BIOS type User* values in BIOS setup for that
+   disk, reboot, run `GEOM` again and build the image with what *Disk 2* shows
+   now (if the BIOS gives one or two cylinders fewer, that is what counts).
 
 ## 4. Then
 

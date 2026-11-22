@@ -154,42 +154,11 @@ func TestOwnMBRBoots(t *testing.T) {
 }
 
 func runGEOM(t *testing.T, g Geometry, noDisk bool) string {
-	c := newCPU()
-	for i := range c.seg {
-		c.seg[i] = 0x1000
+	var disks []Geometry
+	if !noDisk {
+		disks = []Geometry{g}
 	}
-	copy(c.mem[c.lin(0x1000, 0x100):], geomCOM)
-	c.ip = 0x100
-	c.r[rSP] = 0xFFFE
-	var out strings.Builder
-	d := &biosDisk{g: g}
-	exited := false
-	c.ints = func(c *cpu8086, n byte) error {
-		switch n {
-		case 0x13:
-			if noDisk {
-				c.cf = true
-				return nil
-			}
-			return d.int13(c, &out)
-		case 0x21:
-			switch c.get8(4) {
-			case 0x09:
-				for o := c.r[rDX]; c.rd8(c.seg[sDS], o) != '$'; o++ {
-					out.WriteByte(c.rd8(c.seg[sDS], o))
-				}
-			case 0x02:
-				out.WriteByte(c.get8(2))
-			case 0x4C:
-				exited = true
-			}
-		}
-		return nil
-	}
-	if err := c.run(100000, func(*cpu8086) bool { return exited }); err != nil {
-		t.Fatal(err, out.String())
-	}
-	return out.String()
+	return runGEOMEmu(t, disks, [2][2]*ideDev{}).out
 }
 
 func TestGEOMCOM(t *testing.T) {

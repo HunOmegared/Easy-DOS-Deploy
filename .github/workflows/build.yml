@@ -33,6 +33,7 @@ jobs:
       - name: Check the 16-bit code is up to date
         shell: bash
         run: |
+          sudo apt-get install -y nasm >/dev/null
           python3 asm/mbr.py  2>/dev/null | diff - <(tail -n +5 src/mbrcode.go)
           python3 asm/geom.py 2>/dev/null | diff - <(tail -n +5 src/geomcom.go)
       - uses: actions/upload-artifact@v4

@@ -32,8 +32,10 @@ go run ./tools/winres
 
 ## 16-bit code
 
-The MBR boot code of new hard disk images and `GEOM.COM` are written in a tiny
-assembler in Python; see [asm/README.md](../asm/README.md).
+The MBR boot code of new hard disk images is written in a tiny assembler in
+Python; `GEOM.COM` (`asm/geom.asm`) and the FreeDOS boot sector are built
+with [NASM](https://nasm.us), which the scripts call. See
+[asm/README.md](../asm/README.md).
 
 ## GitHub Actions
 
