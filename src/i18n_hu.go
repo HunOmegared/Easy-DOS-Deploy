@@ -596,4 +596,5 @@ var huTexts = map[string]string{
 	"Your own menu":    "Saját menü",
 	"Edit the menu...": "Menü szerkesztése...",
 	"Simple view":      "Egyszerű nézet",
+	"Write to disk...": "Lemezre írás...",
 }

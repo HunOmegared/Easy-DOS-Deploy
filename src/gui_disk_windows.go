@@ -72,6 +72,7 @@ const (
 	bwMenuSum
 	bwGeomHelp
 	bwOnlyC
+	bwWriteCard
 )
 
 // System choices (radio buttons of the System page).
@@ -95,7 +96,7 @@ func bootPanelOf(id int) int {
 		bwSysSource, bwNoteSetup, bwNoteFree, bwNoteSource, bwNoteBlank, bwSetupInfo:
 		return bpSystem
 	case bwHeadBuild, bwIntroBuild, bwLblMenu, bwMenuKind, bwMenuEdit, bwDrvInfo, bwDrvBtn, bwLblLabel, bwLabel, bwLblOut, bwOut, bwOutBrowse, bwCreate, bwClose,
-		bwWriteMenu, bwMenuSum:
+		bwWriteMenu, bwMenuSum, bwWriteCard:
 		return bpBuild
 	}
 	return bpDisk
@@ -200,6 +201,7 @@ func (a *app) createBootPages() {
 	mk(bwOut, "EDIT", "", edit, WS_EX_CLIENTEDGE)
 	mk(bwOutBrowse, "BUTTON", T("Browse..."), WS_TABSTOP, 0)
 	mk(bwCreate, "BUTTON", T("Create"), WS_TABSTOP|BS_DEFPUSHBUTTON, 0)
+	mk(bwWriteCard, "BUTTON", T("Write to disk..."), WS_TABSTOP, 0)
 	mk(bwClose, "BUTTON", T("Close"), WS_TABSTOP, 0)
 	pShowWindow.Call(b.c[bwClose], 0) // a page, not a window
 	setCheck(b.c[bwWriteMenu], true)
@@ -591,8 +593,9 @@ func (b *bootWin) layout() {
 	y += lh + s(4)
 	move(b.c[bwOut], m, y, cw-sb-s(10), rh)
 	move(b.c[bwOutBrowse], w-m-sb, y, sb, rh)
-	bw := fitW(s(160), bp, b.c[bwCreate])
-	move(b.c[bwCreate], w-m-bw, h-m-s(32), bw, s(32))
+	bw := fitW(s(160), bp, b.c[bwCreate], b.c[bwWriteCard])
+	move(b.c[bwCreate], w-m-2*bw-s(10), h-m-s(32), bw, s(32))
+	move(b.c[bwWriteCard], w-m-bw, h-m-s(32), bw, s(32))
 }
 
 func atoiU(s string) uint32 {
@@ -634,11 +637,19 @@ func (b *bootWin) options() BootOptions {
 	return o
 }
 
+// updateWriteCard enables "Write to disk" when the image file is there.
+func (b *bootWin) updateWriteCard() {
+	p := b.options().Path
+	_, err := os.Stat(p)
+	enable(b.c[bwWriteCard], p != "" && err == nil)
+}
+
 // update enables the hard disk fields and shows the partition plan.
 func (b *bootWin) update() {
 	if b.loading {
 		return
 	}
+	b.updateWriteCard()
 	o := b.options()
 	hdd := o.Kind == MediaHDD
 	for _, id := range []int{bwProfile, bwSaveProf, bwDelProf, bwC, bwH, bwS, bwTotal, bwFromImg, bwFromBios, bwBlank} {
@@ -900,6 +911,7 @@ func (b *bootWin) created(o BootOptions, r *Report, err, menuErr error) {
 			r.Warnings = append(r.Warnings, T("The lines of the system source name files that are not on it: %s", strings.Join(b.machineMiss, ", ")))
 		}
 	}
+	b.updateWriteCard()
 	text := reportText(r, T("The image is ready: %s", o.Path))
 	if o.Kind == MediaHDD {
 		text += "\n\n" + T("Try it in 86Box with the same geometry (%d/%d/%d) first.\n\nWrite it to a card now?", o.Geom.C, o.Geom.H, o.Geom.S)
@@ -993,6 +1005,14 @@ func bootProc(hwnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {
 			}
 		case bwCreate:
 			b.create()
+		case bwWriteCard:
+			if p := b.options().Path; p != "" {
+				a.writeCard(p)
+			}
+		case bwOut:
+			if code == EN_CHANGE {
+				b.updateWriteCard()
+			}
 		}
 		theApp.updateSide()
 		return 0
