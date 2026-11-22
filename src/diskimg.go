@@ -79,6 +79,8 @@ type BootOptions struct {
 	// OnlyC makes only C: on a disk bigger than 2 GB (the rest stays unused),
 	// so that the CD-ROM keeps the letter D: that some games expect.
 	OnlyC bool
+	// AddGeom puts GEOM.COM into the root, to see the geometry the BIOS gives.
+	AddGeom bool
 	// Progress, if set, is called with the files written so far.
 	Progress func(done, total int)
 }
@@ -677,7 +679,22 @@ func CreateBootImage(o BootOptions) (*Report, error) {
 		}
 		r.Done = append(r.Done, T("System: FreeDOS (kernel, FreeCOM and the program's own boot code), %d files.", len(names)))
 	}
+	// GEOM.COM goes after the system files: IO.SYS must stay the first
+	// entry of the root and start at the first cluster
+	addGeom := func() error {
+		if !o.AddGeom {
+			return nil
+		}
+		if err := v.WriteFile("GEOM.COM", geomCOM); err != nil {
+			return err
+		}
+		r.Done = append(r.Done, T("GEOM.COM in the root: it shows the geometry the BIOS gives."))
+		return nil
+	}
 	if src == nil {
+		if err := addGeom(); err != nil {
+			return nil, err
+		}
 		if o.FreeDOS == nil {
 			r.Warnings = append(r.Warnings, T("No system source was given: the disk is formatted but does not boot."))
 		}
@@ -712,6 +729,9 @@ func CreateBootImage(o BootOptions) (*Report, error) {
 		copied[name] = true
 	}
 	r.Done = append(r.Done, T("System: %s (boot code and system files from %s).", src.dos, o.Source))
+	if err := addGeom(); err != nil {
+		return nil, err
+	}
 	if o.CopyAll {
 		n := 0
 		var skipped []string

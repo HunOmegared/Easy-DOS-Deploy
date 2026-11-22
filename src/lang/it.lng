@@ -1920,3 +1920,24 @@ TR: Salva un disco in un file immagine
 
 EN: Next:\n1. 86Box: add the image as a hard disk with %d cylinders, %d heads, %d sectors.\n2. Boot your DOS Setup disk 1 (or a boot floppy: FDISK, FORMAT C: /S) and install DOS.\n3. Here: Output > Write to disk image... puts the boot menu and drivers on it.\n4. Disk image > Write an image to a disk.
 TR: Poi:\n1. 86Box: aggiungi l'immagine come disco rigido con %d cilindri, %d testine, %d settori.\n2. Avvia dal disco 1 di DOS Setup (o da un dischetto di avvio: FDISK, FORMAT C: /S) e installa DOS.\n3. Qui: Uscita > Scrivi in un'immagine disco... vi mette il menu di avvio e i driver.\n4. Immagine disco > Scrivi un'immagine su un disco.
+
+EN: GEOM.COM in the root: it shows the geometry the BIOS gives.
+TR: GEOM.COM nella radice: mostra la geometria che dà il BIOS.
+
+EN: Put GEOM.COM onto the disk (it shows the geometry the BIOS gives)
+TR: Metti GEOM.COM sul disco (mostra la geometria che dà il BIOS)
+
+EN: Universal starter card: any IDE BIOS, about 500 MB (BIOS: User 1024/16/63)
+TR: Scheda di avvio universale: qualsiasi BIOS IDE, circa 500 MB (BIOS: User 1024/16/63)
+
+EN: Starter card: in the BIOS setup of each machine set this drive to type User, 1024 cylinders, 16 heads, 63 sectors, and LBA off (NORMAL or CHS). Not Auto.
+TR: Scheda di avvio: nel setup del BIOS di ogni macchina imposta questa unità sul tipo User, 1024 cilindri, 16 testine, 63 settori e LBA disattivato (NORMAL o CHS). Non Auto.
+
+EN: This profile is built in; it cannot be deleted.
+TR: Questo profilo è integrato; non si può eliminare.
+
+EN: Make a starter card that boots on almost any PC
+TR: Crea una scheda di avvio che parte su quasi ogni PC
+
+EN: No floppy needed: a CF card of about 500 MB with a geometry every IDE BIOS can take, and GEOM.COM to find the machine's own geometry. Also a helper for old IDE disks.
+TR: Senza dischetto: una scheda CF di circa 500 MB con una geometria che ogni BIOS IDE accetta, e GEOM.COM per scoprire la geometria propria della macchina. Utile anche per i vecchi dischi IDE.

@@ -23,6 +23,8 @@ of the target machine.
 
 1. **Build the system on the CF card** with Easy DOS Deploy, with the
    geometry the target machine gives to *the card* (see the CF card guide).
+   If you do not know it, or the machine has no auto-detection, make a
+   [starter card](STARTER-CARD.md): it boots almost anywhere.
    Your files can go onto it too, as long as they fit on the old disk later.
    Try it in 86Box, then write it to the card.
 2. **Put both into the target machine:** the CF card as **master** (the first

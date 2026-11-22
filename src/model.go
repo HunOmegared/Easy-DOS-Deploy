@@ -254,6 +254,7 @@ type BuildSettings struct {
 	CopyAll    bool          `json:"copyall,omitempty"`
 	UseOwn     bool          `json:"useown,omitempty"`
 	WriteMenu  bool          `json:"writemenu"`
+	AddGeom    bool          `json:"addgeom,omitempty"`
 	Label      string        `json:"label,omitempty"`
 	Output     string        `json:"output,omitempty"`
 }

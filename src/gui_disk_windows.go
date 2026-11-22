@@ -74,6 +74,7 @@ const (
 	bwOnlyC
 	bwWriteCard
 	bwAdvanced // shows the image size
+	bwAddGeom
 )
 
 // System choices (radio buttons of the System page).
@@ -97,7 +98,7 @@ func bootPanelOf(id int) int {
 		bwSysSource, bwNoteSetup, bwNoteFree, bwNoteSource, bwNoteBlank, bwSetupInfo:
 		return bpSystem
 	case bwHeadBuild, bwIntroBuild, bwLblMenu, bwMenuKind, bwMenuEdit, bwDrvInfo, bwDrvBtn, bwLblLabel, bwLabel, bwLblOut, bwOut, bwOutBrowse, bwCreate, bwClose,
-		bwWriteMenu, bwMenuSum, bwWriteCard:
+		bwWriteMenu, bwMenuSum, bwWriteCard, bwAddGeom:
 		return bpBuild
 	}
 	return bpDisk
@@ -203,6 +204,7 @@ func (a *app) createBootPages() {
 	mk(bwOutBrowse, "BUTTON", T("Browse..."), WS_TABSTOP, 0)
 	mk(bwCreate, "BUTTON", T("Create"), WS_TABSTOP|BS_DEFPUSHBUTTON, 0)
 	mk(bwWriteCard, "BUTTON", T("Write to disk..."), WS_TABSTOP, 0)
+	mk(bwAddGeom, "BUTTON", T("Put GEOM.COM onto the disk (it shows the geometry the BIOS gives)"), WS_TABSTOP|BS_AUTOCHECKBOX, 0)
 	mk(bwClose, "BUTTON", T("Close"), WS_TABSTOP, 0)
 	pShowWindow.Call(b.c[bwClose], 0) // a page, not a window
 	setCheck(b.c[bwWriteMenu], true)
@@ -446,12 +448,19 @@ func (b *bootWin) updateDrivers() {
 	}
 }
 
+// builtinProfiles come before the user's own disk profiles.
+func builtinProfiles() []GeomProfile {
+	g := UniversalGeom
+	return []GeomProfile{{Name: T("Universal starter card: any IDE BIOS, about 500 MB (BIOS: User 1024/16/63)"), C: g.C, H: g.H, S: g.S}}
+}
+
+func allProfiles() []GeomProfile { return append(builtinProfiles(), theApp.set.Profiles...) }
+
 func (b *bootWin) fillProfiles(sel string) {
-	a := theApp
 	cb := b.c[bwProfile]
 	sendMsg(cb, CB_RESETCONTENT, 0, 0)
 	idx := -1
-	for i, p := range a.set.Profiles {
+	for i, p := range allProfiles() {
 		sendMsg(cb, CB_ADDSTRING, 0, uintptr(unsafe.Pointer(u16(p.Name))))
 		if p.Name == sel {
 			idx = i
@@ -599,6 +608,8 @@ func (b *bootWin) layout() {
 	y += 4*lh + s(12)
 	lbl(bwLblLabel, m, y, col)
 	move(b.c[bwLabel], m+col, y, s(140), rh)
+	y += rh + s(8)
+	move(b.c[bwAddGeom], m, y, cw, rh)
 	y += rh + s(12)
 	move(b.c[bwLblOut], m, y, cw, lh)
 	y += lh + s(4)
@@ -626,6 +637,7 @@ func (b *bootWin) options() BootOptions {
 		Label:   strings.TrimSpace(getText(b.c[bwLabel])),
 		Path:    strings.Trim(strings.TrimSpace(getText(b.c[bwOut])), `"`),
 		OnlyC:   checked(b.c[bwOnlyC]),
+		AddGeom: checked(b.c[bwAddGeom]),
 	}
 	if t, err := strconv.ParseInt(strings.TrimSpace(getText(b.c[bwTotal])), 10, 64); err == nil {
 		o.Total = t
@@ -696,6 +708,9 @@ func (b *bootWin) update() {
 		p.OnlyC()
 	}
 	t := p.Describe()
+	if o.Geom == UniversalGeom {
+		t += "\n" + T("Starter card: in the BIOS setup of each machine set this drive to type User, 1024 cylinders, 16 heads, 63 sectors, and LBA off (NORMAL or CHS). Not Auto.")
+	}
 	switch {
 	case bigger && o.OnlyC:
 		t += "\n" + T("The disk is bigger than 2 GB: the space after C: stays unused.")
@@ -727,10 +742,12 @@ func (b *bootWin) setGeom(g Geometry, total int64) {
 func (b *bootWin) loadProfile() {
 	a := theApp
 	i := int(sendMsg(b.c[bwProfile], CB_GETCURSEL, 0, 0))
-	if i < 0 || i >= len(a.set.Profiles) {
+	all := allProfiles()
+	if i < 0 || i >= len(all) {
 		return
 	}
-	p := a.set.Profiles[i]
+	p := all[i]
+	_ = a
 	sendMsg(b.c[bwKind], CB_SETCURSEL, uintptr(MediaHDD), 0)
 	b.setGeom(Geometry{p.C, p.H, p.S}, p.Total)
 }
@@ -772,8 +789,14 @@ func (b *bootWin) saveProfile() {
 
 func (b *bootWin) deleteProfile() {
 	a := theApp
-	i := int(sendMsg(b.c[bwProfile], CB_GETCURSEL, 0, 0))
-	if i < 0 || i >= len(a.set.Profiles) {
+	i := int(sendMsg(b.c[bwProfile], CB_GETCURSEL, 0, 0)) - len(builtinProfiles())
+	if i < 0 {
+		if i >= -len(builtinProfiles()) {
+			msgBox(b.hwnd, T("This profile is built in; it cannot be deleted."), appTitle(), MB_ICONINFORMATION)
+		}
+		return
+	}
+	if i >= len(a.set.Profiles) {
 		return
 	}
 	if msgBox(b.hwnd, T("Delete profile %s?", a.set.Profiles[i].Name), appTitle(), MB_YESNO|MB_ICONQUESTION) != IDYES {
@@ -1879,6 +1902,7 @@ func (b *bootWin) settings() *BuildSettings {
 		CopyAll:   checked(b.c[bwCopyAll]),
 		UseOwn:    checked(b.c[bwUseOwn]),
 		WriteMenu: checked(b.c[bwWriteMenu]),
+		AddGeom:   checked(b.c[bwAddGeom]),
 		Label:     o.Label,
 		Output:    o.Path,
 	}
@@ -1908,6 +1932,7 @@ func (b *bootWin) applySettings(bs *BuildSettings) []string {
 	setText(b.c[bwSource], bs.Source)
 	setCheck(b.c[bwCopyAll], bs.CopyAll)
 	setCheck(b.c[bwWriteMenu], bs.WriteMenu)
+	setCheck(b.c[bwAddGeom], bs.AddGeom)
 	k := sysSource
 	for i, n := range SystemNames {
 		if n == bs.System {
@@ -1940,4 +1965,14 @@ func (b *bootWin) applySettings(bs *BuildSettings) []string {
 	b.fillMenus(0)
 	b.update()
 	return notes
+}
+
+// starter sets up a starter card: the universal geometry and GEOM.COM.
+func (b *bootWin) starter() {
+	sendMsg(b.c[bwKind], CB_SETCURSEL, uintptr(MediaHDD), 0)
+	b.setGeom(UniversalGeom, 0)
+	sendMsg(b.c[bwProfile], CB_SETCURSEL, 0, 0) // the built-in starter profile
+	setCheck(b.c[bwAddGeom], true)
+	setCheck(b.c[bwOnlyC], false)
+	b.update()
 }

@@ -60,6 +60,7 @@ const (
 	wzSub2
 	wzSub3
 	wzSub4
+	wzStarter // page 1: a starter card
 )
 
 type wizTask int
@@ -69,6 +70,7 @@ const (
 	taskCard
 	taskEmu
 	taskExisting
+	taskStarter
 )
 
 // menu choices on page 2: template IDs without the -ms/-fd ending
@@ -114,6 +116,7 @@ func (a *app) openWizard() {
 	head(wzHead, T("What would you like to do?"))
 	mk(wzSub1, "STATIC", T("Easy DOS Deploy builds a bootable DOS system for an old PC: on a CF card or an IDE disk, on a floppy, or as an image for an emulator. Choose what you would like to do; everything can be changed later in the main window."), 0, "")
 	mk(wzCard, "BUTTON", T("Build a DOS system on a CF card or IDE disk"), link, T("The geometry of the target machine, the whole disk in DOS drives, the DOS, its drivers and the boot menu. Written with a card reader or a USB-IDE adapter."))
+	mk(wzStarter, "BUTTON", T("Make a starter card that boots on almost any PC"), link, T("No floppy needed: a CF card of about 500 MB with a geometry every IDE BIOS can take, and GEOM.COM to find the machine's own geometry. Also a helper for old IDE disks."))
 	mk(wzEmu, "BUTTON", T("Make a disk image for an emulator"), link, T("A hard disk image for 86Box or PCem."))
 	mk(wzFloppy, "BUTTON", T("Make a bootable floppy"), link, T("A disk image you can write to a floppy with WinImage or Greaseweazle."))
 	mk(wzExisting, "BUTTON", T("Change the boot menu of an existing system"), link, T("Read the menu from a disk image or a drive, edit it and write it back."))
@@ -171,7 +174,7 @@ func (w *wizardWin) steps() []string {
 		return []string{first, T("The next steps depend on it")}
 	case w.task == taskExisting:
 		return []string{first, T("Where the system is"), rest}
-	case w.task == taskCard:
+	case w.task == taskCard || w.task == taskStarter:
 		return []string{first, T("DOS and boot menu"), T("Where DOS comes from"), rest}
 	}
 	return []string{first, T("DOS and boot menu"), rest}
@@ -252,9 +255,9 @@ func (w *wizardWin) layout() {
 	}
 
 	y := top(wzHead, wzSub1)
-	for _, id := range []int{wzCard, wzEmu, wzFloppy, wzExisting, wzEditor} {
-		move(w.c[id], x0, y, lw, s(68))
-		y += s(72)
+	for _, id := range []int{wzCard, wzStarter, wzEmu, wzFloppy, wzExisting, wzEditor} {
+		move(w.c[id], x0, y, lw, s(64))
+		y += s(68)
 	}
 	move(w.c[wzShowStart], x0, by+s(4), fitW(s(300), s(28), w.c[wzShowStart]), s(24))
 
@@ -331,7 +334,7 @@ func (w *wizardWin) show(page int) {
 	}
 	menu := []int{wzLblMenu, wzMenu0, wzMenu1, wzMenu2, wzMenu3, wzMenuNote0, wzMenuNote1, wzMenuNote2, wzMenuNote3}
 	pages := map[int][]int{
-		1: {wzHead, wzSub1, wzFloppy, wzCard, wzEmu, wzExisting, wzEditor, wzShowStart},
+		1: {wzHead, wzSub1, wzFloppy, wzCard, wzStarter, wzEmu, wzExisting, wzEditor, wzShowStart},
 		2: append([]int{wzHead2, wzSub2, wzLblDOS, wzDOS, wzDOSNote, wzDOSFree, wzDOSFreeNote, wzBack, wzNext}, menu...),
 		3: {wzHead3, wzSub3, wzFromImage, wzFromDir, wzBack3},
 		4: append([]int{wzHead4, wzSub4, wzBack4}, w.sourceChoices()...),
@@ -403,7 +406,7 @@ func (w *wizardWin) next() {
 	a.proj, a.path, a.dirty, a.sel = TemplateByID(tid).Make(), "", false, 1
 	a.setMenuFrom(tid)
 	a.loadProject()
-	if task == taskCard {
+	if task == taskCard || task == taskStarter {
 		w.show(4)
 		return
 	}
@@ -427,6 +430,7 @@ func (w *wizardWin) next() {
 func wizardProc(hwnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {
 	a := theApp
 	w := a.wiz
+	starter := w != nil && w.task == taskStarter
 	switch msg {
 	case WM_MEASUREITEM:
 		if mi := *(**measureItem)(unsafe.Pointer(&lParam)); mi.ctlID == wzSide {
@@ -447,6 +451,9 @@ func wizardProc(hwnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {
 		case wzFloppy, wzCard, wzEmu:
 			w.task = wizTask(int(loword(wParam)) - wzFloppy)
 			w.show(2)
+		case wzStarter:
+			w.task = taskStarter
+			w.show(2)
 		case wzExisting:
 			w.task = taskExisting
 			w.show(3)
@@ -463,6 +470,9 @@ func wizardProc(hwnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {
 		case wzHasBackup:
 			w.close()
 			a.openBootWinWith(MediaHDD, nil)
+			if starter {
+				a.boot.starter()
+			}
 			if p := fileDialog(a.boot.hwnd, false, T("Card backup or hard disk image"), "", "", imgFilter()...); p != "" {
 				setCheck(a.boot.c[bwCopyAll], true)
 				a.boot.applyDiskInfo(p)
@@ -470,6 +480,9 @@ func wizardProc(hwnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {
 		case wzFreeDOS:
 			w.close()
 			a.openBootWinWith(MediaHDD, nil)
+			if starter {
+				a.boot.starter()
+			}
 			a.boot.setSys(sysFree)
 			a.boot.update()
 			a.boot.followSource()
@@ -477,6 +490,9 @@ func wizardProc(hwnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {
 			fd := w.freeDOS()
 			w.close()
 			a.openBootWinWith(MediaHDD, nil)
+			if starter {
+				a.boot.starter()
+			}
 			if fd {
 				a.boot.setSys(sysBlank)
 				a.boot.update()
@@ -488,6 +504,9 @@ func wizardProc(hwnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {
 		case wzBootFloppy:
 			w.close()
 			a.openBootWinWith(MediaHDD, nil)
+			if starter {
+				a.boot.starter()
+			}
 			if p := fileDialog(a.boot.hwnd, false, T("DOS boot floppy image"), "", "", imgFilter()...); p != "" {
 				a.boot.setSys(sysSource)
 				setText(a.boot.c[bwSource], p)

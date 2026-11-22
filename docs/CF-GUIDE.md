@@ -10,6 +10,10 @@ state; a yellow mark means something is still missing. The start-up wizard
 (*File > Start wizard*, then *Build a DOS system on a CF card or IDE disk*)
 leads through the choices and leaves you on the first step.
 
+No floppy drive and an old machine without auto-detection? Start with a
+[starter card](STARTER-CARD.md): it boots on almost any PC with an IDE port
+and has `GEOM.COM` on it.
+
 **Keep a copy of every disk image and card you work on.**
 
 ## 1. Machine and disk

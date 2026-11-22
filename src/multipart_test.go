@@ -129,3 +129,27 @@ func TestOnlyC(t *testing.T) {
 		t.Fatal(n)
 	}
 }
+
+func TestStarterCard(t *testing.T) {
+	src := makeDonor(t, MediaHDD, Geometry{200, 16, 63}, DOSMS)
+	img := filepath.Join(t.TempDir(), "starter.img")
+	if _, err := CreateBootImage(BootOptions{Path: img, Kind: MediaHDD, Geom: UniversalGeom, Source: src, AddGeom: true}); err != nil {
+		t.Fatal(err)
+	}
+	v, err := OpenImage(img, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer v.Close()
+	ents, _, _ := v.readDir(v.root())
+	if ents[0].Name != "IO.SYS" || ents[0].first() != 2 {
+		t.Fatal("IO.SYS is not first")
+	}
+	if b, err := v.ReadFile("GEOM.COM"); err != nil || len(b) != len(geomCOM) {
+		t.Fatal("no GEOM.COM", err)
+	}
+	// plain CHS: every BIOS limit
+	if g := UniversalGeom; g.H > 16 || g.S > 63 || g.C > 1024 || g.Sectors()*512 > 528482304 {
+		t.Fatal(g)
+	}
+}

@@ -1920,3 +1920,24 @@ TR: Platte als Image-Datei sichern
 
 EN: Next:\n1. 86Box: add the image as a hard disk with %d cylinders, %d heads, %d sectors.\n2. Boot your DOS Setup disk 1 (or a boot floppy: FDISK, FORMAT C: /S) and install DOS.\n3. Here: Output > Write to disk image... puts the boot menu and drivers on it.\n4. Disk image > Write an image to a disk.
 TR: Weiter:\n1. 86Box: das Image als Festplatte mit %d Zylindern, %d Köpfen, %d Sektoren einbinden.\n2. Von DOS-Setup-Diskette 1 booten (oder von einer Bootdiskette: FDISK, FORMAT C: /S) und DOS installieren.\n3. Hier: Ausgabe > In Disk-Image schreiben... bringt das Bootmenü und die Treiber darauf.\n4. Disk-Image > Image auf eine Platte schreiben.
+
+EN: GEOM.COM in the root: it shows the geometry the BIOS gives.
+TR: GEOM.COM im Hauptverzeichnis: es zeigt die Geometrie, die das BIOS gibt.
+
+EN: Put GEOM.COM onto the disk (it shows the geometry the BIOS gives)
+TR: GEOM.COM auf die Platte legen (es zeigt die Geometrie, die das BIOS gibt)
+
+EN: Universal starter card: any IDE BIOS, about 500 MB (BIOS: User 1024/16/63)
+TR: Universelle Startkarte: jedes IDE-BIOS, etwa 500 MB (BIOS: User 1024/16/63)
+
+EN: Starter card: in the BIOS setup of each machine set this drive to type User, 1024 cylinders, 16 heads, 63 sectors, and LBA off (NORMAL or CHS). Not Auto.
+TR: Startkarte: im BIOS-Setup jedes Rechners dieses Laufwerk auf Typ User stellen, 1024 Zylinder, 16 Köpfe, 63 Sektoren, LBA aus (NORMAL oder CHS). Nicht Auto.
+
+EN: This profile is built in; it cannot be deleted.
+TR: Dieses Profil ist eingebaut und lässt sich nicht löschen.
+
+EN: Make a starter card that boots on almost any PC
+TR: Eine Startkarte machen, die auf fast jedem PC bootet
+
+EN: No floppy needed: a CF card of about 500 MB with a geometry every IDE BIOS can take, and GEOM.COM to find the machine's own geometry. Also a helper for old IDE disks.
+TR: Ohne Diskette: eine CF-Karte von etwa 500 MB mit einer Geometrie, die jedes IDE-BIOS annimmt, und GEOM.COM, um die eigene Geometrie des Rechners zu finden. Auch eine Hilfe für alte IDE-Platten.

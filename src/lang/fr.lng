@@ -1920,3 +1920,24 @@ TR: Sauvegarder un disque dans un fichier image
 
 EN: Next:\n1. 86Box: add the image as a hard disk with %d cylinders, %d heads, %d sectors.\n2. Boot your DOS Setup disk 1 (or a boot floppy: FDISK, FORMAT C: /S) and install DOS.\n3. Here: Output > Write to disk image... puts the boot menu and drivers on it.\n4. Disk image > Write an image to a disk.
 TR: Ensuite :\n1. 86Box : ajoutez l'image comme disque dur avec %d cylindres, %d têtes, %d secteurs.\n2. Démarrez sur la disquette 1 de DOS Setup (ou une disquette de démarrage : FDISK, FORMAT C: /S) et installez DOS.\n3. Ici : Sortie > Écrire dans une image disque... y place le menu de démarrage et les pilotes.\n4. Image disque > Écrire une image sur un disque.
+
+EN: GEOM.COM in the root: it shows the geometry the BIOS gives.
+TR: GEOM.COM à la racine : il affiche la géométrie que donne le BIOS.
+
+EN: Put GEOM.COM onto the disk (it shows the geometry the BIOS gives)
+TR: Mettre GEOM.COM sur le disque (il affiche la géométrie que donne le BIOS)
+
+EN: Universal starter card: any IDE BIOS, about 500 MB (BIOS: User 1024/16/63)
+TR: Carte de démarrage universelle : tout BIOS IDE, environ 500 Mo (BIOS : User 1024/16/63)
+
+EN: Starter card: in the BIOS setup of each machine set this drive to type User, 1024 cylinders, 16 heads, 63 sectors, and LBA off (NORMAL or CHS). Not Auto.
+TR: Carte de démarrage : dans le setup du BIOS de chaque machine, réglez ce disque sur le type User, 1024 cylindres, 16 têtes, 63 secteurs, LBA désactivé (NORMAL ou CHS). Pas Auto.
+
+EN: This profile is built in; it cannot be deleted.
+TR: Ce profil est intégré ; il ne peut pas être supprimé.
+
+EN: Make a starter card that boots on almost any PC
+TR: Créer une carte de démarrage qui démarre sur presque tout PC
+
+EN: No floppy needed: a CF card of about 500 MB with a geometry every IDE BIOS can take, and GEOM.COM to find the machine's own geometry. Also a helper for old IDE disks.
+TR: Sans disquette : une carte CF d'environ 500 Mo avec une géométrie que tout BIOS IDE accepte, et GEOM.COM pour trouver la géométrie propre de la machine. Sert aussi d'aide pour les vieux disques IDE.

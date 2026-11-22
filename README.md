@@ -48,6 +48,10 @@ tests. Other machines have not been tested on real hardware yet.
   start-up wizard leads through them. The project file keeps the whole
   recipe, so the same system can be built again, or for another card by
   changing only the geometry.
+* **A starter card** that boots on almost any PC with an IDE port, 286s and
+  386s without auto-detection included, with no floppy drive needed, and
+  `GEOM.COM` on it to find the machine's own geometry. See
+  [Starter card](docs/STARTER-CARD.md).
 * **The exact geometry** of the target machine: from a disk profile, from
   the values in BIOS setup, from `GEOM.COM` run on the target machine, or
   from a backup of a working card.
@@ -102,6 +106,7 @@ that folder is writable (portable use), otherwise in
 | Document | Content |
 |---|---|
 | [CF card guide](docs/CF-GUIDE.md) | the steps of a project: geometry, big disks, where DOS comes from, your files, trying in 86Box, writing the card |
+| [Starter card](docs/STARTER-CARD.md) | a CF card that boots on almost any PC with an IDE port, without a floppy, with GEOM.COM on it |
 | [Old IDE disks](docs/OLD-IDE-DISKS.md) | disks a USB-IDE adapter cannot handle: a CF card as a helper, installing on the target machine, a PC with an IDE port |
 | [Drivers](docs/DRIVERS.md) | the built-in driver list, where each driver comes from, adding your own |
 | [Translating](docs/TRANSLATING.md) | adding a new language |

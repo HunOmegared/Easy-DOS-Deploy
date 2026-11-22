@@ -92,6 +92,12 @@ func UserCylinders(setup Geometry, mode int) (uint32, Geometry, bool) {
 	return 0, Geometry{}, false
 }
 
+// UniversalGeom is the geometry of a starter card: plain CHS that every
+// BIOS with IDE support can take as a User type (16 heads, 63 sectors).
+// The BIOS is set to 1024 cylinders; the image uses fewer, because some
+// BIOSes give DOS a cylinder or two less than they are set to.
+var UniversalGeom = Geometry{1000, 16, 63}
+
 // biosCylLimit: some BIOSes of the early 1990s do not handle more than 4096
 // cylinders in setup (the 2 GB barrier).
 const biosCylLimit = 4096

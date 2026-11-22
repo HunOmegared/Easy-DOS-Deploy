@@ -1920,3 +1920,24 @@ TR: Copiar un disco a un archivo de imagen
 
 EN: Next:\n1. 86Box: add the image as a hard disk with %d cylinders, %d heads, %d sectors.\n2. Boot your DOS Setup disk 1 (or a boot floppy: FDISK, FORMAT C: /S) and install DOS.\n3. Here: Output > Write to disk image... puts the boot menu and drivers on it.\n4. Disk image > Write an image to a disk.
 TR: A continuación:\n1. 86Box: añada la imagen como disco duro con %d cilindros, %d cabezas, %d sectores.\n2. Arranque con el disco 1 de DOS Setup (o con un disquete de arranque: FDISK, FORMAT C: /S) e instale DOS.\n3. Aquí: Salida > Escribir en una imagen de disco... coloca en ella el menú de arranque y los controladores.\n4. Imagen de disco > Escribir una imagen en un disco.
+
+EN: GEOM.COM in the root: it shows the geometry the BIOS gives.
+TR: GEOM.COM en la raíz: muestra la geometría que da la BIOS.
+
+EN: Put GEOM.COM onto the disk (it shows the geometry the BIOS gives)
+TR: Poner GEOM.COM en el disco (muestra la geometría que da la BIOS)
+
+EN: Universal starter card: any IDE BIOS, about 500 MB (BIOS: User 1024/16/63)
+TR: Tarjeta de arranque universal: cualquier BIOS IDE, unos 500 MB (BIOS: User 1024/16/63)
+
+EN: Starter card: in the BIOS setup of each machine set this drive to type User, 1024 cylinders, 16 heads, 63 sectors, and LBA off (NORMAL or CHS). Not Auto.
+TR: Tarjeta de arranque: en el setup de la BIOS de cada máquina ponga esta unidad en tipo User, 1024 cilindros, 16 cabezas, 63 sectores y LBA desactivado (NORMAL o CHS). No Auto.
+
+EN: This profile is built in; it cannot be deleted.
+TR: Este perfil es integrado; no se puede eliminar.
+
+EN: Make a starter card that boots on almost any PC
+TR: Crear una tarjeta de arranque que arranca en casi cualquier PC
+
+EN: No floppy needed: a CF card of about 500 MB with a geometry every IDE BIOS can take, and GEOM.COM to find the machine's own geometry. Also a helper for old IDE disks.
+TR: Sin disquete: una tarjeta CF de unos 500 MB con una geometría que acepta cualquier BIOS IDE, y GEOM.COM para averiguar la geometría propia de la máquina. También sirve de ayuda para discos IDE antiguos.
