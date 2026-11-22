@@ -1416,11 +1416,12 @@ const (
 const wmDownloadDone = WM_APP + 1
 
 type drvWin struct {
-	hwnd   uintptr
-	c      map[int]uintptr
-	busy   bool
-	mu     sync.Mutex
-	result []DownloadResult
+	hwnd    uintptr
+	c       map[int]uintptr
+	loading bool // the list is being filled: no check box events
+	busy    bool
+	mu      sync.Mutex
+	result  []DownloadResult
 }
 
 func (a *app) openDrivers() {
@@ -1438,8 +1439,15 @@ func (a *app) openDrivers() {
 		sendMsg(h, WM_SETFONT, a.font, 1)
 		d.c[id] = h
 	}
-	mk(dvHead, "STATIC", T("Select what goes onto the disk (several can be selected). Missing files can be downloaded, or browse for them (a single file or a zip)."), 0, 0)
-	mk(dvList, "LISTBOX", "", WS_TABSTOP|LBS_NOTIFY|LBS_MULTIPLESEL|LBS_NOINTEGRALHEIGHT|WS_VSCROLL, WS_EX_CLIENTEDGE)
+	loadCommonControls()
+	mk(dvHead, "STATIC", T("Tick what goes onto the disk. Missing files can be downloaded (arrow), or browse for them (folder): a single file or a zip. The gear or a double click edits an entry."), 0, 0)
+	mk(dvList, "SysListView32", "", WS_TABSTOP|LVS_REPORT|LVS_SINGLESEL|LVS_SHOWSELALWAYS|LVS_NOSORTHEADER, WS_EX_CLIENTEDGE)
+	lv := d.c[dvList]
+	sendMsg(lv, LVM_SETEXTENDEDLISTVIEWSTYLE, 0, LVS_EX_CHECKBOXES|LVS_EX_FULLROWSELECT|LVS_EX_SUBITEMIMAGES|LVS_EX_DOUBLEBUFFER)
+	sendMsg(lv, LVM_SETIMAGELIST, LVSIL_SMALL, makeIconList(a.s(16)))
+	lvInsertColumn(lv, 0, T("Driver"), a.s(300), false)
+	lvInsertColumn(lv, 1, T("Status"), a.s(140), false)
+	lvInsertColumn(lv, 2, "", a.s(36), true)
 	mk(dvInfo, "EDIT", "", ES_MULTILINE|ES_READONLY|ES_AUTOVSCROLL|WS_VSCROLL, WS_EX_CLIENTEDGE)
 	mk(dvNew, "BUTTON", T("New..."), WS_TABSTOP, 0)
 	mk(dvEdit, "BUTTON", T("Edit..."), WS_TABSTOP, 0)
@@ -1468,6 +1476,10 @@ func (d *drvWin) layout() {
 	lh := h - top - 2*bh - 3*m - s(4)
 	move(d.c[dvHead], m, m, w-2*m, headH)
 	move(d.c[dvList], m, top, listW, lh)
+	gear, status := s(36), s(140)
+	sendMsg(d.c[dvList], LVM_SETCOLUMNWIDTH, 2, uintptr(gear))
+	sendMsg(d.c[dvList], LVM_SETCOLUMNWIDTH, 1, uintptr(status))
+	sendMsg(d.c[dvList], LVM_SETCOLUMNWIDTH, 0, uintptr(max(s(120), listW-gear-status-scrollBarWidth()-s(6))))
 	move(d.c[dvInfo], 2*m+listW, top, w-3*m-listW, lh)
 	row := func(y int, ids []int, widths []int) int {
 		x := m
@@ -1487,50 +1499,63 @@ func (d *drvWin) layout() {
 	move(d.c[dvClose], w-m-cw, y2, cw, bh)
 }
 
-func (d *drvWin) selected(i int) bool {
-	return sendMsg(d.c[dvList], LB_GETSEL, uintptr(i), 0) > 0
-}
+func (d *drvWin) selected(i int) bool { return lvChecked(d.c[dvList], i) }
 
 func (d *drvWin) refresh() { d.refreshFocus(-1) }
 
-// refreshFocus rebuilds the list; focus >= 0 moves the caret there.
+// driverState is the icon and word for the status column.
+func driverState(st *Store, dr *Driver) (int, string) {
+	allGen := true
+	for _, f := range dr.Files {
+		if f.Content == "" {
+			allGen = false
+		}
+	}
+	switch {
+	case allGen:
+		return iconOK, T("built-in")
+	case st.Ready(dr):
+		return iconOK, T("present")
+	case len(dr.URLs) > 0:
+		return iconDownload, T("to download")
+	}
+	return iconBrowse, T("to browse for")
+}
+
+// refreshFocus rebuilds the list; focus >= 0 moves the selection there.
 func (d *drvWin) refreshFocus(focus int) {
 	a := theApp
-	lb := d.c[dvList]
-	caret := int(sendMsg(lb, LB_GETCARETINDEX, 0, 0))
+	lv := d.c[dvList]
+	cur := lvFocused(lv)
 	if focus >= 0 {
-		caret = focus
+		cur = focus
 	}
-	top := sendMsg(lb, LB_GETTOPINDEX, 0, 0)
-	sendMsg(lb, LB_RESETCONTENT, 0, 0)
+	top := int(sendMsg(lv, LVM_GETTOPINDEX, 0, 0))
+	d.loading = true
+	sendMsg(lv, LVM_DELETEALLITEMS, 0, 0)
 	want := map[string]bool{}
 	for _, id := range a.proj.Drivers {
 		want[id] = true
 	}
 	for i := range a.store.Catalog {
 		dr := &a.store.Catalog[i]
-		state := T("present")
-		if !a.store.Ready(dr) {
-			state = T("MISSING")
+		icon, state := driverState(a.store, dr)
+		lvSetCell(lv, i, 0, dr.Name, -1)
+		lvSetCell(lv, i, 1, state, icon)
+		lvSetCell(lv, i, 2, "", iconGear)
+		lvSetChecked(lv, i, want[dr.ID])
+	}
+	n := len(a.store.Catalog)
+	if n > 0 {
+		// the old scroll position: show the last row of that page first
+		if per := int(sendMsg(lv, LVM_GETCOUNTPERPAGE, 0, 0)); top > 0 && per > 0 {
+			sendMsg(lv, LVM_ENSUREVISIBLE, uintptr(min(n-1, top+per-1)), 0)
 		}
-		allGen := true
-		for _, f := range dr.Files {
-			if f.Content == "" {
-				allGen = false
-			}
-		}
-		if allGen {
-			state = T("built-in")
-		}
-		sendMsg(lb, LB_ADDSTRING, 0, uintptr(unsafe.Pointer(u16(fmt.Sprintf("%s  —  %s", dr.Name, state)))))
-		if want[dr.ID] {
-			sendMsg(lb, LB_SETSEL, 1, uintptr(i))
+		if cur >= 0 && cur < n {
+			lvSelect(lv, cur)
 		}
 	}
-	sendMsg(lb, LB_SETTOPINDEX, top, 0)
-	if caret >= 0 && caret < len(a.store.Catalog) {
-		sendMsg(lb, LB_SETCARETINDEX, uintptr(caret), 0)
-	}
+	d.loading = false
 	d.showInfo()
 	enable(d.c[dvDownload], !d.busy)
 	enable(d.c[dvReset], a.store.Custom)
@@ -1538,7 +1563,7 @@ func (d *drvWin) refreshFocus(focus int) {
 
 func (d *drvWin) focusedIndex() int {
 	a := theApp
-	i := int(sendMsg(d.c[dvList], LB_GETCARETINDEX, 0, 0))
+	i := lvFocused(d.c[dvList])
 	if i < 0 || i >= len(a.store.Catalog) {
 		return -1
 	}
@@ -1758,6 +1783,35 @@ func (d *drvWin) reset() {
 	a.updateStatus()
 }
 
+// notify handles the list: check boxes, the selected row, the gear.
+func (d *drvWin) notify(n *nmListView) {
+	a := theApp
+	if n.hdr.idFrom != dvList || d.loading {
+		return
+	}
+	switch n.hdr.code {
+	case LVN_ITEMCHANGED:
+		if n.changed&LVIF_STATE == 0 {
+			return
+		}
+		if (n.newState^n.oldState)&LVIS_STATEIMAGEMASK != 0 && n.oldState&LVIS_STATEIMAGEMASK != 0 {
+			d.syncSelection()
+			a.updateStatus()
+		}
+		if (n.newState^n.oldState)&LVIS_FOCUSED != 0 {
+			d.showInfo()
+		}
+	case NM_CLICK:
+		if row, col := lvHit(d.c[dvList], n.pt); row >= 0 && col == 2 {
+			a.openEditor(row)
+		}
+	case NM_DBLCLK:
+		if row, _ := lvHit(d.c[dvList], n.pt); row >= 0 {
+			a.openEditor(row)
+		}
+	}
+}
+
 func driversProc(hwnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {
 	a := theApp
 	d := a.drv
@@ -1772,16 +1826,16 @@ func driversProc(hwnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {
 			d.downloadDone()
 		}
 		return 0
+	case WM_NOTIFY:
+		if d != nil && len(d.c) > 0 {
+			d.notify(*(**nmListView)(unsafe.Pointer(&lParam)))
+		}
+		return 0
 	case WM_COMMAND:
 		if d == nil {
 			return 0
 		}
 		switch int(loword(wParam)) {
-		case dvList:
-			if hiword(wParam) == LBN_SELCHANGE {
-				d.syncSelection()
-				d.showInfo()
-			}
 		case dvDownload:
 			d.download()
 		case dvBrowse:

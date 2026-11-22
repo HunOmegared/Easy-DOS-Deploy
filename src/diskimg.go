@@ -76,6 +76,8 @@ type BootOptions struct {
 	Extra map[string][]byte
 	// NoDriveSpace leaves DRVSPACE.BIN / DBLSPACE.BIN of the source out.
 	NoDriveSpace bool
+	// Progress, if set, is called with the files written so far.
+	Progress func(done, total int)
 }
 
 // DOS kinds found on a source disk.
@@ -531,6 +533,7 @@ func CreateBootImage(o BootOptions) (*Report, error) {
 		if err != nil {
 			return nil, err
 		}
+		makeSparse(f)
 		err = f.Truncate(total * 512)
 		if cerr := f.Close(); err == nil {
 			err = cerr
@@ -554,6 +557,7 @@ func CreateBootImage(o BootOptions) (*Report, error) {
 			os.Remove(o.Path)
 		}
 	}()
+	makeSparse(f)
 	if err := f.Truncate(total * 512); err != nil {
 		return nil, err
 	}
@@ -623,6 +627,24 @@ func CreateBootImage(o BootOptions) (*Report, error) {
 		return nil, fmt.Errorf(T("the new image cannot be opened: %v"), err)
 	}
 	defer v.Close()
+	files, totalFiles := 0, len(o.FreeDOS)+len(o.Extra)
+	if src != nil {
+		totalFiles += len(systemFiles(src.dos))
+		if o.CopyAll {
+			src.v.Walk(func(fi FileInfo) error {
+				if !fi.Dir {
+					totalFiles++
+				}
+				return nil
+			})
+		}
+	}
+	step := func() {
+		files++
+		if o.Progress != nil {
+			o.Progress(files, max(totalFiles, files))
+		}
+	}
 	if src == nil && o.FreeDOS != nil {
 		if o.FreeDOS["KERNEL.SYS"] == nil || o.FreeDOS["COMMAND.COM"] == nil {
 			return nil, fmt.Errorf("%s", T("FreeDOS: the kernel (KERNEL.SYS) or the command shell (COMMAND.COM) is missing."))
@@ -637,6 +659,7 @@ func CreateBootImage(o BootOptions) (*Report, error) {
 			if err := v.WriteFile(n, o.FreeDOS[n]); err != nil {
 				return nil, err
 			}
+			step()
 		}
 		if o.Kind == MediaHDD {
 			if _, err := v.mkdirAll([]string{"FREEDOS", "TEMP"}, true); err != nil {
@@ -671,6 +694,7 @@ func CreateBootImage(o BootOptions) (*Report, error) {
 		if err := v.WriteFile(name, data); err != nil {
 			return nil, err
 		}
+		step()
 		attr := byte(0x20)
 		if name != "COMMAND.COM" && src.dos != DOSFree {
 			attr = 0x07 // read-only, hidden, system
@@ -705,6 +729,7 @@ func CreateBootImage(o BootOptions) (*Report, error) {
 				v.SetAttr(fi.Path, a)
 			}
 			n++
+			step()
 			return nil
 		})
 		if err != nil {
@@ -725,6 +750,7 @@ func CreateBootImage(o BootOptions) (*Report, error) {
 			if err := v.WriteFile(n, o.Extra[n]); err != nil {
 				return nil, fmt.Errorf("%s: %v", n, err)
 			}
+			step()
 		}
 		r.Done = append(r.Done, T("%d files of MS-DOS installed (C:\\DOS).", len(names)))
 	}

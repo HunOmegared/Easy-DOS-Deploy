@@ -185,6 +185,8 @@ const (
 	phaseRead = iota
 	phaseWrite
 	phaseVerify
+	phaseFiles // making an image: files written (counts, not bytes)
+	phaseMenu  // making an image: the boot menu and drivers
 )
 
 func needAdmin(err error) bool { return errors.Is(err, errAccessDenied) }

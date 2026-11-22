@@ -701,33 +701,55 @@ func (b *bootWin) create() {
 		}
 		o.FreeDOS = files
 	}
-	r, err := CreateBootImage(o)
+	// the work runs in the background with a progress window; the report
+	// is shown when it is done
+	var r *Report
+	var menuErr error
+	var missing []string
+	if b.setupMode() && b.setup != nil {
+		_, missing = b.setup.DOSFiles(b.setupOpt)
+	}
+	proj, store := a.proj, a.store
+	a.startJob(T("Creating the image: %s", filepath.Base(o.Path)), func(prog Progress) error {
+		o.Progress = func(done, total int) { prog(phaseFiles, int64(done), int64(total)) }
+		var err error
+		if r, err = CreateBootImage(o); err != nil {
+			return err
+		}
+		r.Warnings = append(r.Warnings, missing...)
+		if withMenu {
+			prog(phaseMenu, 0, 1)
+			r2, err := WriteToImage(o.Path, proj, store, true)
+			// the menu writer reports the free space again at the end
+			if n := len(r.Done); n > 0 && strings.HasPrefix(r.Done[n-1], strings.TrimSpace(strings.Split(T("Free space: %s", ""), ":")[0])) {
+				r.Done = r.Done[:n-1]
+			}
+			if r2 != nil {
+				r.Done = append(r.Done, r2.Done...)
+				for _, w := range r2.Warnings {
+					if !strings.Contains(w, "IO.SYS") { // the system check is ours already
+						r.Warnings = append(r.Warnings, w)
+					}
+				}
+			}
+			menuErr = err
+		}
+		return nil
+	}, func(err error) {
+		b.created(o, r, err, menuErr)
+	})
+}
+
+// created reports a finished image.
+func (b *bootWin) created(o BootOptions, r *Report, err, menuErr error) {
+	a := theApp
 	if err != nil {
 		msgBox(b.hwnd, T("Could not create the image:")+"\n"+err.Error(), appTitle(), MB_ICONERROR)
 		return
 	}
-	if b.setupMode() && b.setup != nil {
-		_, missing := b.setup.DOSFiles(b.setupOpt)
-		r.Warnings = append(r.Warnings, missing...)
-	}
-	if withMenu {
-		r2, err := WriteToImage(o.Path, a.proj, a.store, true)
-		// the menu writer reports the free space again at the end
-		if n := len(r.Done); n > 0 && strings.HasPrefix(r.Done[n-1], strings.TrimSpace(strings.Split(T("Free space: %s", ""), ":")[0])) {
-			r.Done = r.Done[:n-1]
-		}
-		if r2 != nil {
-			r.Done = append(r.Done, r2.Done...)
-			for _, w := range r2.Warnings {
-				if !strings.Contains(w, "IO.SYS") { // the system check is ours already
-					r.Warnings = append(r.Warnings, w)
-				}
-			}
-		}
-		if err != nil {
-			msgBox(b.hwnd, reportText(r, T("Error: %s", err.Error())), appTitle(), MB_ICONERROR)
-			return
-		}
+	if menuErr != nil {
+		msgBox(b.hwnd, reportText(r, T("Error: %s", menuErr.Error())), appTitle(), MB_ICONERROR)
+		return
 	}
 	if b.useOwn() {
 		r.Done = append(r.Done, T("Drivers of the system source used: %s", b.machine.Summary()))
@@ -1061,6 +1083,14 @@ func jobProc(hwnd uintptr, msg uint32, wParam, lParam uintptr) uintptr {
 			j.mu.Lock()
 			ph, d, t := j.phase, j.done, j.total
 			j.mu.Unlock()
+			if ph == phaseFiles || ph == phaseMenu {
+				step := T("Copying files: %d / %d", d, t)
+				if ph == phaseMenu {
+					step = T("Writing the boot menu and the drivers...")
+				}
+				setText(j.text, j.what+"\n\n"+step)
+				return 0
+			}
 			step := T("Reading")
 			switch ph {
 			case phaseWrite:

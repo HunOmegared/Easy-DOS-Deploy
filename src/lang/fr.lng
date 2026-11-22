@@ -598,9 +598,6 @@ TR: Dossier local :
 EN: MBR: the program's own boot code (the source has no MBR).
 TR: MBR : le code d'amorçage propre au programme (la source n'a pas de MBR).
 
-EN: MISSING
-TR: MANQUANT
-
 EN: MS-DOS: this is the [%s] block, and %%CONFIG%% will be %s.
 TR: MS-DOS : c'est le bloc [%s], et %%CONFIG%% vaudra %s.
 
@@ -873,9 +870,6 @@ TR: Enregistré : %s\n\nLancez GEOM sur la machine cible depuis une disquette de
 
 EN: Sectors/track:
 TR: Secteurs/piste :
-
-EN: Select what goes onto the disk (several can be selected). Missing files can be downloaded, or browse for them (a single file or a zip).
-TR: Choisissez ce qui va sur le disque (sélection multiple possible). Les fichiers manquants peuvent être téléchargés ou sélectionnés (un fichier seul ou un zip).
 
 EN: Show this at start
 TR: Afficher au démarrage
@@ -1593,3 +1587,27 @@ TR: Disquettes d'installation de MS-DOS (images)
 
 EN: The program installs MS-DOS from the images of your Setup disks into C:\\DOS, as Setup would.
 TR: Le programme installe MS-DOS depuis les images de vos disquettes d'installation dans C:\\DOS, comme le ferait Setup.
+
+EN: Tick what goes onto the disk. Missing files can be downloaded (arrow), or browse for them (folder): a single file or a zip. The gear or a double click edits an entry.
+TR: Cochez ce qui va sur le disque. Les fichiers manquants peuvent être téléchargés (flèche) ou choisis (dossier) : un seul fichier ou un zip. La roue dentée ou un double clic modifie une entrée.
+
+EN: Driver
+TR: Pilote
+
+EN: Status
+TR: État
+
+EN: to download
+TR: à télécharger
+
+EN: to browse for
+TR: à choisir
+
+EN: Creating the image: %s
+TR: Création de l'image : %s
+
+EN: Copying files: %d / %d
+TR: Copie des fichiers : %d / %d
+
+EN: Writing the boot menu and the drivers...
+TR: Écriture du menu de démarrage et des pilotes...
