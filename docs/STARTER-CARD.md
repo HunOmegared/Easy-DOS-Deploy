@@ -88,11 +88,19 @@ What the IDE devices say about themselves:
   Primary slave:    SanDisk SDCFB-1024
     Own geometry: 1985/16/63, 977 MB
     Without auto-detection, BIOS type User: 1024/16/63
-    (a BIOS without LBA uses at most 1024 cylinders, about 504 MB)
+    (Without LBA: at most 1024 cylinders, about 504 MB. With LBA: set the
+    drive to Auto/LBA in BIOS setup, run GEOM again and use its Disk line.)
 ```
 
+On the screen the channels and the numbers to type are shown in inverse.
 Devices on an XT-IDE or SCSI card are not asked; for those only the BIOS part
 counts.
+
+The *own geometry* is the drive's basic geometry, what an Award BIOS shows as
+*NORMAL* on auto-detection. In *LBA* or *LARGE* mode the BIOS gives DOS a
+translated geometry (for example 1019 / 255 / 63 instead of 16256 / 16 / 63):
+that is what the *Disk* line of GEOM shows, and that is what the image must be
+built with.
 
 ### Measuring another card or disk
 

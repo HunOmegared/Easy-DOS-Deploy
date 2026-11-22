@@ -8,12 +8,28 @@
 ;    primary and secondary channel): model, own geometry, size, and the
 ;    values to enter as type User in a BIOS without auto-detection.
 ;
+; The channels and the numbers to type are shown in inverse on the screen
+; (written through the BIOS, so it needs no ANSI.SYS; not when the output
+; goes to a file).
+;
 ; 8086 instructions only, so that it runs on any PC. Build: nasm -f bin.
 
 cpu 8086
 org 100h
 
 start:
+	mov ax, 4400h		; is the output the screen (a console device)?
+	mov bx, 1
+	int 21h
+	jc .notty
+	and dl, 82h
+	cmp dl, 82h
+	jne .notty
+	mov byte [tty], 1
+	mov ah, 0Fh		; the video page
+	int 10h
+	mov [page], bh
+.notty:
 	mov dx, m_head
 	call print
 
@@ -65,7 +81,7 @@ start:
 	mov ah, cl
 	mov cl, 6
 	shr ah, cl		; AX = last cylinder number
-	call num
+	call hnum
 	mov dx, m_hd
 	call print
 	pop cx
@@ -75,14 +91,14 @@ start:
 	xor ah, ah
 	inc ax			; heads = last head + 1
 	push ax
-	call num
+	call hnum
 	mov dx, m_sec
 	call print
 	pop si
 	pop cx
 	mov al, cl
 	and ax, 3Fh		; sectors per track
-	call num
+	call hnum
 	mov dx, m_crlf
 	call print
 	cmp si, 256
@@ -131,6 +147,19 @@ ide:
 ; probe: asks the device CL (A0h master, B0h slave) on the channel at BX for
 ; IDENTIFY DEVICE and prints what it says. DX = its name.
 probe:
+	push dx
+	mov dx, m_ind
+	call print
+	pop dx
+	mov si, dx
+	mov byte [hl], 1
+	call print
+	mov byte [hl], 0
+.skip:				; the padding after the name
+	lodsb
+	cmp al, '$'
+	jne .skip
+	mov dx, si
 	call print
 	mov dx, bx
 	add dx, 206h		; device control: no interrupts from the drive
@@ -364,6 +393,7 @@ show:
 	jz .nouser
 	mov dx, m_user
 	call print
+	mov byte [hl], 1
 	mov ax, [c]
 	cmp ax, 1024
 	jbe .cok
@@ -378,6 +408,7 @@ show:
 	call print
 	mov ax, [s]
 	call num
+	mov byte [hl], 0
 	cmp word [c], 1024
 	jbe .crlf
 	mov dx, m_cut
@@ -389,10 +420,59 @@ show:
 	mov dx, m_crlf
 	jmp print
 
-; print: the $-terminated string at DX
+; print: the $-terminated string at DX (in inverse if [hl] is set)
 print:
+	cmp byte [hl], 0
+	jne .each
 	mov ah, 9
 	int 21h
+	ret
+.each:
+	push si
+	mov si, dx
+.c:
+	lodsb
+	cmp al, '$'
+	je .e
+	mov dl, al
+	call putc
+	jmp .c
+.e:
+	pop si
+	ret
+
+; putc: prints the character DL; in inverse if [hl] is set and the output is
+; the screen: the BIOS writes it with the inverse attribute at the cursor,
+; then DOS prints it there (that keeps the attribute) and moves the cursor.
+putc:
+	cmp byte [hl], 0
+	je .dos
+	cmp byte [tty], 0
+	je .dos
+	cmp dl, ' '
+	jb .dos
+	push ax
+	push bx
+	push cx
+	mov ah, 9
+	mov al, dl
+	mov bh, [page]
+	mov bl, 70h		; black on light grey
+	mov cx, 1
+	int 10h
+	pop cx
+	pop bx
+	pop ax
+.dos:
+	mov ah, 2
+	int 21h
+	ret
+
+; hnum: num in inverse
+hnum:
+	mov byte [hl], 1
+	call num
+	mov byte [hl], 0
 	ret
 
 ; num: prints AX in decimal
@@ -410,8 +490,7 @@ num:
 .n2:
 	pop dx
 	add dl, '0'
-	mov ah, 2
-	int 21h
+	call putc
 	loop .n2
 	pop bx
 	ret
@@ -432,10 +511,11 @@ m_256	db 13, 10, 'WARNING: 256 heads. MS-DOS 6.x and Windows 9x cannot use a dis
 	db 'Type User with fewer cylinders (Easy DOS Deploy, "From BIOS setup...",', 13, 10
 	db 'tells how many), then run GEOM again.', 13, 10, '$'
 m_ide	db 13, 10, 'What the IDE devices say about themselves:', 13, 10, '$'
-m_pm	db '  Primary master:   $'
-m_ps	db '  Primary slave:    $'
-m_sm	db '  Secondary master: $'
-m_ss	db '  Secondary slave:  $'
+m_ind	db '  $'
+m_pm	db 'Primary master:$', '   $'
+m_ps	db 'Primary slave:$', '    $'
+m_sm	db 'Secondary master:$', ' $'
+m_ss	db 'Secondary slave:$', '  $'
 m_nodev	db '-', 13, 10, '$'
 m_atapi	db 'CD-ROM or other ATAPI device', 13, 10, '$'
 m_own	db 13, 10, '    Own geometry: $'
@@ -444,11 +524,15 @@ m_comma	db ', $'
 m_mb	db ' MB$'
 m_gb	db ' GB$'
 m_user	db 13, 10, '    Without auto-detection, BIOS type User: $'
-m_cut	db 13, 10, '    (a BIOS without LBA uses at most 1024 cylinders, about 504 MB)$'
+m_cut	db 13, 10, '    (Without LBA: at most 1024 cylinders, about 504 MB. With LBA: set the', 13, 10
+	db '    drive to Auto/LBA in BIOS setup, run GEOM again and use its Disk line.)$'
 m_crlf	db 13, 10, '$'
 m_tail	db 13, 10, 'Devices on other ports (XT-IDE, SCSI) are not shown.', 13, 10, '$'
 
 exitcode db 0
+tty	db 0
+page	db 0
+hl	db 0
 heads256 db 0
 ndisk	db 0
 drive	db 0

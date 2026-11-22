@@ -349,6 +349,9 @@ func (e *emu86) step() error {
 	case 0xAB:
 		e.ww(e.es, e.di, e.ax)
 		e.di += 2
+	case 0xAC:
+		e.s8(0, e.rb(seg, e.si))
+		e.si++
 	case 0xAD:
 		e.ax = e.rw(seg, e.si)
 		e.si += 2
@@ -511,7 +514,8 @@ func ataIdentify(model string, c, h, s uint16, lba uint32) *ideDev {
 }
 
 type geomRun struct {
-	out  string
+	out  string // what DOS printed
+	hl   string // the same with the inverse parts in [ ]
 	exit byte
 }
 
@@ -523,8 +527,10 @@ func runGEOMEmu(t *testing.T, disks []Geometry, ide [2][2]*ideDev) geomRun {
 	e.sp, e.ip = 0xFFFE, 0x100
 	copy(e.mem[e.lin(0x1000, 0x100):], geomCOM)
 	e.mem[0x475] = byte(len(disks))
-	var out strings.Builder
+	var out, hl strings.Builder
 	var exit byte
+	inv := -1 // the character the BIOS just wrote in inverse
+	inHL := false
 	sel := [2]int{}
 	chanOf := func(p uint16) (int, uint16, bool) {
 		switch {
@@ -608,14 +614,40 @@ func runGEOMEmu(t *testing.T, disks []Geometry, ide [2][2]*ideDev) geomRun {
 			e.cx = uint16(byte(g.C))<<8 | uint16(byte(g.S)|byte(g.C>>8)<<6)
 			e.dx = uint16(byte(g.H-1))<<8 | uint16(len(disks))
 			e.cf = false
-		case 0x21:
+		case 0x10:
 			switch byte(e.ax >> 8) {
+			case 0x0F:
+				e.bx = e.bx&0xFF | 0<<8
+			case 0x09:
+				if byte(e.bx) != 0x70 || e.cx != 1 || byte(e.bx>>8) != 0 {
+					t.Fatalf("INT 10h AH=09h BX=%04X CX=%d", e.bx, e.cx)
+				}
+				inv = int(byte(e.ax))
+			}
+		case 0x21:
+			put := func(c byte) {
+				out.WriteByte(c)
+				on := inv == int(c)
+				if on != inHL {
+					if on {
+						hl.WriteByte('[')
+					} else {
+						hl.WriteByte(']')
+					}
+					inHL = on
+				}
+				hl.WriteByte(c)
+				inv = -1
+			}
+			switch byte(e.ax >> 8) {
+			case 0x44:
+				e.dx, e.cf = 0x83, false // the console
 			case 0x09:
 				for o := e.dx; e.rb(e.ds, o) != '$'; o++ {
-					out.WriteByte(e.rb(e.ds, o))
+					put(e.rb(e.ds, o))
 				}
 			case 0x02:
-				out.WriteByte(byte(e.dx))
+				put(byte(e.dx))
 			case 0x4C:
 				exit = byte(e.ax)
 				return false
@@ -636,7 +668,7 @@ func runGEOMEmu(t *testing.T, disks []Geometry, ide [2][2]*ideDev) geomRun {
 			t.Fatal("does not stop", out.String())
 		}
 	}
-	return geomRun{strings.ReplaceAll(out.String(), "\r\n", "\n"), exit}
+	return geomRun{strings.ReplaceAll(out.String(), "\r\n", "\n"), strings.ReplaceAll(hl.String(), "\r\n", "\n"), exit}
 }
 
 func TestGEOMDisksAndIDE(t *testing.T) {
@@ -654,7 +686,7 @@ func TestGEOMDisksAndIDE(t *testing.T) {
 		"Disk 2: Cylinders: 1013   Heads: 32   Sectors/track: 63",
 		"Enter these three numbers",
 		"Primary master:   SanDisk SDCFB-512\n    Own geometry: 993/16/63, 488 MB\n    Without auto-detection, BIOS type User: 993/16/63\n",
-		"Primary slave:    SanDisk SDCFB-1024\n    Own geometry: 1985/16/63, 977 MB\n    Without auto-detection, BIOS type User: 1024/16/63\n    (a BIOS without LBA uses at most 1024 cylinders",
+		"Primary slave:    SanDisk SDCFB-1024\n    Own geometry: 1985/16/63, 977 MB\n    Without auto-detection, BIOS type User: 1024/16/63\n    (Without LBA: at most 1024 cylinders",
 		"Secondary master: ST3144A\n    Own geometry: 1001/15/17, 124 MB\n    Without auto-detection, BIOS type User: 1001/15/17\n",
 		"Secondary slave:  CD-ROM or other ATAPI device",
 	} {
@@ -664,6 +696,17 @@ func TestGEOMDisksAndIDE(t *testing.T) {
 	}
 	if r.exit != 0 {
 		t.Fatal(r.exit)
+	}
+	for _, want := range []string{
+		"Disk 2: Cylinders: [1013]   Heads: [32]   Sectors/track: [63]\n",
+		"  [Primary master:]   SanDisk",
+		"  [Secondary slave:]  CD-ROM",
+		"BIOS type User: [1024/16/63]\n",
+		"Own geometry: 1985/16/63, 977 MB\n",
+	} {
+		if !strings.Contains(r.hl, want) {
+			t.Fatalf("missing %q in:\n%s", want, r.hl)
+		}
 	}
 
 	// nothing on the IDE ports, no disk in the BIOS (an XT with XT-IDE)
