@@ -796,7 +796,8 @@ func CreateBootImage(o BootOptions) (*Report, error) {
 }
 
 // mkFloppyBAT is MKFLOPPY.BAT, put next to GEOM.COM: on the target machine
-// it makes a boot floppy in drive A: with GEOM, FORMAT, FDISK and SYS, with
+// it makes a boot floppy in drive A: with GEOM, FORMAT, FDISK and SYS (and an
+// AUTOEXEC.BAT that runs GEOM, so DOS does not ask the date), with
 // the FORMAT of MS-DOS (C:\DOS) or of a full FreeDOS (C:\FREEDOS\BIN,
 // C:\FDOS\BIN).
 func mkFloppyBAT() []byte {
@@ -819,6 +820,9 @@ func mkFloppyBAT() []byte {
 		"SET OLDPATH=",
 		"IF NOT EXIST A:\\COMMAND.COM GOTO FAIL",
 		"COPY C:\\GEOM.COM A:\\ >NUL",
+		"ECHO @ECHO OFF> A:\\AUTOEXEC.BAT",
+		"ECHO PATH A:\\>> A:\\AUTOEXEC.BAT",
+		"ECHO GEOM>> A:\\AUTOEXEC.BAT",
 		"FOR %%F IN (FORMAT.COM FORMAT.EXE FDISK.EXE FDISK.COM SYS.COM SYS.EXE) DO IF EXIST %D%\\%%F COPY %D%\\%%F A:\\ >NUL",
 		"ECHO.",
 		"ECHO The boot floppy is ready. Boot from it and type GEOM.",

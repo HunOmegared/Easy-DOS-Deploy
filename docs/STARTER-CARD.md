@@ -128,7 +128,7 @@ MKFLOPPY
 ```
 
 It formats the floppy as a boot disk and copies `GEOM`, `FORMAT`, `FDISK` and
-`SYS` onto it. (The program puts `MKFLOPPY.BAT` next to `GEOM.COM`. By hand
+`SYS` onto it, with an `AUTOEXEC.BAT` that runs `GEOM` when the floppy boots. (The program puts `MKFLOPPY.BAT` next to `GEOM.COM`. By hand
 it is `FORMAT A: /S`, then copying those files from `C:\DOS`.)
 
 Use a disk the drive can handle (360K, 720K, 1.2M or 1.44M); FORMAT formats
