@@ -154,6 +154,9 @@ what the BIOS gives it there. FDISK and SYS are useful later too.
 
 ## If it does not boot
 
+* **It stops right after the memory test, the first time after BIOS setup:**
+  many old BIOSes restart without resetting the disk after *Save & Exit*.
+  Switch the machine off and on again.
 * **Check the BIOS values** again: User type, 16 heads, 63 sectors, LBA off.
   The heads and sectors must match exactly; the cylinders need only be at
   least 1002.
@@ -187,7 +190,11 @@ other one set by the BIOS.
    closest, and build the image with exactly what it shows (two cylinders
    fewer, as the profiles do).
 3. Boot and run `GEOM`: it shows 4 heads and 17 sectors (type 2) or 15 heads
-   and 17 sectors (type 9).
+   and 17 sectors (type 9), and 613 or 898 cylinders.
+
+Do not use Auto for these cards either: the BIOS then takes the image's own
+size (613 or 898 cylinders) and gives DOS two cylinders fewer than the image
+needs.
 
 The images use two cylinders fewer than the table (613 and 898), because
 some BIOSes keep the last cylinder for themselves.
