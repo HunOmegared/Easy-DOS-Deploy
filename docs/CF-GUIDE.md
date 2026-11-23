@@ -36,7 +36,7 @@ find the geometry, with a button for each:
 | Way | How |
 |---|---|
 | **The values in BIOS setup** | *From BIOS setup...* works out what DOS gets in NORMAL, LBA or LARGE mode. |
-| **`GEOM.COM`** on the target machine | The most exact way: a tiny DOS program that prints what the BIOS gives, and what the IDE cards and disks say about themselves (with the BIOS *User* values for a BIOS without auto-detection). The help makes a FreeDOS boot floppy that runs it by itself, puts it onto your own boot floppy image, or saves it. `MSD.EXE` (Disk Drives) shows the same. |
+| **`GEOM.COM`** on the target machine | The most exact way: a tiny DOS program that prints what the BIOS gives, and the IDE cards and disks with what to set for them in a BIOS without auto-detection (type *User*, or *LBA*). The help makes a FreeDOS boot floppy that runs it by itself, puts it onto your own boot floppy image, or saves it. `MSD.EXE` (Disk Drives) shows the same. |
 | **A backup of a card that already boots** on that machine | *From a disk backup...* reads the geometry from the backup. |
 
 Save the geometry as a **disk profile**, and next time you only choose it

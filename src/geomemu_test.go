@@ -685,9 +685,9 @@ func TestGEOMDisksAndIDE(t *testing.T) {
 		"Disk 1: Cylinders: 1022   Heads: 16   Sectors/track: 63",
 		"Disk 2: Cylinders: 1013   Heads: 32   Sectors/track: 63",
 		"Enter these three numbers",
-		"Primary master:   SanDisk SDCFB-512\n    Own geometry: 993/16/63, 488 MB\n    Without auto-detection, BIOS type User: 993/16/63\n",
-		"Primary slave:    SanDisk SDCFB-1024\n    Own geometry: 1985/16/63, 977 MB\n    Without auto-detection, BIOS type User: 1024/16/63\n    (Without LBA: at most 1024 cylinders",
-		"Secondary master: ST3144A\n    Own geometry: 1001/15/17, 124 MB\n    Without auto-detection, BIOS type User: 1001/15/17\n",
+		"Primary master:   SanDisk SDCFB-512, 488 MB\n    BIOS setup: User 993/16/63\n",
+		"Primary slave:    SanDisk SDCFB-1024, 977 MB\n    BIOS setup: User 1024/16/63 (504 MB)   LBA 993/32/63\n",
+		"Secondary master: ST3144A, 124 MB\n    BIOS setup: User 1001/15/17\n",
 		"Secondary slave:  CD-ROM or other ATAPI device",
 	} {
 		if !strings.Contains(r.out, want) {
@@ -701,8 +701,8 @@ func TestGEOMDisksAndIDE(t *testing.T) {
 		"Disk 2: Cylinders: [1013]   Heads: [32]   Sectors/track: [63]\n",
 		"  [Primary master:]   SanDisk",
 		"  [Secondary slave:]  CD-ROM",
-		"BIOS type User: [1024/16/63]\n",
-		"Own geometry: 1985/16/63, 977 MB\n",
+		"BIOS setup: User [1024/16/63] (504 MB)   LBA [993/32/63]\n",
+		"SanDisk SDCFB-1024, 977 MB\n",
 	} {
 		if !strings.Contains(r.hl, want) {
 			t.Fatalf("missing %q in:\n%s", want, r.hl)
@@ -717,7 +717,12 @@ func TestGEOMDisksAndIDE(t *testing.T) {
 	// a big card, over 64 GB of sectors in GB
 	big := [2][2]*ideDev{{ataIdentify("BIG CARD", 16383, 16, 63, 250069680)}}
 	r = runGEOMEmu(t, []Geometry{{1021, 128, 63}}, big)
-	if !strings.Contains(r.out, "Own geometry: 16383/16/63, 119 GB") {
+	if !strings.Contains(r.out, "BIG CARD, 119 GB\n    BIOS setup: User 1024/16/63 (504 MB)   LBA 1024/255/63\n") {
+		t.Fatal(r.out)
+	}
+	// the 8 GB card on the Award BIOS: LBA 1019/255/63, as its setup showed
+	r = runGEOMEmu(t, nil, [2][2]*ideDev{{ataIdentify("86B_HD01", 16256, 16, 63, 16256*16*63)}})
+	if !strings.Contains(r.out, "86B_HD01, 8001 MB\n    BIOS setup: User 1024/16/63 (504 MB)   LBA 1019/255/63\n") {
 		t.Fatal(r.out)
 	}
 	// 256 heads: the warning, exit code 2

@@ -4,9 +4,9 @@
 ; 1. What the BIOS gives DOS for every hard disk it knows (INT 13h, AH=08h):
 ;    the numbers to type into Easy DOS Deploy. With a starter card as the
 ;    first disk, the second disk can be measured with its own BIOS settings.
-; 2. What the IDE devices say about themselves (ATA IDENTIFY DEVICE on the
-;    primary and secondary channel): model, own geometry, size, and the
-;    values to enter as type User in a BIOS without auto-detection.
+; 2. The IDE devices (ATA IDENTIFY DEVICE on the primary and secondary
+;    channel): model, size, and what to set in a BIOS without
+;    auto-detection: type User, and for a bigger disk LBA mode.
 ;
 ; The channels and the numbers to type are shown in inverse on the screen
 ; (written through the BIOS, so it needs no ANSI.SYS; not when the output
@@ -297,7 +297,10 @@ waitst:
 	pop es
 	ret
 
-; show: prints the IDENTIFY data in buf
+; show: prints the IDENTIFY data in buf: the model and size, then what to
+; enter in BIOS setup: type User (CHS, at most 1024 cylinders) and, for a
+; bigger disk with LBA, what LBA mode gives (the usual LBA-assisted
+; translation: 16, 32, 64, 128 or 255 heads by size, 63 sectors).
 show:
 	; the model: 40 characters, two in each word, high byte first
 	mov si, buf + 54
@@ -322,28 +325,23 @@ show:
 	mov byte [di+1], '$'
 	mov dx, model
 	call print
-	mov dx, m_own
+	mov dx, m_comma
 	call print
 	mov ax, [buf+2]		; word 1: cylinders
 	mov [c], ax
-	call num
-	mov dx, m_slash
-	call print
 	mov ax, [buf+6]		; word 3: heads
 	mov [h], ax
-	call num
-	mov dx, m_slash
-	call print
 	mov ax, [buf+12]	; word 6: sectors per track
 	mov [s], ax
-	call num
-	mov dx, m_comma
-	call print
 	; the size: LBA sectors (words 60-61) if it has LBA, else C*H*S
+	mov byte [lba], 0
 	test byte [buf+99], 2	; word 49 bit 9
 	jz .chs
 	mov ax, [buf+120]
 	mov dx, [buf+122]
+	mov [tot], ax
+	mov [tot+2], dx
+	mov byte [lba], 1
 	jmp .size
 .chs:
 	mov ax, [c]
@@ -379,18 +377,19 @@ show:
 	mov dx, m_mb
 	call print
 .user:
-	; type User in a BIOS without auto-detection: at most 1024 cylinders,
-	; 16 heads and 63 sectors (the CHS limit, about 504 MB)
+	mov dx, m_crlf
+	call print
+	; type User: at most 1024 cylinders, 16 heads and 63 sectors
 	mov ax, [h]
 	cmp ax, 16
-	ja .nouser
+	ja .lba
 	test ax, ax
-	jz .nouser
+	jz .lba
 	mov ax, [s]
 	cmp ax, 63
-	ja .nouser
+	ja .lba
 	test ax, ax
-	jz .nouser
+	jz .lba
 	mov dx, m_user
 	call print
 	mov byte [hl], 1
@@ -410,15 +409,72 @@ show:
 	call num
 	mov byte [hl], 0
 	cmp word [c], 1024
-	jbe .crlf
-	mov dx, m_cut
+	jbe .lba
+	mov dx, m_504
 	call print
+.lba:
+	; LBA mode: only for a disk with LBA that is bigger than type User
+	cmp byte [lba], 0
+	je .crlf
+	cmp word [c], 1024
+	jbe .crlf
+	mov ax, [tot]
+	mov dx, [tot+2]
+	mov si, ltab
+.t:
+	mov bx, [si+4]		; heads for disks up to this size
+	cmp bx, 255
+	je .heads
+	cmp dx, [si+2]
+	jb .heads
+	ja .tn
+	cmp ax, [si]
+	jbe .heads
+.tn:
+	add si, 6
+	jmp .t
+.heads:
+	mov [h], bx
+	mov cx, ax		; C = sectors / (heads * 63), at most 1024
+	mov ax, bx
+	mov bx, 63
+	push dx
+	mul bx
+	mov bx, ax		; heads * 63
+	pop dx
+	mov ax, cx
+	cmp dx, bx
+	jae .c1024		; the quotient would not fit in 16 bits
+	div bx
+	cmp ax, 1024
+	jbe .lc
+.c1024:
+	mov ax, 1024
+.lc:
+	push ax
+	mov dx, m_lba
+	call print
+	mov byte [hl], 1
+	pop ax
+	call num
+	mov dx, m_slash
+	call print
+	mov ax, [h]
+	call num
+	mov dx, m_s63
+	call print
+	mov byte [hl], 0
 .crlf:
 	mov dx, m_crlf
 	jmp print
-.nouser:
-	mov dx, m_crlf
-	jmp print
+
+; sizes in sectors (low word, high word) and the heads LBA mode uses up to
+; that size; the last entry: anything bigger
+ltab	dw 0C000h, 000Fh, 16	; 504 MB
+	dw 8000h, 001Fh, 32	; 1008 MB
+	dw 0000h, 003Fh, 64	; 2016 MB
+	dw 0000h, 007Eh, 128	; 4032 MB
+	dw 0, 0, 255
 
 ; print: the $-terminated string at DX (in inverse if [hl] is set)
 print:
@@ -510,7 +566,7 @@ m_256	db 13, 10, 'WARNING: 256 heads. MS-DOS 6.x and Windows 9x cannot use a dis
 	db 'that the BIOS gives like this. In BIOS setup, set the drive to', 13, 10
 	db 'Type User with fewer cylinders (Easy DOS Deploy, "From BIOS setup...",', 13, 10
 	db 'tells how many), then run GEOM again.', 13, 10, '$'
-m_ide	db 13, 10, 'What the IDE devices say about themselves:', 13, 10, '$'
+m_ide	db 13, 10, 'IDE devices, and what to set in BIOS setup without auto-detection:', 13, 10, '$'
 m_ind	db '  $'
 m_pm	db 'Primary master:$', '   $'
 m_ps	db 'Primary slave:$', '    $'
@@ -518,14 +574,14 @@ m_sm	db 'Secondary master:$', ' $'
 m_ss	db 'Secondary slave:$', '  $'
 m_nodev	db '-', 13, 10, '$'
 m_atapi	db 'CD-ROM or other ATAPI device', 13, 10, '$'
-m_own	db 13, 10, '    Own geometry: $'
 m_slash	db '/$'
 m_comma	db ', $'
 m_mb	db ' MB$'
 m_gb	db ' GB$'
-m_user	db 13, 10, '    Without auto-detection, BIOS type User: $'
-m_cut	db 13, 10, '    (Without LBA: at most 1024 cylinders, about 504 MB. With LBA: set the', 13, 10
-	db '    drive to Auto/LBA in BIOS setup, run GEOM again and use its Disk line.)$'
+m_user	db '    BIOS setup: User $'
+m_504	db ' (504 MB)$'
+m_lba	db '   LBA $'
+m_s63	db '/63$'
 m_crlf	db 13, 10, '$'
 m_tail	db 13, 10, 'Devices on other ports (XT-IDE, SCSI) are not shown.', 13, 10, '$'
 
@@ -536,6 +592,8 @@ hl	db 0
 heads256 db 0
 ndisk	db 0
 drive	db 0
+lba	db 0
+tot	dw 0, 0
 c	dw 0
 h	dw 0
 s	dw 0

@@ -74,33 +74,31 @@ GEOM shows two things:
 * **What the BIOS gives DOS**, for every hard disk the BIOS knows, for example
   `Disk 1: Cylinders: 1022   Heads: 16   Sectors/track: 63`. With the starter
   card, heads and sectors are 16 and 63, as set.
-* **What the IDE devices say about themselves.** GEOM asks every device on the
-  two IDE channels (primary and secondary, master and slave) directly, even
-  the ones the BIOS does not know. For each disk or card it shows the model,
-  its own geometry and size, and the values to choose as BIOS type *User* if
-  the BIOS has no auto-detection. CD-ROM drives are named as such.
+* **The IDE devices, and what to set in BIOS setup.** GEOM asks every device
+  on the two IDE channels (primary and secondary, master and slave) directly,
+  even the ones the BIOS does not know. For each disk or card it shows the
+  model and size, and what to enter in a BIOS without auto-detection: type
+  *User*, and for a disk bigger than 504 MB also what *LBA* mode gives.
+  CD-ROM drives are named as such.
 
 ```
-What the IDE devices say about themselves:
-  Primary master:   SanDisk SDCFB-512
-    Own geometry: 993/16/63, 488 MB
-    Without auto-detection, BIOS type User: 993/16/63
-  Primary slave:    SanDisk SDCFB-1024
-    Own geometry: 1985/16/63, 977 MB
-    Without auto-detection, BIOS type User: 1024/16/63
-    (Without LBA: at most 1024 cylinders, about 504 MB. With LBA: set the
-    drive to Auto/LBA in BIOS setup, run GEOM again and use its Disk line.)
+IDE devices, and what to set in BIOS setup without auto-detection:
+  Primary master:   SanDisk SDCFB-512, 488 MB
+    BIOS setup: User 993/16/63
+  Primary slave:    SanDisk SDCFB-1024, 977 MB
+    BIOS setup: User 1024/16/63 (504 MB)   LBA 993/32/63
 ```
 
 On the screen the channels and the numbers to type are shown in inverse.
 Devices on an XT-IDE or SCSI card are not asked; for those only the BIOS part
 counts.
 
-The *own geometry* is the drive's basic geometry, what an Award BIOS shows as
-*NORMAL* on auto-detection. In *LBA* or *LARGE* mode the BIOS gives DOS a
-translated geometry (for example 1019 / 255 / 63 instead of 16256 / 16 / 63):
-that is what the *Disk* line of GEOM shows, and that is what the image must be
-built with.
+*User* is the plain geometry (an Award BIOS calls it *NORMAL*): at most 1024
+cylinders, so at most 504 MB. *LBA* is what a BIOS with LBA mode makes of the
+same disk (the usual translation; at most 1024 / 255 / 63, about 8 GB). It is
+calculated by GEOM; what counts in the end is the *Disk* line after the BIOS
+is set, which can be one or two cylinders fewer. *LARGE* mode differs from
+BIOS to BIOS, so GEOM does not show it.
 
 ### Measuring another card or disk
 
@@ -112,9 +110,9 @@ same cable, or on the secondary channel), then:
    BIOS has it) and boot from the starter card. `GEOM` shows it as *Disk 2*:
    build the image with those three numbers.
 2. **The BIOS has no auto-detection:** boot from the starter card (the second
-   disk can be *None* in BIOS setup). `GEOM` shows the second disk under *What
-   the IDE devices say*. Enter its *BIOS type User* values in BIOS setup for that
-   disk, reboot, run `GEOM` again and build the image with what *Disk 2* shows
+   disk can be *None* in BIOS setup). `GEOM` shows the second disk under *IDE
+   devices*. Enter its *User* values in BIOS setup for that disk (or its *LBA*
+   values with LBA mode, if the BIOS has it and the disk is bigger), reboot, run `GEOM` again and build the image with what *Disk 2* shows
    now (if the BIOS gives one or two cylinders fewer, that is what counts).
 
 ### No floppy drive on your modern PC? Make the boot floppy on the old machine

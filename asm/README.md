@@ -7,8 +7,9 @@ uses; each instruction is written as its bytes with the mnemonic in a comment.
 `geom.asm` is the source of `GEOM.COM` (NASM, `cpu 8086`, so it runs on an XT
 too). It lists the hard disks the BIOS gives DOS (INT 13h, AH=08h) and asks
 the devices on the two standard IDE channels (1F0h and 170h, master and
-slave) for their own geometry with ATA IDENTIFY DEVICE. `geom.py` builds it
-with NASM.
+slave) with ATA IDENTIFY DEVICE, and shows what to set for them in a BIOS
+without auto-detection (type User, and LBA mode with the usual translation).
+`geom.py` builds it with NASM.
 
 Run them from the repository root:
 
