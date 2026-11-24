@@ -149,7 +149,7 @@ func TestStarterCard(t *testing.T) {
 	if b, err := v.ReadFile("GEOM.COM"); err != nil || len(b) != len(geomCOM) {
 		t.Fatal("no GEOM.COM", err)
 	}
-	if b, err := v.ReadFile("MKFLOPPY.BAT"); err != nil || !strings.Contains(string(b), "FORMAT A: /S\r\n") || !strings.Contains(string(b), "COPY C:\\GEOM.COM A:\\") || !strings.Contains(string(b), "ECHO GEOM>> A:\\AUTOEXEC.BAT\r\n") {
+	if b, err := v.ReadFile("MKFLOPPY.BAT"); err != nil || !strings.Contains(string(b), "FORMAT A: /S %F%\r\n") || !strings.Contains(string(b), "COPY C:\\GEOM.COM A:\\") || !strings.Contains(string(b), "ECHO GEOM>> A:\\AUTOEXEC.BAT\r\n") {
 		t.Fatal("no MKFLOPPY.BAT", err)
 	}
 	// plain CHS: every BIOS limit

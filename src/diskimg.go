@@ -804,6 +804,9 @@ func mkFloppyBAT() []byte {
 	lines := []string{
 		"@ECHO OFF",
 		"REM Makes a boot floppy in drive A: with GEOM, FORMAT, FDISK and SYS.",
+		"REM MKFLOPPY 360 or MKFLOPPY 720: a smaller disk in a bigger drive.",
+		"SET F=",
+		"IF NOT \"%1\"==\"\" SET F=/F:%1",
 		"SET D=",
 		"IF EXIST C:\\DOS\\FORMAT.COM SET D=C:\\DOS",
 		"IF EXIST C:\\FREEDOS\\BIN\\FORMAT.EXE SET D=C:\\FREEDOS\\BIN",
@@ -811,11 +814,12 @@ func mkFloppyBAT() []byte {
 		"IF \"%D%\"==\"\" GOTO NOFMT",
 		"ECHO.",
 		"ECHO This makes a boot floppy in drive A: with GEOM, FORMAT, FDISK and SYS.",
-		"ECHO Everything on the floppy will be erased.",
+		"ECHO Everything on the floppy will be erased. (A 360K disk in a 1.2M drive:",
+		"ECHO MKFLOPPY 360. A 720K disk in a 1.44M drive: MKFLOPPY 720.)",
 		"ECHO.",
 		"SET OLDPATH=%PATH%",
 		"SET PATH=%D%;%PATH%",
-		"%D%\\FORMAT A: /S",
+		"%D%\\FORMAT A: /S %F%",
 		"SET PATH=%OLDPATH%",
 		"SET OLDPATH=",
 		"IF NOT EXIST A:\\COMMAND.COM GOTO FAIL",
@@ -829,7 +833,8 @@ func mkFloppyBAT() []byte {
 		"GOTO END",
 		":FAIL",
 		"ECHO.",
-		"ECHO The floppy was not made (FORMAT stopped or failed).",
+		"ECHO The floppy was not made (FORMAT stopped or failed). A 360K disk in a",
+		"ECHO 1.2M drive: MKFLOPPY 360. A 720K disk in a 1.44M drive: MKFLOPPY 720.",
 		"GOTO END",
 		":NOFMT",
 		"ECHO FORMAT was not found in C:\\DOS, C:\\FREEDOS\\BIN or C:\\FDOS\\BIN.",
@@ -837,6 +842,7 @@ func mkFloppyBAT() []byte {
 		"ECHO with MS-DOS from the Setup disks, or with a full FreeDOS.",
 		":END",
 		"SET D=",
+		"SET F=",
 	}
 	return []byte(strings.Join(lines, "\r\n") + "\r\n")
 }

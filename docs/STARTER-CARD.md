@@ -131,6 +131,9 @@ it is `FORMAT A: /S`, then copying those files from `C:\DOS`.)
 
 Use a disk the drive can handle (360K, 720K, 1.2M or 1.44M); FORMAT formats
 it for the drive and asks a few questions (press Enter, then N at the end).
+For a smaller disk in a bigger drive give its size: `MKFLOPPY 360` for a 360K
+disk in a 1.2M drive, `MKFLOPPY 720` for a 720K disk in a 1.44M drive.
+Everything fits even on a 360K disk.
 This needs a starter card with a full DOS: MS-DOS from the Setup disks, or
 FreeDOS from a full FreeDOS source. The FreeDOS the program downloads by
 itself is only the kernel and the command line, without FORMAT.
